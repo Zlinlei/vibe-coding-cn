@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Catalog Data Product",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "name",
     "kind",
@@ -14,20 +14,62 @@
     "qualityScore"
   ],
   "properties": {
-    "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "kind": { "type": "string", "enum": ["data-product"] },
-    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "data-product"
+      ]
+    },
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "lifecycle": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "beta",
+        "production",
+        "deprecated"
+      ]
+    },
     "source": {
       "type": "object",
-      "required": ["contract", "dataProductPath"],
+      "required": [
+        "contract",
+        "dataProductPath"
+      ],
       "properties": {
-        "contract": { "type": "string", "minLength": 1 },
-        "dataProductPath": { "type": "string", "minLength": 1 }
-      }
+        "contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataProductPath": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
-    "classification": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
-    "qualityScore": { "type": "integer" }
+    "classification": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ]
+    },
+    "qualityScore": {
+      "type": "integer"
+    }
   }
 }

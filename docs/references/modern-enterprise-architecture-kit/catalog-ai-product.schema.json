@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Catalog AI Product",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "name",
     "kind",
@@ -14,28 +14,83 @@
     "scorecard"
   ],
   "properties": {
-    "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "kind": { "type": "string", "enum": ["ai-product"] },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
-    "riskTier": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "ai-product"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "lifecycle": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "beta",
+        "production",
+        "deprecated"
+      ]
+    },
+    "riskTier": {
+      "type": "string",
+      "enum": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ]
+    },
     "source": {
       "type": "object",
-      "required": ["aiProductPath", "contractPath"],
+      "required": [
+        "aiProductPath",
+        "contractPath"
+      ],
       "properties": {
-        "aiProductPath": { "type": "string", "minLength": 1 },
-        "contractPath": { "type": "string", "minLength": 1 }
-      }
+        "aiProductPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contractPath": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "runtime": {
       "type": "object",
-      "required": ["gatewayRoute", "ragIndex", "toolRegistry"],
+      "required": [
+        "gatewayRoute",
+        "ragIndex",
+        "toolRegistry"
+      ],
       "properties": {
-        "gatewayRoute": { "type": "string", "minLength": 1 },
-        "ragIndex": { "type": "string", "pattern": "^vector:[a-z0-9-]+:v[0-9]+$" },
-        "toolRegistry": { "type": "string", "minLength": 1 }
-      }
+        "gatewayRoute": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ragIndex": {
+          "type": "string",
+          "pattern": "^vector:[a-z0-9-]+:v[0-9]+$"
+        },
+        "toolRegistry": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
-    "scorecard": { "type": "string", "minLength": 1 }
+    "scorecard": {
+      "type": "string",
+      "minLength": 1
+    }
   }
 }

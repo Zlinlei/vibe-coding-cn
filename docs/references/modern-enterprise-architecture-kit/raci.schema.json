@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "RACI Decision Matrix",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "decision",
     "accountable",
@@ -12,11 +12,39 @@
     "evidence"
   ],
   "properties": {
-    "decision": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "accountable": { "type": "string", "minLength": 1 },
-    "responsible": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-    "consulted": { "type": "array", "items": { "type": "string" } },
-    "informed": { "type": "array", "items": { "type": "string" } },
-    "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+    "decision": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "accountable": {
+      "type": "string",
+      "minLength": 1
+    },
+    "responsible": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "consulted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "informed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
   }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Supply Chain Attestation",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "attestation",
     "subjectService",
@@ -22,120 +22,301 @@
     "verification"
   ],
   "properties": {
-    "attestation": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "subjectService": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "attestation": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "subjectService": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*-service$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
     "source": {
       "type": "object",
-      "required": ["repository", "commit"],
+      "required": [
+        "repository",
+        "commit"
+      ],
       "properties": {
-        "repository": { "type": "string", "minLength": 1 },
-        "commit": { "type": "string", "pattern": "^[a-f0-9]{12,40}$" }
-      }
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{12,40}$"
+        }
+      },
+      "additionalProperties": false
     },
     "sourceControl": {
       "type": "object",
-      "required": ["branchProtection", "reviewRequired", "signedCommitRequired"],
+      "required": [
+        "branchProtection",
+        "reviewRequired",
+        "signedCommitRequired"
+      ],
       "properties": {
-        "branchProtection": { "type": "boolean" },
-        "reviewRequired": { "type": "boolean" },
-        "signedCommitRequired": { "type": "boolean" }
-      }
+        "branchProtection": {
+          "type": "boolean"
+        },
+        "reviewRequired": {
+          "type": "boolean"
+        },
+        "signedCommitRequired": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "artifact": {
       "type": "object",
-      "required": ["repository", "digest"],
+      "required": [
+        "repository",
+        "digest"
+      ],
       "properties": {
-        "repository": { "type": "string", "minLength": 1 },
-        "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
-      }
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
     },
     "slsa": {
       "type": "object",
-      "required": ["level", "buildType"],
+      "required": [
+        "level",
+        "buildType"
+      ],
       "properties": {
-        "level": { "type": "integer", "enum": [1, 2, 3] },
-        "buildType": { "type": "string", "minLength": 1 }
-      }
+        "level": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        },
+        "buildType": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "builder": {
       "type": "object",
-      "required": ["id", "workflow", "isolated"],
+      "required": [
+        "id",
+        "workflow",
+        "isolated"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "workflow": { "type": "string", "minLength": 1 },
-        "isolated": { "type": "boolean" }
-      }
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workflow": {
+          "type": "string",
+          "minLength": 1
+        },
+        "isolated": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "sbom": {
       "type": "object",
-      "required": ["format", "location"],
+      "required": [
+        "format",
+        "location"
+      ],
       "properties": {
-        "format": { "type": "string", "enum": ["cyclonedx", "spdx"] },
-        "location": { "type": "string", "minLength": 1 }
-      }
+        "format": {
+          "type": "string",
+          "enum": [
+            "cyclonedx",
+            "spdx"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "provenance": {
       "type": "object",
-      "required": ["format", "location"],
+      "required": [
+        "format",
+        "location"
+      ],
       "properties": {
-        "format": { "type": "string", "enum": ["in-toto", "slsa"] },
-        "location": { "type": "string", "minLength": 1 }
-      }
+        "format": {
+          "type": "string",
+          "enum": [
+            "in-toto",
+            "slsa"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "signature": {
       "type": "object",
-      "required": ["provider", "location"],
+      "required": [
+        "provider",
+        "location"
+      ],
       "properties": {
-        "provider": { "type": "string", "enum": ["sigstore", "cosign", "notary"] },
-        "location": { "type": "string", "minLength": 1 }
-      }
+        "provider": {
+          "type": "string",
+          "enum": [
+            "sigstore",
+            "cosign",
+            "notary"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "certificate": {
       "type": "object",
-      "required": ["identity", "issuer"],
+      "required": [
+        "identity",
+        "issuer"
+      ],
       "properties": {
-        "identity": { "type": "string", "minLength": 1 },
-        "issuer": { "type": "string", "minLength": 1 }
-      }
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "transparencyLog": {
       "type": "object",
-      "required": ["provider", "entry"],
+      "required": [
+        "provider",
+        "entry"
+      ],
       "properties": {
-        "provider": { "type": "string", "minLength": 1 },
-        "entry": { "type": "string", "minLength": 1 }
-      }
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "vulnerability": {
       "type": "object",
-      "required": ["scan", "criticalOpen", "highOpen", "remediationSla"],
+      "required": [
+        "scan",
+        "criticalOpen",
+        "highOpen",
+        "remediationSla"
+      ],
       "properties": {
-        "scan": { "type": "string", "minLength": 1 },
-        "criticalOpen": { "type": "integer" },
-        "highOpen": { "type": "integer" },
-        "remediationSla": { "type": "string", "minLength": 1 }
-      }
+        "scan": {
+          "type": "string",
+          "minLength": 1
+        },
+        "criticalOpen": {
+          "type": "integer"
+        },
+        "highOpen": {
+          "type": "integer"
+        },
+        "remediationSla": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "scorecard": {
       "type": "object",
-      "required": ["report", "minimumScore", "actualScore"],
+      "required": [
+        "report",
+        "minimumScore",
+        "actualScore"
+      ],
       "properties": {
-        "report": { "type": "string", "minLength": 1 },
-        "minimumScore": { "type": "integer" },
-        "actualScore": { "type": "integer" }
-      }
+        "report": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minimumScore": {
+          "type": "integer"
+        },
+        "actualScore": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
     },
     "verification": {
       "type": "object",
-      "required": ["policy", "command", "evidence", "verifiedAt", "result"],
+      "required": [
+        "policy",
+        "command",
+        "evidence",
+        "verifiedAt",
+        "result"
+      ],
       "properties": {
-        "policy": { "type": "string", "minLength": 1 },
-        "command": { "type": "string", "minLength": 1 },
-        "evidence": { "type": "string", "minLength": 1 },
-        "verifiedAt": { "type": "string", "format": "date" },
-        "result": { "type": "string", "enum": ["pass", "fail", "waived"] }
-      }
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date"
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "waived"
+          ]
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

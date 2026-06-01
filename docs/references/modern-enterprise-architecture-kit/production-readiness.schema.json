@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Production Readiness Gate",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "gate",
     "owner",
@@ -14,20 +14,45 @@
     "expiry"
   ],
   "properties": {
-    "gate": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "owner": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "appliesTo": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "gate": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "appliesTo": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "requiredEvidence": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["evidence", "source", "blocking"],
+        "required": [
+          "evidence",
+          "source",
+          "blocking"
+        ],
         "properties": {
-          "evidence": { "type": "string", "minLength": 1 },
-          "source": { "type": "string", "minLength": 1 },
-          "blocking": { "type": "boolean" }
-        }
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blocking": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "blockingRules": {
@@ -35,31 +60,73 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["rule", "severity", "message"],
+        "required": [
+          "rule",
+          "severity",
+          "message"
+        ],
         "properties": {
-          "rule": { "type": "string", "minLength": 1 },
-          "severity": { "type": "string", "enum": ["warn", "block"] },
-          "message": { "type": "string", "minLength": 1 }
-        }
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "warn",
+              "block"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
       }
     },
     "waiverPolicy": {
       "type": "object",
-      "required": ["allowed", "requiresException", "maxDays"],
+      "required": [
+        "allowed",
+        "requiresException",
+        "maxDays"
+      ],
       "properties": {
-        "allowed": { "type": "boolean" },
-        "requiresException": { "type": "string", "minLength": 1 },
-        "maxDays": { "type": "integer" }
-      }
+        "allowed": {
+          "type": "boolean"
+        },
+        "requiresException": {
+          "type": "string",
+          "minLength": 1
+        },
+        "maxDays": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
     },
     "verification": {
       "type": "object",
-      "required": ["command", "report"],
+      "required": [
+        "command",
+        "report"
+      ],
       "properties": {
-        "command": { "type": "string", "minLength": 1 },
-        "report": { "type": "string", "minLength": 1 }
-      }
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
-    "expiry": { "type": "string", "format": "date" }
+    "expiry": {
+      "type": "string",
+      "format": "date"
+    }
   }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Deprecation Policy",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "object",
     "owner",
@@ -14,13 +14,43 @@
     "removalGate"
   ],
   "properties": {
-    "object": { "type": "string", "minLength": 1 },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "replacement": { "type": "string", "minLength": 1 },
-    "consumers": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-    "noticeDate": { "type": "string", "format": "date" },
-    "migrationDeadline": { "type": "string", "format": "date" },
-    "rollback": { "type": "string", "minLength": 1 },
-    "removalGate": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+    "object": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "replacement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "noticeDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "migrationDeadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "rollback": {
+      "type": "string",
+      "minLength": 1
+    },
+    "removalGate": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
   }
 }

@@ -20,6 +20,7 @@ modern-enterprise-architecture-kit/
 - schema 必须使用 JSON Schema draft 2020-12，根类型必须是 `object`。
 - 每个 schema 必须声明 `required`，关键嵌套对象也应声明自己的 `required`。
 - schema 中的关键命名、日期、数组和字符串约束应尽量用 `pattern`、`format`、`minItems` 和 `minLength` 表达。
+- V2.7 起，所有对象 schema 必须声明 `additionalProperties=false`；新增字段必须同步进入 `properties`、示例、控制项或 checker 证据链，不能用未知字段绕过治理。
 - 示例必须通过同名 schema 校验，并保持领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告之间的基础一致性。
 - V2.5 起，服务可靠性、数据治理、AI 运行控制、GitOps 运行安全和供应链漏洞/Scorecard 字段属于可执行门禁，不应退回说明性字段。
 - 示例只放最低可执行字段，不写敏感信息、真实域名、真实密钥或真实客户数据。

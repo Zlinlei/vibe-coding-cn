@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GitOps Deployment Contract",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "deployment",
     "environment",
@@ -21,80 +21,225 @@
     "policy"
   ],
   "properties": {
-    "deployment": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
-    "environment": { "type": "string", "enum": ["dev", "staging", "prod"] },
-    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
-    "namespace": { "type": "string", "minLength": 1 },
+    "deployment": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*-service$"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "dev",
+        "staging",
+        "prod"
+      ]
+    },
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "service": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*-service$"
+    },
+    "namespace": {
+      "type": "string",
+      "minLength": 1
+    },
     "image": {
       "type": "object",
-      "required": ["repository", "digest"],
+      "required": [
+        "repository",
+        "digest"
+      ],
       "properties": {
-        "repository": { "type": "string", "minLength": 1 },
-        "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
-      }
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
     },
-    "replicas": { "type": "integer" },
+    "replicas": {
+      "type": "integer"
+    },
     "resources": {
       "type": "object",
-      "required": ["requests", "limits"],
+      "required": [
+        "requests",
+        "limits"
+      ],
       "properties": {
-        "requests": { "type": "object", "required": ["cpu", "memory"], "properties": { "cpu": { "type": "string" }, "memory": { "type": "string" } } },
-        "limits": { "type": "object", "required": ["cpu", "memory"], "properties": { "cpu": { "type": "string" }, "memory": { "type": "string" } } }
-      }
+        "requests": {
+          "type": "object",
+          "required": [
+            "cpu",
+            "memory"
+          ],
+          "properties": {
+            "cpu": {
+              "type": "string"
+            },
+            "memory": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "limits": {
+          "type": "object",
+          "required": [
+            "cpu",
+            "memory"
+          ],
+          "properties": {
+            "cpu": {
+              "type": "string"
+            },
+            "memory": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     },
     "strategy": {
       "type": "object",
-      "required": ["type", "maxUnavailable"],
+      "required": [
+        "type",
+        "maxUnavailable"
+      ],
       "properties": {
-        "type": { "type": "string", "enum": ["rolling", "canary", "blue-green"] },
-        "maxUnavailable": { "type": "string", "minLength": 1 }
-      }
+        "type": {
+          "type": "string",
+          "enum": [
+            "rolling",
+            "canary",
+            "blue-green"
+          ]
+        },
+        "maxUnavailable": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
-    "serviceAccount": { "type": "string", "minLength": 1 },
+    "serviceAccount": {
+      "type": "string",
+      "minLength": 1
+    },
     "security": {
       "type": "object",
-      "required": ["podSecurity", "networkPolicy", "imageVerificationPolicy"],
+      "required": [
+        "podSecurity",
+        "networkPolicy",
+        "imageVerificationPolicy"
+      ],
       "properties": {
-        "podSecurity": { "type": "string", "minLength": 1 },
-        "networkPolicy": { "type": "string", "minLength": 1 },
-        "imageVerificationPolicy": { "type": "string", "minLength": 1 }
-      }
+        "podSecurity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "networkPolicy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "imageVerificationPolicy": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "scaling": {
       "type": "object",
-      "required": ["hpa", "minReplicas", "maxReplicas", "metric"],
+      "required": [
+        "hpa",
+        "minReplicas",
+        "maxReplicas",
+        "metric"
+      ],
       "properties": {
-        "hpa": { "type": "boolean" },
-        "minReplicas": { "type": "integer" },
-        "maxReplicas": { "type": "integer" },
-        "metric": { "type": "string", "minLength": 1 }
-      }
+        "hpa": {
+          "type": "boolean"
+        },
+        "minReplicas": {
+          "type": "integer"
+        },
+        "maxReplicas": {
+          "type": "integer"
+        },
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "availability": {
       "type": "object",
-      "required": ["podDisruptionBudget", "multiZone"],
+      "required": [
+        "podDisruptionBudget",
+        "multiZone"
+      ],
       "properties": {
-        "podDisruptionBudget": { "type": "string", "minLength": 1 },
-        "multiZone": { "type": "boolean" }
-      }
+        "podDisruptionBudget": {
+          "type": "string",
+          "minLength": 1
+        },
+        "multiZone": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "configRefs": {
       "type": "object",
-      "required": ["configMaps", "secrets"],
+      "required": [
+        "configMaps",
+        "secrets"
+      ],
       "properties": {
-        "configMaps": { "type": "array", "items": { "type": "string" } },
-        "secrets": { "type": "array", "items": { "type": "string" } }
-      }
+        "configMaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "secrets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "policy": {
       "type": "object",
-      "required": ["requiresSignedImage", "requiresProvenance", "requiresSbom"],
+      "required": [
+        "requiresSignedImage",
+        "requiresProvenance",
+        "requiresSbom"
+      ],
       "properties": {
-        "requiresSignedImage": { "type": "boolean" },
-        "requiresProvenance": { "type": "boolean" },
-        "requiresSbom": { "type": "boolean" }
-      }
+        "requiresSignedImage": {
+          "type": "boolean"
+        },
+        "requiresProvenance": {
+          "type": "boolean"
+        },
+        "requiresSbom": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

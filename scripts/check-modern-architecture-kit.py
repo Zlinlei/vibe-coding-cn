@@ -309,6 +309,9 @@ def validate_schema_fragment(schema: dict[str, Any], location: str) -> list[str]
     if properties is not None and not isinstance(properties, dict):
         errors.append(f"{location}: properties must be an object")
         properties = {}
+    additional_properties = schema.get("additionalProperties")
+    if schema_type == "object" and additional_properties is not False:
+        errors.append(f"{location}: additionalProperties must be false for strict starter kit schemas")
 
     if isinstance(required, list):
         missing_properties = sorted(set(required) - set(properties))
@@ -703,6 +706,13 @@ def validate_instance(schema: dict[str, Any], value: Any, location: str) -> list
                     errors.append(f"{location}: missing required field '{field}'")
         properties = schema.get("properties", {})
         if isinstance(properties, dict):
+            additional_properties = schema.get("additionalProperties")
+            if additional_properties is not False:
+                errors.append(f"{location}: strict object schemas must set additionalProperties=false")
+            else:
+                unexpected_fields = sorted(set(value) - set(properties))
+                for field in unexpected_fields:
+                    errors.append(f"{location}: unexpected field '{field}'")
             for field, field_schema in properties.items():
                 if field in value and isinstance(field_schema, dict):
                     errors.extend(validate_instance(field_schema, value[field], f"{location}.{field}"))

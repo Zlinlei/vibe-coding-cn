@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "AI Tool Contract",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "tool",
     "owner",
@@ -17,38 +17,109 @@
     "audit"
   ],
   "properties": {
-    "tool": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "backingApi": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-api$" },
-    "riskTier": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
-    "sideEffectLevel": { "type": "string", "enum": ["read-only", "preview", "write", "external-action"] },
-    "inputSchema": { "type": "string", "minLength": 1 },
-    "outputSchema": { "type": "string", "minLength": 1 },
+    "tool": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "backingApi": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*-api$"
+    },
+    "riskTier": {
+      "type": "string",
+      "enum": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ]
+    },
+    "sideEffectLevel": {
+      "type": "string",
+      "enum": [
+        "read-only",
+        "preview",
+        "write",
+        "external-action"
+      ]
+    },
+    "inputSchema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outputSchema": {
+      "type": "string",
+      "minLength": 1
+    },
     "auth": {
       "type": "object",
-      "required": ["type", "scope"],
+      "required": [
+        "type",
+        "scope"
+      ],
       "properties": {
-        "type": { "type": "string", "enum": ["delegated-user", "service-account", "none"] },
-        "scope": { "type": "string", "minLength": 1 }
-      }
+        "type": {
+          "type": "string",
+          "enum": [
+            "delegated-user",
+            "service-account",
+            "none"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "runtimeControls": {
       "type": "object",
-      "required": ["requiresHumanApproval", "timeoutMs", "rateLimit"],
+      "required": [
+        "requiresHumanApproval",
+        "timeoutMs",
+        "rateLimit"
+      ],
       "properties": {
-        "requiresHumanApproval": { "type": "boolean" },
-        "timeoutMs": { "type": "integer" },
-        "rateLimit": { "type": "string", "minLength": 1 }
-      }
+        "requiresHumanApproval": {
+          "type": "boolean"
+        },
+        "timeoutMs": {
+          "type": "integer"
+        },
+        "rateLimit": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "audit": {
       "type": "object",
-      "required": ["eventName", "retention"],
+      "required": [
+        "eventName",
+        "retention"
+      ],
       "properties": {
-        "eventName": { "type": "string", "minLength": 1 },
-        "retention": { "type": "string", "minLength": 1 }
-      }
+        "eventName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retention": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

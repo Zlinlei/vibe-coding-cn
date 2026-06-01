@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Data Product Contract",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "dataProduct",
     "domain",
@@ -24,81 +24,224 @@
     "slo"
   ],
   "properties": {
-    "dataProduct": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
-    "tier": { "type": "string", "enum": ["tier-1", "tier-2", "tier-3"] },
-    "consumers": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-    "schema": { "type": "string", "minLength": 1 },
-    "semanticGrain": { "type": "string", "minLength": 1 },
-    "freshness": { "type": "string", "pattern": "^\\d+[mhd]$" },
+    "dataProduct": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "lifecycle": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "beta",
+        "production",
+        "deprecated"
+      ]
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "tier-1",
+        "tier-2",
+        "tier-3"
+      ]
+    },
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semanticGrain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "freshness": {
+      "type": "string",
+      "pattern": "^\\d+[mhd]$"
+    },
     "quality": {
       "type": "object",
-      "required": ["completeness", "validity", "uniqueness", "accuracy"],
+      "required": [
+        "completeness",
+        "validity",
+        "uniqueness",
+        "accuracy"
+      ],
       "properties": {
-        "completeness": { "type": "string", "minLength": 1 },
-        "validity": { "type": "string", "minLength": 1 },
-        "uniqueness": { "type": "string", "minLength": 1 },
-        "accuracy": { "type": "string", "minLength": 1 }
-      }
+        "completeness": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uniqueness": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accuracy": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "classification": {
       "type": "object",
-      "required": ["level"],
+      "required": [
+        "level"
+      ],
       "properties": {
-        "level": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
-        "pii": { "type": "array", "items": { "type": "string" } }
-      }
+        "level": {
+          "type": "string",
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "restricted"
+          ]
+        },
+        "pii": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     },
-    "retention": { "type": "string", "minLength": 1 },
+    "retention": {
+      "type": "string",
+      "minLength": 1
+    },
     "accessPolicy": {
       "type": "object",
-      "required": ["policy", "approvalRequired"],
+      "required": [
+        "policy",
+        "approvalRequired"
+      ],
       "properties": {
-        "policy": { "type": "string", "minLength": 1 },
-        "approvalRequired": { "type": "boolean" }
-      }
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvalRequired": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "audit": {
       "type": "object",
-      "required": ["enabled", "logRetention"],
+      "required": [
+        "enabled",
+        "logRetention"
+      ],
       "properties": {
-        "enabled": { "type": "boolean" },
-        "logRetention": { "type": "string", "minLength": 1 }
-      }
+        "enabled": {
+          "type": "boolean"
+        },
+        "logRetention": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "lineage": {
       "type": "object",
-      "required": ["upstream", "downstream"],
+      "required": [
+        "upstream",
+        "downstream"
+      ],
       "properties": {
-        "upstream": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "downstream": { "type": "array", "items": { "type": "string" } }
-      }
+        "upstream": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "downstream": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "aiUsage": {
       "type": "object",
-      "required": ["allowed", "disallowed"],
+      "required": [
+        "allowed",
+        "disallowed"
+      ],
       "properties": {
-        "allowed": { "type": "array", "items": { "type": "string" } },
-        "disallowed": { "type": "array", "items": { "type": "string" } }
-      }
+        "allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "disallowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "cost": {
       "type": "object",
-      "required": ["owner", "allocationTag"],
+      "required": [
+        "owner",
+        "allocationTag"
+      ],
       "properties": {
-        "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-        "allocationTag": { "type": "string", "minLength": 1 }
-      }
+        "owner": {
+          "type": "string",
+          "pattern": "^team-[a-z0-9-]+$"
+        },
+        "allocationTag": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "slo": {
       "type": "object",
-      "required": ["freshness", "availability"],
+      "required": [
+        "freshness",
+        "availability"
+      ],
       "properties": {
-        "freshness": { "type": "string", "pattern": "^\\d+[mhd]$" },
-        "availability": { "type": "number" }
-      }
+        "freshness": {
+          "type": "string",
+          "pattern": "^\\d+[mhd]$"
+        },
+        "availability": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

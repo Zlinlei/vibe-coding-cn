@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Reliability Tiering Policy",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "tier",
     "availabilityTarget",
@@ -13,20 +13,51 @@
     "errorBudgetPolicy"
   ],
   "properties": {
-    "tier": { "type": "string", "enum": ["tier-1", "tier-2", "tier-3"] },
-    "availabilityTarget": { "type": "string" },
-    "rto": { "type": "string" },
-    "rpo": { "type": "string" },
-    "onCall": { "type": "string" },
-    "drillCadence": { "type": "string" },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "tier-1",
+        "tier-2",
+        "tier-3"
+      ]
+    },
+    "availabilityTarget": {
+      "type": "string"
+    },
+    "rto": {
+      "type": "string"
+    },
+    "rpo": {
+      "type": "string"
+    },
+    "onCall": {
+      "type": "string"
+    },
+    "drillCadence": {
+      "type": "string"
+    },
     "errorBudgetPolicy": {
       "type": "object",
-      "required": ["attentionAt", "restrictAt", "freezeAt"],
+      "required": [
+        "attentionAt",
+        "restrictAt",
+        "freezeAt"
+      ],
       "properties": {
-        "attentionAt": { "type": "string", "pattern": "^\\d+%$" },
-        "restrictAt": { "type": "string", "pattern": "^\\d+%$" },
-        "freezeAt": { "type": "string", "pattern": "^\\d+%$" }
-      }
+        "attentionAt": {
+          "type": "string",
+          "pattern": "^\\d+%$"
+        },
+        "restrictAt": {
+          "type": "string",
+          "pattern": "^\\d+%$"
+        },
+        "freezeAt": {
+          "type": "string",
+          "pattern": "^\\d+%$"
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

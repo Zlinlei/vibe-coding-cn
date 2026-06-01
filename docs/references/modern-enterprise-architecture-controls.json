@@ -1,9 +1,9 @@
 {
-  "version": "V2.6",
+  "version": "V2.7",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据",
+  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并要求 starter kit 严格拒绝未知字段",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -230,6 +230,22 @@
       ],
       "checkerEvidence": [
         "validate_pair"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-SCHEMA-STRICT-001",
+      "category": "schema-strictness",
+      "title": "Starter Kit schema 必须拒绝未知字段",
+      "statement": "所有 starter kit schema 的对象结构必须显式设置 additionalProperties=false，示例中出现未声明字段必须被 checker 阻断。",
+      "requiredArtifacts": [
+        "scripts/check-modern-architecture-kit.py",
+        "docs/references/modern-enterprise-architecture-kit/README.md"
+      ],
+      "schemaRequirements": [],
+      "exampleRequirements": [],
+      "checkerEvidence": [
+        "additionalProperties must be false for strict starter kit schemas",
+        "unexpected field"
       ]
     }
   ]

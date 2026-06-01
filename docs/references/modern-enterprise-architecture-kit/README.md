@@ -1,6 +1,8 @@
 # 现代企业数字化平台 Starter Kit
 
-本目录把《现代企业数字化平台架构说明文档》的 V2.6 起点转成可执行资产，当前包含 25 组 schema/example。
+本目录把《现代企业数字化平台架构说明文档》的 V2.7 起点转成可执行资产，当前包含 25 组 schema/example。
+
+V2.7 启用严格 schema 模式：所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
 
 ## 文件说明
 
@@ -44,12 +46,13 @@ make check-modern-architecture-kit
 
 4. 目标项目落地时，应把这些 schema 接入 CI、Developer Portal、catalog 生成和发布准入。
 
-## V2.6 校验范围
+## V2.7 校验范围
 
 - 检查每组 `*.schema.json` 和 `*.example.yaml` 是否同时存在。
 - 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称、控制项数量和索引提及是否一致。
 - 检查 `modern-enterprise-architecture-controls.json` 中的控制项是否能追溯到 schema 字段、example 字段和 checker 规则。
 - 检查 schema 的 draft 版本、根类型、`required`、`properties`、`items`、`enum`、`pattern`、`minLength`、`minItems` 和 `format: date`。
+- 检查所有对象 schema 是否声明 `additionalProperties=false`，并阻断 YAML 示例中的未知字段。
 - 检查示例 YAML 的类型、必填字段、枚举、命名格式、数组最小长度和日期格式。
 - 检查 starter kit 示例中的领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告是否保持关键字段一致。
 - 检查服务可靠性等级、GitOps ServiceAccount、生产供应链策略、AI 工具风险映射、AI 预算 owner、供应链漏洞和 Scorecard 结果是否形成可阻断门禁。
@@ -58,5 +61,6 @@ make check-modern-architecture-kit
 
 - 本目录是企业架构 starter kit，不是某个真实业务系统的生产配置。
 - schema 只定义最低字段基线，不替代企业内部更细的安全、合规、成本和行业监管要求。
+- 需要企业自定义字段时，必须先把字段纳入 schema、示例、控制项或明确的扩展字段策略，不能用未知字段绕过治理。
 - `make check-modern-architecture-kit` 是零依赖 starter gate，不替代生产级 JSON Schema、YAML、OpenAPI、AsyncAPI、Policy as Code、GitOps diff 和供应链安全校验器。
 - 示例中的团队名、域名、服务名和指标值只用于说明，落地时必须替换为真实 owner 和真实目标。

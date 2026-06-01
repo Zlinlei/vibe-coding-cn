@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "RAG Index Contract",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "indexId",
     "owner",
@@ -14,41 +14,93 @@
     "deletion"
   ],
   "properties": {
-    "indexId": { "type": "string", "pattern": "^vector:[a-z0-9-]+:v[0-9]+$" },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "sources": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-    "embeddingModel": { "type": "string", "minLength": 1 },
+    "indexId": {
+      "type": "string",
+      "pattern": "^vector:[a-z0-9-]+:v[0-9]+$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "embeddingModel": {
+      "type": "string",
+      "minLength": 1
+    },
     "chunking": {
       "type": "object",
-      "required": ["strategy", "maxTokens"],
+      "required": [
+        "strategy",
+        "maxTokens"
+      ],
       "properties": {
-        "strategy": { "type": "string", "minLength": 1 },
-        "maxTokens": { "type": "integer" }
-      }
+        "strategy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "maxTokens": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
     },
     "accessControl": {
       "type": "object",
-      "required": ["policy", "filterRequired"],
+      "required": [
+        "policy",
+        "filterRequired"
+      ],
       "properties": {
-        "policy": { "type": "string", "minLength": 1 },
-        "filterRequired": { "type": "boolean" }
-      }
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filterRequired": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "refresh": {
       "type": "object",
-      "required": ["cadence", "ownerApproval"],
+      "required": [
+        "cadence",
+        "ownerApproval"
+      ],
       "properties": {
-        "cadence": { "type": "string", "minLength": 1 },
-        "ownerApproval": { "type": "boolean" }
-      }
+        "cadence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerApproval": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "deletion": {
       "type": "object",
-      "required": ["supportsSubjectDelete", "retention"],
+      "required": [
+        "supportsSubjectDelete",
+        "retention"
+      ],
       "properties": {
-        "supportsSubjectDelete": { "type": "boolean" },
-        "retention": { "type": "string", "minLength": 1 }
-      }
+        "supportsSubjectDelete": {
+          "type": "boolean"
+        },
+        "retention": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

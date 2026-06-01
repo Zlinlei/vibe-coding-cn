@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Event Contract",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "event",
     "domain",
@@ -16,23 +16,77 @@
     "consumers"
   ],
   "properties": {
-    "event": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "producerService": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
-    "topic": { "type": "string", "minLength": 1 },
-    "schema": { "type": "string", "minLength": 1 },
-    "version": { "type": "string", "pattern": "^v[0-9]+$" },
-    "compatibility": { "type": "string", "enum": ["backward", "forward", "full", "none"] },
+    "event": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "producerService": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*-service$"
+    },
+    "topic": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v[0-9]+$"
+    },
+    "compatibility": {
+      "type": "string",
+      "enum": [
+        "backward",
+        "forward",
+        "full",
+        "none"
+      ]
+    },
     "delivery": {
       "type": "object",
-      "required": ["semantics", "idempotencyKey", "retryPolicy"],
+      "required": [
+        "semantics",
+        "idempotencyKey",
+        "retryPolicy"
+      ],
       "properties": {
-        "semantics": { "type": "string", "enum": ["at-least-once", "at-most-once", "exactly-once"] },
-        "idempotencyKey": { "type": "string", "minLength": 1 },
-        "retryPolicy": { "type": "string", "minLength": 1 }
-      }
+        "semantics": {
+          "type": "string",
+          "enum": [
+            "at-least-once",
+            "at-most-once",
+            "exactly-once"
+          ]
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retryPolicy": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
-    "consumers": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
   }
 }

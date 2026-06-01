@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Policy Exception",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "exception",
     "policy",
@@ -20,35 +20,111 @@
     "closure"
   ],
   "properties": {
-    "exception": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "policy": { "type": "string", "minLength": 1 },
-    "subject": { "type": "string", "minLength": 1 },
-    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-    "reason": { "type": "string", "minLength": 1 },
-    "risk": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
-    "compensatingControls": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-    "requestedAt": { "type": "string", "format": "date" },
-    "approvedAt": { "type": "string", "format": "date" },
-    "status": { "type": "string", "enum": ["requested", "approved", "rejected", "expired", "closed"] },
-    "approver": { "type": "string", "minLength": 1 },
-    "expiresOn": { "type": "string", "format": "date" },
+    "exception": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^team-[a-z0-9-]+$"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risk": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "compensatingControls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "approved",
+        "rejected",
+        "expired",
+        "closed"
+      ]
+    },
+    "approver": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expiresOn": {
+      "type": "string",
+      "format": "date"
+    },
     "remediation": {
       "type": "object",
-      "required": ["owner", "plan", "dueDate"],
+      "required": [
+        "owner",
+        "plan",
+        "dueDate"
+      ],
       "properties": {
-        "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
-        "plan": { "type": "string", "minLength": 1 },
-        "dueDate": { "type": "string", "format": "date" }
-      }
+        "owner": {
+          "type": "string",
+          "pattern": "^team-[a-z0-9-]+$"
+        },
+        "plan": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "additionalProperties": false
     },
     "closure": {
       "type": "object",
-      "required": ["required", "autoBlockAfterExpiry"],
+      "required": [
+        "required",
+        "autoBlockAfterExpiry"
+      ],
       "properties": {
-        "required": { "type": "boolean" },
-        "autoBlockAfterExpiry": { "type": "boolean" },
-        "evidence": { "type": "string", "minLength": 1 }
-      }
+        "required": {
+          "type": "boolean"
+        },
+        "autoBlockAfterExpiry": {
+          "type": "boolean"
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     }
   }
 }
