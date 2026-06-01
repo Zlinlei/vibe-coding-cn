@@ -560,6 +560,8 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             errors.append("cross-file: service.domain must match domain.domain")
         if service.get("owner") != domain.get("owner"):
             errors.append("cross-file: service.owner must match domain.owner in starter kit examples")
+        if service.get("tier") != domain.get("sloTier"):
+            errors.append("cross-file: service.tier must match domain.sloTier in starter kit examples")
 
     if isinstance(service, dict) and isinstance(api_contract, dict):
         if api_contract.get("domain") != service.get("domain"):
@@ -582,6 +584,18 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             errors.append("cross-file: data-product.domain must match domain.domain")
         if data_product.get("owner") != domain.get("owner"):
             errors.append("cross-file: data-product.owner must match domain.owner in starter kit examples")
+        lineage = data_product.get("lineage")
+        consumers = data_product.get("consumers")
+        if isinstance(lineage, dict) and isinstance(consumers, list):
+            downstream = lineage.get("downstream")
+            if isinstance(downstream, list) and sorted(consumers) != sorted(downstream):
+                errors.append("cross-file: data-product.consumers must match data-product.lineage.downstream in starter kit examples")
+        cost = data_product.get("cost")
+        if isinstance(cost, dict) and cost.get("owner") != data_product.get("owner"):
+            errors.append("cross-file: data-product.cost.owner must match data-product.owner")
+        data_slo = data_product.get("slo")
+        if isinstance(data_slo, dict) and data_slo.get("freshness") != data_product.get("freshness"):
+            errors.append("cross-file: data-product.slo.freshness must match data-product.freshness")
 
     if isinstance(data_product, dict) and isinstance(catalog_data_product, dict):
         if catalog_data_product.get("name") != data_product.get("dataProduct"):
@@ -590,6 +604,9 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             errors.append("cross-file: catalog-data-product.domain must match data-product.domain")
         if catalog_data_product.get("owner") != data_product.get("owner"):
             errors.append("cross-file: catalog-data-product.owner must match data-product.owner")
+        data_classification = data_product.get("classification")
+        if isinstance(data_classification, dict) and catalog_data_product.get("classification") != data_classification.get("level"):
+            errors.append("cross-file: catalog-data-product.classification must match data-product.classification.level")
 
     if isinstance(service, dict) and isinstance(catalog_component, dict):
         if catalog_component.get("name") != service.get("service"):
@@ -619,11 +636,19 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             errors.append("cross-file: gitops-deployment.service must match service.service")
         if gitops_deployment.get("deployment") != service.get("service"):
             errors.append("cross-file: gitops-deployment.deployment must match service.service")
+        if gitops_deployment.get("serviceAccount") != service.get("service"):
+            errors.append("cross-file: gitops-deployment.serviceAccount must match service.service in starter kit examples")
         service_runtime = service.get("runtime")
         deployment_image = gitops_deployment.get("image")
         if isinstance(service_runtime, dict) and isinstance(deployment_image, dict):
             if deployment_image.get("repository") != service_runtime.get("imageRepository"):
                 errors.append("cross-file: gitops-deployment.image.repository must match service.runtime.imageRepository")
+        scaling = gitops_deployment.get("scaling")
+        if isinstance(scaling, dict):
+            min_replicas = scaling.get("minReplicas")
+            max_replicas = scaling.get("maxReplicas")
+            if isinstance(min_replicas, int) and isinstance(max_replicas, int) and max_replicas < min_replicas:
+                errors.append("cross-file: gitops-deployment.scaling.maxReplicas must be >= minReplicas")
 
     if isinstance(service, dict) and isinstance(release_evidence, dict):
         if release_evidence.get("subjectService") != service.get("service"):
@@ -680,6 +705,18 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
         if isinstance(artifact, dict) and isinstance(deployment_image, dict):
             if artifact.get("digest") != deployment_image.get("digest"):
                 errors.append("cross-file: supply-chain-attestation.artifact.digest must match gitops-deployment.image.digest")
+        gitops_security = gitops_deployment.get("security")
+        attestation_verification = supply_chain_attestation.get("verification")
+        if isinstance(gitops_security, dict) and isinstance(attestation_verification, dict):
+            if gitops_security.get("imageVerificationPolicy") != attestation_verification.get("policy"):
+                errors.append(
+                    "cross-file: gitops-deployment.security.imageVerificationPolicy must match supply-chain-attestation.verification.policy"
+                )
+        gitops_policy = gitops_deployment.get("policy")
+        if isinstance(gitops_policy, dict) and gitops_deployment.get("environment") == "prod":
+            for field in ("requiresSignedImage", "requiresProvenance", "requiresSbom"):
+                if gitops_policy.get(field) is not True:
+                    errors.append(f"cross-file: prod gitops-deployment.policy.{field} must be true")
 
     if isinstance(release_evidence, dict) and isinstance(supply_chain_attestation, dict):
         if supply_chain_attestation.get("source", {}).get("commit") != release_evidence.get("commit"):
@@ -703,6 +740,18 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
         if isinstance(release_verification, dict) and isinstance(attestation_verification, dict):
             if release_verification.get("policy") != attestation_verification.get("policy"):
                 errors.append("cross-file: release-evidence.verification.policy must match supply-chain-attestation.verification.policy")
+        vulnerability = supply_chain_attestation.get("vulnerability")
+        if supply_chain_attestation.get("verification", {}).get("result") == "pass" and isinstance(vulnerability, dict):
+            if vulnerability.get("criticalOpen") != 0:
+                errors.append("cross-file: passing supply-chain-attestation must have zero critical vulnerabilities")
+            if vulnerability.get("highOpen") != 0:
+                errors.append("cross-file: passing supply-chain-attestation must have zero high vulnerabilities")
+        scorecard_result = supply_chain_attestation.get("scorecard")
+        if isinstance(scorecard_result, dict):
+            minimum_score = scorecard_result.get("minimumScore")
+            actual_score = scorecard_result.get("actualScore")
+            if isinstance(minimum_score, int) and isinstance(actual_score, int) and actual_score < minimum_score:
+                errors.append("cross-file: supply-chain-attestation.scorecard.actualScore must be >= minimumScore")
 
     if isinstance(service, dict) and isinstance(policy_exception, dict):
         if policy_exception.get("subject") != service.get("service"):
@@ -781,10 +830,30 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     if isinstance(ai_product, dict) and isinstance(ai_tool_contract, dict):
         tools = ai_product.get("tools")
         registered_tools = []
+        tool_entries = []
         if isinstance(tools, list):
-            registered_tools = [item.get("tool") for item in tools if isinstance(item, dict)]
+            tool_entries = [item for item in tools if isinstance(item, dict)]
+            registered_tools = [item.get("tool") for item in tool_entries]
         if ai_tool_contract.get("tool") not in registered_tools:
             errors.append("cross-file: ai-tool-contract.tool must be listed in ai-product.tools")
+        matching_tool_entries = [item for item in tool_entries if item.get("tool") == ai_tool_contract.get("tool")]
+        if matching_tool_entries:
+            ai_tool_entry = matching_tool_entries[0]
+            runtime_controls = ai_tool_contract.get("runtimeControls")
+            if isinstance(runtime_controls, dict):
+                if ai_tool_entry.get("requiresHumanApproval") != runtime_controls.get("requiresHumanApproval"):
+                    errors.append(
+                        "cross-file: ai-product.tools.requiresHumanApproval must match ai-tool-contract.runtimeControls.requiresHumanApproval"
+                    )
+            expected_risk_level = {
+                "R1": "low",
+                "R2": "medium",
+                "R3": "high",
+                "R4": "critical",
+                "R5": "critical",
+            }.get(ai_tool_contract.get("riskTier"))
+            if expected_risk_level and ai_tool_entry.get("riskLevel") != expected_risk_level:
+                errors.append("cross-file: ai-product.tools.riskLevel must match ai-tool-contract.riskTier mapping")
 
     if isinstance(ai_product, dict) and isinstance(rag_index_contract, dict):
         rag = ai_product.get("rag")
@@ -813,6 +882,9 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
         if isinstance(runtime, dict) and isinstance(rag, dict):
             if runtime.get("ragIndex") != rag.get("vectorIndex"):
                 errors.append("cross-file: catalog-ai-product.runtime.ragIndex must match ai-product.rag.vectorIndex")
+        budget = ai_product.get("budget")
+        if isinstance(budget, dict) and budget.get("owner") != ai_product.get("owner"):
+            errors.append("cross-file: ai-product.budget.owner must match ai-product.owner")
 
     if isinstance(service, dict) and isinstance(scorecard, dict):
         if scorecard.get("subject") != service.get("service"):

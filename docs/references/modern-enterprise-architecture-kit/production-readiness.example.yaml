@@ -4,14 +4,36 @@ appliesTo:
   - tier-1-service
   - tier-2-service
 requiredEvidence:
-  - service.yaml
-  - catalog entry
-  - runbook
-  - rollback plan
-  - SLO dashboard
-  - SBOM and provenance
+  - evidence: service.yaml
+    source: domains/order/services/order-command-service/service.yaml
+    blocking: true
+  - evidence: catalog entry
+    source: catalog/components/order-command-service.yaml
+    blocking: true
+  - evidence: runbook
+    source: domains/order/services/order-command-service/docs/runbook.md
+    blocking: true
+  - evidence: SLO dashboard
+    source: observability/dashboards/order-command-service.yaml
+    blocking: true
+  - evidence: SBOM and provenance
+    source: governance/evidence/supply-chain/order-command-service-supply-chain.yaml
+    blocking: true
 blockingRules:
-  - missing owner
-  - missing rollback plan
-  - unsigned artifact
+  - rule: missing-owner
+    severity: block
+    message: production assets must have an owner
+  - rule: missing-rollback-plan
+    severity: block
+    message: production releases must declare rollback evidence
+  - rule: unsigned-artifact
+    severity: block
+    message: production artifacts must pass signature verification
+waiverPolicy:
+  allowed: true
+  requiresException: governance/evidence/exceptions/policy-exception.yaml
+  maxDays: 30
+verification:
+  command: make check-modern-architecture-kit
+  report: governance/evidence/releases/order-command-service-2026-06-01.md
 expiry: 2026-12-01

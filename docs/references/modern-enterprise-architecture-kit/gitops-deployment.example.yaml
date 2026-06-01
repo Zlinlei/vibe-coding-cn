@@ -17,6 +17,24 @@ resources:
 strategy:
   type: canary
   maxUnavailable: "0"
+serviceAccount: order-command-service
+security:
+  podSecurity: restricted
+  networkPolicy: infra/kubernetes/policies/order-command-service-network-policy.yaml
+  imageVerificationPolicy: governance/supply-chain/prod-admission.rego
+scaling:
+  hpa: true
+  minReplicas: 3
+  maxReplicas: 12
+  metric: cpu-70-percent
+availability:
+  podDisruptionBudget: minAvailable=2
+  multiZone: true
+configRefs:
+  configMaps:
+    - order-command-service-config
+  secrets:
+    - order-command-service-secrets
 policy:
   requiresSignedImage: true
   requiresProvenance: true

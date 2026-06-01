@@ -13,6 +13,11 @@
     "replicas",
     "resources",
     "strategy",
+    "serviceAccount",
+    "security",
+    "scaling",
+    "availability",
+    "configRefs",
     "policy"
   ],
   "properties": {
@@ -44,6 +49,42 @@
       "properties": {
         "type": { "type": "string", "enum": ["rolling", "canary", "blue-green"] },
         "maxUnavailable": { "type": "string", "minLength": 1 }
+      }
+    },
+    "serviceAccount": { "type": "string", "minLength": 1 },
+    "security": {
+      "type": "object",
+      "required": ["podSecurity", "networkPolicy", "imageVerificationPolicy"],
+      "properties": {
+        "podSecurity": { "type": "string", "minLength": 1 },
+        "networkPolicy": { "type": "string", "minLength": 1 },
+        "imageVerificationPolicy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scaling": {
+      "type": "object",
+      "required": ["hpa", "minReplicas", "maxReplicas", "metric"],
+      "properties": {
+        "hpa": { "type": "boolean" },
+        "minReplicas": { "type": "integer" },
+        "maxReplicas": { "type": "integer" },
+        "metric": { "type": "string", "minLength": 1 }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "required": ["podDisruptionBudget", "multiZone"],
+      "properties": {
+        "podDisruptionBudget": { "type": "string", "minLength": 1 },
+        "multiZone": { "type": "boolean" }
+      }
+    },
+    "configRefs": {
+      "type": "object",
+      "required": ["configMaps", "secrets"],
+      "properties": {
+        "configMaps": { "type": "array", "items": { "type": "string" } },
+        "secrets": { "type": "array", "items": { "type": "string" } }
       }
     },
     "policy": {

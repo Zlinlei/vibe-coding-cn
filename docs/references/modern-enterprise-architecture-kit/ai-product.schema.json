@@ -15,7 +15,13 @@
     "tools",
     "evals",
     "guardrails",
-    "observability"
+    "observability",
+    "slo",
+    "budget",
+    "fallback",
+    "providerPolicy",
+    "dataUsePolicy",
+    "runbook"
   ],
   "properties": {
     "aiProduct": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
@@ -25,8 +31,12 @@
     "businessGoal": { "type": "string", "minLength": 1 },
     "model": {
       "type": "object",
-      "required": ["gatewayRoute"],
-      "properties": { "gatewayRoute": { "type": "string", "minLength": 1 } }
+      "required": ["gatewayRoute", "approvedModel", "modelVersion"],
+      "properties": {
+        "gatewayRoute": { "type": "string", "minLength": 1 },
+        "approvedModel": { "type": "string", "minLength": 1 },
+        "modelVersion": { "type": "string", "minLength": 1 }
+      }
     },
     "prompts": {
       "type": "object",
@@ -46,9 +56,10 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["tool", "requiresHumanApproval"],
+        "required": ["tool", "riskLevel", "requiresHumanApproval"],
         "properties": {
           "tool": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "riskLevel": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
           "requiresHumanApproval": { "type": "boolean" }
         }
       }
@@ -72,6 +83,59 @@
       "properties": {
         "traceRetentionDays": { "type": "integer" },
         "replayEnabled": { "type": "boolean" }
+      }
+    },
+    "slo": {
+      "type": "object",
+      "required": ["taskCompletionRate", "groundedAnswerRate", "toolErrorRate", "p95LatencyMs"],
+      "properties": {
+        "taskCompletionRate": { "type": "string", "minLength": 1 },
+        "groundedAnswerRate": { "type": "string", "minLength": 1 },
+        "toolErrorRate": { "type": "string", "minLength": 1 },
+        "p95LatencyMs": { "type": "integer" }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "required": ["monthlyUsd", "costPerSuccessfulTaskUsd", "owner"],
+      "properties": {
+        "monthlyUsd": { "type": "integer" },
+        "costPerSuccessfulTaskUsd": { "type": "number" },
+        "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" }
+      }
+    },
+    "fallback": {
+      "type": "object",
+      "required": ["degradedMode", "humanHandoff", "rollbackPrompt"],
+      "properties": {
+        "degradedMode": { "type": "string", "minLength": 1 },
+        "humanHandoff": { "type": "string", "minLength": 1 },
+        "rollbackPrompt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "providerPolicy": {
+      "type": "object",
+      "required": ["logRetention", "dataTrainingOptOut", "crossBorderReview"],
+      "properties": {
+        "logRetention": { "type": "string", "minLength": 1 },
+        "dataTrainingOptOut": { "type": "boolean" },
+        "crossBorderReview": { "type": "string", "minLength": 1 }
+      }
+    },
+    "dataUsePolicy": {
+      "type": "object",
+      "required": ["allowed", "disallowed"],
+      "properties": {
+        "allowed": { "type": "array", "items": { "type": "string" } },
+        "disallowed": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "runbook": {
+      "type": "object",
+      "required": ["incident", "rollback"],
+      "properties": {
+        "incident": { "type": "string", "minLength": 1 },
+        "rollback": { "type": "string", "minLength": 1 }
       }
     }
   }

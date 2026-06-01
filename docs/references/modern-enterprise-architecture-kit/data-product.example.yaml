@@ -2,24 +2,44 @@ dataProduct: order-facts
 domain: order
 owner: team-order
 lifecycle: production
+tier: tier-2
+consumers:
+  - revenue-dashboard
+  - customer-service-agent
 schema: schema/order-facts.schema.yaml
 semanticGrain: one row per order state transition
 freshness: 15m
 quality:
   completeness: ">= 99.5%"
+  validity: ">= 99.0%"
   uniqueness: order_event_id
+  accuracy: reconciled with payment settlement daily
 classification:
   level: confidential
   pii:
     - customer_id
+retention: 2y
+accessPolicy:
+  policy: governance/data-governance/order-facts-access.rego
+  approvalRequired: true
+audit:
+  enabled: true
+  logRetention: 2y
 lineage:
   upstream:
     - order-command-service
   downstream:
     - revenue-dashboard
+    - customer-service-agent
 aiUsage:
   allowed:
     - rag
     - evaluation
   disallowed:
     - foundation-model-training
+cost:
+  owner: team-order
+  allocationTag: cost.domain.order
+slo:
+  freshness: 15m
+  availability: 99.5

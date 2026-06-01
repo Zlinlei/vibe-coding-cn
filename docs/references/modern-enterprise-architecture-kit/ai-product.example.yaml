@@ -5,6 +5,8 @@ riskTier: R3
 businessGoal: assist support agents with grounded answers
 model:
   gatewayRoute: support-safe-default
+  approvedModel: vendor-support-model
+  modelVersion: "2026-05"
 prompts:
   system: prompts/system.prompt.md
 rag:
@@ -12,6 +14,7 @@ rag:
   vectorIndex: vector:customer-support-policy:v12
 tools:
   - tool: refund-preview
+    riskLevel: high
     requiresHumanApproval: true
 evals:
   regression: evals/regression.yaml
@@ -21,3 +24,29 @@ guardrails:
 observability:
   traceRetentionDays: 180
   replayEnabled: true
+slo:
+  taskCompletionRate: ">= 85%"
+  groundedAnswerRate: ">= 95%"
+  toolErrorRate: "<= 2%"
+  p95LatencyMs: 6000
+budget:
+  monthlyUsd: 3000
+  costPerSuccessfulTaskUsd: 0.12
+  owner: team-support-ai
+fallback:
+  degradedMode: human-support-queue
+  humanHandoff: support-workbench
+  rollbackPrompt: prompts/system.previous.prompt.md
+providerPolicy:
+  logRetention: 30d
+  dataTrainingOptOut: true
+  crossBorderReview: governance/security/cross-border-ai-review.md
+dataUsePolicy:
+  allowed:
+    - rag
+    - evaluation
+  disallowed:
+    - foundation-model-training
+runbook:
+  incident: governance/playbooks/ai-incident-playbook.md
+  rollback: docs/rollback.md

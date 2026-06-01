@@ -8,6 +8,7 @@
     "subjectService",
     "owner",
     "source",
+    "sourceControl",
     "artifact",
     "slsa",
     "builder",
@@ -16,6 +17,8 @@
     "signature",
     "certificate",
     "transparencyLog",
+    "vulnerability",
+    "scorecard",
     "verification"
   ],
   "properties": {
@@ -28,6 +31,15 @@
       "properties": {
         "repository": { "type": "string", "minLength": 1 },
         "commit": { "type": "string", "pattern": "^[a-f0-9]{12,40}$" }
+      }
+    },
+    "sourceControl": {
+      "type": "object",
+      "required": ["branchProtection", "reviewRequired", "signedCommitRequired"],
+      "properties": {
+        "branchProtection": { "type": "boolean" },
+        "reviewRequired": { "type": "boolean" },
+        "signedCommitRequired": { "type": "boolean" }
       }
     },
     "artifact": {
@@ -93,6 +105,25 @@
       "properties": {
         "provider": { "type": "string", "minLength": 1 },
         "entry": { "type": "string", "minLength": 1 }
+      }
+    },
+    "vulnerability": {
+      "type": "object",
+      "required": ["scan", "criticalOpen", "highOpen", "remediationSla"],
+      "properties": {
+        "scan": { "type": "string", "minLength": 1 },
+        "criticalOpen": { "type": "integer" },
+        "highOpen": { "type": "integer" },
+        "remediationSla": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scorecard": {
+      "type": "object",
+      "required": ["report", "minimumScore", "actualScore"],
+      "properties": {
+        "report": { "type": "string", "minLength": 1 },
+        "minimumScore": { "type": "integer" },
+        "actualScore": { "type": "integer" }
       }
     },
     "verification": {

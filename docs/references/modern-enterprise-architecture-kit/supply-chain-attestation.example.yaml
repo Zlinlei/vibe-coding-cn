@@ -4,6 +4,10 @@ owner: team-order
 source:
   repository: domains/order/services/order-command-service
   commit: 0123456789abcdef0123456789abcdef01234567
+sourceControl:
+  branchProtection: true
+  reviewRequired: true
+  signedCommitRequired: true
 artifact:
   repository: registry.company.com/order/order-command-service
   digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
@@ -29,6 +33,15 @@ certificate:
 transparencyLog:
   provider: rekor
   entry: rekor://order-command-service/1234567890
+vulnerability:
+  scan: artifacts/order-command-service/vulnerability-report.json
+  criticalOpen: 0
+  highOpen: 0
+  remediationSla: 7d
+scorecard:
+  report: artifacts/order-command-service/openssf-scorecard.json
+  minimumScore: 8
+  actualScore: 9
 verification:
   policy: governance/supply-chain/prod-admission.rego
   command: cosign verify --certificate-identity-regexp github.com/company/platform --certificate-oidc-issuer https://token.actions.githubusercontent.com registry.company.com/order/order-command-service@sha256:1111111111111111111111111111111111111111111111111111111111111111
