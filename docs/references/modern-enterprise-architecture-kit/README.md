@@ -1,6 +1,6 @@
 # 现代企业数字化平台 Starter Kit
 
-本目录把《现代企业数字化平台架构说明文档》的 V2.5 起点转成可执行资产，当前包含 25 组 schema/example。
+本目录把《现代企业数字化平台架构说明文档》的 V2.6 起点转成可执行资产，当前包含 25 组 schema/example。
 
 ## 文件说明
 
@@ -44,10 +44,11 @@ make check-modern-architecture-kit
 
 4. 目标项目落地时，应把这些 schema 接入 CI、Developer Portal、catalog 生成和发布准入。
 
-## V2.5 校验范围
+## V2.6 校验范围
 
 - 检查每组 `*.schema.json` 和 `*.example.yaml` 是否同时存在。
-- 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称和索引提及是否一致。
+- 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称、控制项数量和索引提及是否一致。
+- 检查 `modern-enterprise-architecture-controls.json` 中的控制项是否能追溯到 schema 字段、example 字段和 checker 规则。
 - 检查 schema 的 draft 版本、根类型、`required`、`properties`、`items`、`enum`、`pattern`、`minLength`、`minItems` 和 `format: date`。
 - 检查示例 YAML 的类型、必填字段、枚举、命名格式、数组最小长度和日期格式。
 - 检查 starter kit 示例中的领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告是否保持关键字段一致。

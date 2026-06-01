@@ -19,6 +19,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 KIT_DIR = ROOT / "docs/references/modern-enterprise-architecture-kit"
 VERSION_MANIFEST_PATH = ROOT / "docs/references/modern-enterprise-architecture-version.json"
+CONTROL_CATALOG_PATH = ROOT / "docs/references/modern-enterprise-architecture-controls.json"
 PAIR_NAMES = [
     "domain",
     "service",
@@ -61,6 +62,14 @@ def load_version_manifest() -> dict[str, Any]:
     if not isinstance(manifest, dict):
         raise ValueError("manifest root must be an object")
     return manifest
+
+
+def load_control_catalog() -> dict[str, Any]:
+    with CONTROL_CATALOG_PATH.open(encoding="utf-8") as handle:
+        catalog = json.load(handle)
+    if not isinstance(catalog, dict):
+        raise ValueError("control catalog root must be an object")
+    return catalog
 
 
 def load_schema(path: Path) -> dict[str, Any]:
@@ -372,6 +381,7 @@ def validate_version_manifest() -> list[str]:
         "summary",
         "architectureDocument",
         "starterKit",
+        "controlCatalog",
         "requiredMentions",
     ]
     for field in required_fields:
@@ -407,6 +417,18 @@ def validate_version_manifest() -> list[str]:
         errors.append(f"{rel}: starterKit.pairs must match checker PAIR_NAMES order")
     if len(manifest_pairs) != expected_pair_count:
         errors.append(f"{rel}: starterKit.pairs length must match expectedPairCount")
+
+    control_catalog = manifest.get("controlCatalog")
+    expected_control_count = None
+    if not isinstance(control_catalog, dict):
+        errors.append(f"{rel}: controlCatalog must be an object")
+    else:
+        control_catalog_path = control_catalog.get("path")
+        if control_catalog_path != str(CONTROL_CATALOG_PATH.relative_to(ROOT)):
+            errors.append(f"{rel}: controlCatalog.path must be {CONTROL_CATALOG_PATH.relative_to(ROOT)}")
+        expected_control_count = control_catalog.get("expectedControlCount")
+        if not isinstance(expected_control_count, int) or isinstance(expected_control_count, bool) or expected_control_count < 1:
+            errors.append(f"{rel}: controlCatalog.expectedControlCount must be a positive integer")
 
     mentions = manifest.get("requiredMentions")
     if not isinstance(mentions, list):
@@ -455,6 +477,194 @@ def validate_version_manifest() -> list[str]:
         for expected_text in contains:
             if expected_text not in content:
                 errors.append(f"{path_value}: missing version manifest text '{expected_text}'")
+
+    if isinstance(current_version, str):
+        errors.extend(validate_control_catalog(current_version, expected_control_count))
+
+    return errors
+
+
+def get_dotted_value(value: Any, dotted_path: str) -> Any:
+    current = value
+    for part in dotted_path.split("."):
+        if isinstance(current, dict) and part in current:
+            current = current[part]
+        else:
+            return None
+    return current
+
+
+def validate_control_catalog(expected_version: str, expected_control_count: Any) -> list[str]:
+    errors: list[str] = []
+    rel = str(CONTROL_CATALOG_PATH.relative_to(ROOT))
+
+    if not CONTROL_CATALOG_PATH.is_file():
+        return [f"{rel}: missing control catalog"]
+
+    try:
+        catalog = load_control_catalog()
+    except (json.JSONDecodeError, ValueError) as exc:
+        return [f"{rel}: invalid JSON control catalog: {exc}"]
+
+    if catalog.get("version") != expected_version:
+        errors.append(f"{rel}: version must match version manifest currentVersion {expected_version}")
+    if not is_iso_date(catalog.get("releaseDate", "")):
+        errors.append(f"{rel}: releaseDate must be a YYYY-MM-DD date")
+
+    controls = catalog.get("controls")
+    if not isinstance(controls, list) or not controls:
+        return errors + [f"{rel}: controls must be a non-empty array"]
+    if isinstance(expected_control_count, int) and len(controls) != expected_control_count:
+        errors.append(f"{rel}: controls length must match controlCatalog.expectedControlCount")
+
+    seen_ids: set[str] = set()
+    checker_text = Path(__file__).read_text(encoding="utf-8")
+    required_control_fields = [
+        "id",
+        "category",
+        "title",
+        "statement",
+        "requiredArtifacts",
+        "schemaRequirements",
+        "exampleRequirements",
+        "checkerEvidence",
+    ]
+
+    for index, control in enumerate(controls):
+        location = f"{rel}.controls[{index}]"
+        if not isinstance(control, dict):
+            errors.append(f"{location}: control must be an object")
+            continue
+        for field in required_control_fields:
+            if field not in control:
+                errors.append(f"{location}: missing required field '{field}'")
+
+        control_id = control.get("id")
+        if not isinstance(control_id, str) or not re.fullmatch(r"CTRL-[A-Z0-9-]+", control_id):
+            errors.append(f"{location}: id must match CTRL-*")
+        elif control_id in seen_ids:
+            errors.append(f"{location}: duplicate control id '{control_id}'")
+        else:
+            seen_ids.add(control_id)
+
+        artifacts = control.get("requiredArtifacts")
+        if not isinstance(artifacts, list) or not artifacts:
+            errors.append(f"{location}: requiredArtifacts must be a non-empty string array")
+        else:
+            for artifact in artifacts:
+                if not isinstance(artifact, str):
+                    errors.append(f"{location}: requiredArtifacts entries must be strings")
+                    continue
+                if not (ROOT / artifact).is_file():
+                    errors.append(f"{location}: required artifact is missing: {artifact}")
+
+        schema_requirements = control.get("schemaRequirements")
+        if not isinstance(schema_requirements, list):
+            errors.append(f"{location}: schemaRequirements must be an array")
+        else:
+            for req_index, requirement in enumerate(schema_requirements):
+                req_location = f"{location}.schemaRequirements[{req_index}]"
+                errors.extend(validate_control_schema_requirement(requirement, req_location))
+
+        example_requirements = control.get("exampleRequirements")
+        if not isinstance(example_requirements, list):
+            errors.append(f"{location}: exampleRequirements must be an array")
+        else:
+            for req_index, requirement in enumerate(example_requirements):
+                req_location = f"{location}.exampleRequirements[{req_index}]"
+                errors.extend(validate_control_example_requirement(requirement, req_location))
+
+        checker_evidence = control.get("checkerEvidence")
+        if not isinstance(checker_evidence, list) or not checker_evidence:
+            errors.append(f"{location}: checkerEvidence must be a non-empty string array")
+        else:
+            for evidence in checker_evidence:
+                if not isinstance(evidence, str):
+                    errors.append(f"{location}: checkerEvidence entries must be strings")
+                    continue
+                if evidence not in checker_text:
+                    errors.append(f"{location}: checker evidence is not present in script: {evidence}")
+
+    return errors
+
+
+def validate_control_schema_requirement(requirement: Any, location: str) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(requirement, dict):
+        return [f"{location}: schema requirement must be an object"]
+
+    path_value = requirement.get("path")
+    if not isinstance(path_value, str):
+        return [f"{location}: path must be a string"]
+    schema_path = ROOT / path_value
+    if not schema_path.is_file():
+        return [f"{location}: schema path is missing: {path_value}"]
+
+    try:
+        schema = load_schema(schema_path)
+    except (json.JSONDecodeError, ValueError) as exc:
+        return [f"{location}: invalid schema JSON: {exc}"]
+
+    required = requirement.get("required", [])
+    if not isinstance(required, list) or not all(isinstance(item, str) for item in required):
+        errors.append(f"{location}: required must be a string array")
+        required = []
+    root_required = schema.get("required", [])
+    root_properties = schema.get("properties", {})
+    for field in required:
+        if field not in root_required:
+            errors.append(f"{location}: schema root required is missing '{field}'")
+        if not isinstance(root_properties, dict) or field not in root_properties:
+            errors.append(f"{location}: schema root properties is missing '{field}'")
+
+    nested_required = requirement.get("nestedRequired", {})
+    if not isinstance(nested_required, dict):
+        errors.append(f"{location}: nestedRequired must be an object")
+        nested_required = {}
+    for field, nested_fields in nested_required.items():
+        if not isinstance(field, str) or not isinstance(nested_fields, list) or not all(
+            isinstance(item, str) for item in nested_fields
+        ):
+            errors.append(f"{location}: nestedRequired entries must map strings to string arrays")
+            continue
+        nested_schema = root_properties.get(field) if isinstance(root_properties, dict) else None
+        if not isinstance(nested_schema, dict):
+            errors.append(f"{location}: nested schema '{field}' is missing")
+            continue
+        nested_schema_required = nested_schema.get("required", [])
+        nested_schema_properties = nested_schema.get("properties", {})
+        for nested_field in nested_fields:
+            if nested_field not in nested_schema_required:
+                errors.append(f"{location}: nested schema '{field}' required is missing '{nested_field}'")
+            if not isinstance(nested_schema_properties, dict) or nested_field not in nested_schema_properties:
+                errors.append(f"{location}: nested schema '{field}' properties is missing '{nested_field}'")
+
+    return errors
+
+
+def validate_control_example_requirement(requirement: Any, location: str) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(requirement, dict):
+        return [f"{location}: example requirement must be an object"]
+
+    path_value = requirement.get("path")
+    if not isinstance(path_value, str):
+        return [f"{location}: path must be a string"]
+    example_path = ROOT / path_value
+    if not example_path.is_file():
+        return [f"{location}: example path is missing: {path_value}"]
+
+    try:
+        example = parse_yaml_example(example_path)
+    except KitValidationError as exc:
+        return [f"{location}: invalid YAML example: {exc}"]
+
+    fields = requirement.get("fields")
+    if not isinstance(fields, list) or not all(isinstance(item, str) for item in fields):
+        return [f"{location}: fields must be a string array"]
+    for field in fields:
+        if get_dotted_value(example, field) is None:
+            errors.append(f"{location}: example is missing field '{field}'")
 
     return errors
 
@@ -959,7 +1169,7 @@ def main() -> int:
         print(f"TOTAL={len(errors)}")
         return 1
 
-    print(f"OK modern enterprise architecture kit checked: {len(PAIR_NAMES)} schema/example pairs")
+    print(f"OK modern enterprise architecture kit checked: {len(PAIR_NAMES)} schema/example pairs and control catalog")
     return 0
 
 

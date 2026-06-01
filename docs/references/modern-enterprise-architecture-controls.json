@@ -1,0 +1,236 @@
+{
+  "version": "V2.6",
+  "releaseDate": "2026-06-02",
+  "status": "Baseline Candidate",
+  "profile": "modern-enterprise-architecture-executable-controls",
+  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据",
+  "alignment": [
+    {
+      "source": "NIST OSCAL",
+      "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
+      "rationale": "采用机器可读控制目录思想，记录控制项、证据和验证入口"
+    },
+    {
+      "source": "SLSA v1.2",
+      "url": "https://slsa.dev/spec/v1.2/",
+      "rationale": "供应链控制项覆盖 source、build、provenance 和 artifact evidence"
+    },
+    {
+      "source": "NIST SSDF SP 800-218",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "rationale": "安全开发控制项覆盖设计、构建、测试、发布和漏洞响应"
+    }
+  ],
+  "controls": [
+    {
+      "id": "CTRL-ARCH-VERSION-001",
+      "category": "version-governance",
+      "title": "架构版本和索引同步必须可证明",
+      "statement": "当前架构版本、发布状态、starter kit pair 清单和索引提及必须由机器可读清单驱动。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-version.json",
+        "scripts/check-modern-architecture-kit.py"
+      ],
+      "schemaRequirements": [],
+      "exampleRequirements": [],
+      "checkerEvidence": [
+        "validate_version_manifest",
+        "starterKit.pairs must match checker PAIR_NAMES order"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-RELIABILITY-001",
+      "category": "reliability",
+      "title": "生产服务必须声明可靠性等级和恢复目标",
+      "statement": "生产服务必须声明 tier、RTO、RPO、on-call、错误预算策略和演练证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/service.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/service.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/service.schema.json",
+          "required": ["tier", "reliability"],
+          "nestedRequired": {
+            "reliability": ["rto", "rpo", "onCall", "errorBudgetPolicy", "drillEvidence"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/service.example.yaml",
+          "fields": ["tier", "reliability.rto", "reliability.rpo", "reliability.onCall", "reliability.drillEvidence"]
+        }
+      ],
+      "checkerEvidence": [
+        "service.tier must match domain.sloTier"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-DATA-GOVERNANCE-001",
+      "category": "data-governance",
+      "title": "数据产品必须声明治理、审计和成本责任",
+      "statement": "数据产品必须声明消费者、保留期、访问策略、审计、AI 使用策略、成本 owner 和 SLO。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/data-product.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/data-product.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/data-product.schema.json",
+          "required": ["tier", "consumers", "retention", "accessPolicy", "audit", "aiUsage", "cost", "slo"],
+          "nestedRequired": {
+            "quality": ["completeness", "validity", "uniqueness", "accuracy"],
+            "accessPolicy": ["policy", "approvalRequired"],
+            "audit": ["enabled", "logRetention"],
+            "cost": ["owner", "allocationTag"],
+            "slo": ["freshness", "availability"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/data-product.example.yaml",
+          "fields": ["consumers", "retention", "accessPolicy.policy", "audit.enabled", "aiUsage.disallowed", "cost.owner", "slo.freshness"]
+        }
+      ],
+      "checkerEvidence": [
+        "data-product.consumers must match data-product.lineage.downstream",
+        "data-product.cost.owner must match data-product.owner",
+        "data-product.slo.freshness must match data-product.freshness"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AI-RUNTIME-001",
+      "category": "ai-governance",
+      "title": "AI 产品必须声明运行控制、预算和降级路径",
+      "statement": "AI 产品必须声明模型版本、SLO、预算、降级、供应商策略、数据使用策略和专用 runbook。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/ai-product.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/ai-product.example.yaml",
+        "docs/references/modern-enterprise-architecture-kit/ai-tool-contract.schema.json"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/ai-product.schema.json",
+          "required": ["slo", "budget", "fallback", "providerPolicy", "dataUsePolicy", "runbook"],
+          "nestedRequired": {
+            "model": ["gatewayRoute", "approvedModel", "modelVersion"],
+            "slo": ["taskCompletionRate", "groundedAnswerRate", "toolErrorRate", "p95LatencyMs"],
+            "budget": ["monthlyUsd", "costPerSuccessfulTaskUsd", "owner"],
+            "fallback": ["degradedMode", "humanHandoff", "rollbackPrompt"],
+            "providerPolicy": ["logRetention", "dataTrainingOptOut", "crossBorderReview"],
+            "dataUsePolicy": ["allowed", "disallowed"],
+            "runbook": ["incident", "rollback"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/ai-product.example.yaml",
+          "fields": ["model.approvedModel", "slo.groundedAnswerRate", "budget.owner", "fallback.humanHandoff", "providerPolicy.dataTrainingOptOut", "runbook.incident"]
+        }
+      ],
+      "checkerEvidence": [
+        "ai-product.tools.requiresHumanApproval must match ai-tool-contract.runtimeControls.requiresHumanApproval",
+        "ai-product.tools.riskLevel must match ai-tool-contract.riskTier mapping",
+        "ai-product.budget.owner must match ai-product.owner"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-GITOPS-SECURITY-001",
+      "category": "gitops-runtime-security",
+      "title": "GitOps 生产期望状态必须声明运行安全基线",
+      "statement": "生产 GitOps 契约必须声明 ServiceAccount、Pod 安全、网络策略、镜像验签策略、HPA、PDB 和配置引用。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/gitops-deployment.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/gitops-deployment.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/gitops-deployment.schema.json",
+          "required": ["serviceAccount", "security", "scaling", "availability", "configRefs", "policy"],
+          "nestedRequired": {
+            "security": ["podSecurity", "networkPolicy", "imageVerificationPolicy"],
+            "scaling": ["hpa", "minReplicas", "maxReplicas", "metric"],
+            "availability": ["podDisruptionBudget", "multiZone"],
+            "configRefs": ["configMaps", "secrets"],
+            "policy": ["requiresSignedImage", "requiresProvenance", "requiresSbom"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/gitops-deployment.example.yaml",
+          "fields": ["serviceAccount", "security.imageVerificationPolicy", "scaling.hpa", "availability.podDisruptionBudget", "configRefs.secrets"]
+        }
+      ],
+      "checkerEvidence": [
+        "gitops-deployment.serviceAccount must match service.service",
+        "prod gitops-deployment.policy.{field} must be true",
+        "gitops-deployment.scaling.maxReplicas must be >= minReplicas"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-SUPPLY-CHAIN-001",
+      "category": "supply-chain-security",
+      "title": "供应链证明必须覆盖源码、构建、制品、漏洞和 Scorecard",
+      "statement": "供应链证明必须覆盖 source control、SLSA、SBOM、provenance、签名、透明日志、漏洞扫描、Scorecard 和验签证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/supply-chain-attestation.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/supply-chain-attestation.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/supply-chain-attestation.schema.json",
+          "required": ["sourceControl", "slsa", "sbom", "provenance", "signature", "transparencyLog", "vulnerability", "scorecard", "verification"],
+          "nestedRequired": {
+            "sourceControl": ["branchProtection", "reviewRequired", "signedCommitRequired"],
+            "vulnerability": ["scan", "criticalOpen", "highOpen", "remediationSla"],
+            "scorecard": ["report", "minimumScore", "actualScore"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/supply-chain-attestation.example.yaml",
+          "fields": ["sourceControl.branchProtection", "slsa.level", "sbom.location", "vulnerability.criticalOpen", "scorecard.actualScore", "verification.result"]
+        }
+      ],
+      "checkerEvidence": [
+        "passing supply-chain-attestation must have zero critical vulnerabilities",
+        "passing supply-chain-attestation must have zero high vulnerabilities",
+        "supply-chain-attestation.scorecard.actualScore must be >= minimumScore"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-PRODUCTION-READINESS-001",
+      "category": "production-readiness",
+      "title": "生产就绪门禁必须结构化证据、阻断规则和豁免策略",
+      "statement": "生产就绪门禁必须声明结构化 evidence、blocking rule、waiver policy、verification command 和过期时间。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/production-readiness.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/production-readiness.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/production-readiness.schema.json",
+          "required": ["requiredEvidence", "blockingRules", "waiverPolicy", "verification", "expiry"],
+          "nestedRequired": {
+            "waiverPolicy": ["allowed", "requiresException", "maxDays"],
+            "verification": ["command", "report"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/production-readiness.example.yaml",
+          "fields": ["requiredEvidence", "blockingRules", "waiverPolicy.requiresException", "verification.command", "expiry"]
+        }
+      ],
+      "checkerEvidence": [
+        "validate_pair"
+      ]
+    }
+  ]
+}
