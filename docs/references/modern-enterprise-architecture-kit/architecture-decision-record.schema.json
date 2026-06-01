@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture Decision Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "adr",
+    "version",
+    "status",
+    "owner",
+    "decidedOn",
+    "decisionMakers",
+    "scope",
+    "context",
+    "options",
+    "decision",
+    "consequences",
+    "links",
+    "review",
+    "retention"
+  ],
+  "properties": {
+    "adr": {
+      "type": "string",
+      "pattern": "^adr-[0-9]{4}-[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^V\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "accepted",
+        "superseded",
+        "deprecated",
+        "rejected"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decidedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "decisionMakers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "name",
+          "approval"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approval": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ]
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architectureVersion",
+        "changeRecord",
+        "domain",
+        "affectedArtifacts"
+      ],
+      "properties": {
+        "architectureVersion": {
+          "type": "string",
+          "pattern": "^V\\d+\\.\\d+$"
+        },
+        "changeRecord": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affectedArtifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "problem",
+        "drivers",
+        "constraints"
+      ],
+      "properties": {
+        "problem": {
+          "type": "string",
+          "minLength": 1
+        },
+        "drivers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "option",
+          "summary",
+          "tradeoffs",
+          "decision"
+        ],
+        "properties": {
+          "option": {
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tradeoffs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "selected",
+              "rejected"
+            ]
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selectedOption",
+        "rationale",
+        "implementationPlan",
+        "guardrails"
+      ],
+      "properties": {
+        "selectedOption": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implementationPlan": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "guardrails": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "consequences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "positive",
+        "negative",
+        "risks"
+      ],
+      "properties": {
+        "positive": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "negative": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "risks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controls",
+        "risks",
+        "poamItems",
+        "evidence"
+      ],
+      "properties": {
+        "controls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^CTRL-[A-Z0-9-]+$"
+          }
+        },
+        "risks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "poamItems": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewedBy",
+        "reviewedOn",
+        "nextReviewOn"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "needs-changes"
+          ]
+        },
+        "reviewedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewedOn": {
+          "type": "string",
+          "format": "date"
+        },
+        "nextReviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period",
+        "reviewOn"
+      ],
+      "properties": {
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

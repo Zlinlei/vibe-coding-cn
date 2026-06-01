@@ -1,9 +1,9 @@
 poam: modern-enterprise-architecture-poam
-version: V2.22
+version: V2.23
 owner: governance-team
 generatedOn: 2026-06-02
 scope:
-  architectureVersion: V2.22
+  architectureVersion: V2.23
   controlAssessmentReport: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
   openFindings: 0
   blockingFindings: 0

@@ -1,9 +1,9 @@
 riskRegister: modern-enterprise-architecture-risk-register
-version: V2.22
+version: V2.23
 owner: governance-team
 generatedOn: 2026-06-02
 scope:
-  architectureVersion: V2.22
+  architectureVersion: V2.23
   subject: modern-enterprise-architecture
   controlCatalog: docs/references/modern-enterprise-architecture-controls.json
   controlAssessmentReport: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml

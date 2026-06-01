@@ -1,13 +1,13 @@
 package: modern-enterprise-architecture-audit-export
-version: V2.22
+version: V2.23
 generatedOn: 2026-06-02
 owner: governance-team
 scope:
-  architectureVersion: V2.22
+  architectureVersion: V2.23
   environment: starter-kit
   subject: modern-enterprise-architecture
-  controlCount: 37
-  starterKitPairs: 53
+  controlCount: 38
+  starterKitPairs: 54
 contents:
   - artifact: architecture-document
     path: docs/references/modern-enterprise-architecture-template.md
@@ -31,6 +31,10 @@ contents:
     required: true
   - artifact: baseline-change-record
     path: docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+    type: yaml
+    required: true
+  - artifact: architecture-decision-record
+    path: docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml
     type: yaml
     required: true
   - artifact: oscal-export-profile
@@ -84,8 +88,8 @@ contents:
 verification:
   command: make check-modern-architecture-audit-export
   result: pass
-  runId: local-v2-22-risk-register
-  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-22.md
+  runId: local-v2-23-architecture-decision-record
+  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-23.md
 signing:
   required: true
   method: sigstore-cosign-or-enterprise-signing

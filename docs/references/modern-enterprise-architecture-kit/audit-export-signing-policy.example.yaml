@@ -1,12 +1,12 @@
 policy: modern-enterprise-architecture-audit-export-signing-policy
-version: V2.22
+version: V2.23
 owner: governance-team
 generatedOn: 2026-06-02
 scope:
-  architectureVersion: V2.22
+  architectureVersion: V2.23
   package: modern-enterprise-architecture-audit-export
-  controlCount: 37
-  starterKitPairs: 53
+  controlCount: 38
+  starterKitPairs: 54
 payload:
   path: build/modern-enterprise-architecture-audit/audit-export-provenance.json
   digestAlgorithm: sha256

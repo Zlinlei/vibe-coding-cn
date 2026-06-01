@@ -1,0 +1,93 @@
+adr: adr-0023-architecture-decision-record-contract
+version: V2.23
+status: accepted
+owner: architecture-governance-board
+decidedOn: 2026-06-02
+decisionMakers:
+  - role: architecture-governance
+    name: architecture-governance-board
+    approval: approved
+  - role: platform
+    name: platform-team
+    approval: approved
+  - role: security
+    name: security-team
+    approval: approved
+scope:
+  architectureVersion: V2.23
+  changeRecord: docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+  domain: enterprise-architecture-governance
+  affectedArtifacts:
+    - docs/references/modern-enterprise-architecture-template.md
+    - docs/references/modern-enterprise-architecture-version.json
+    - docs/references/modern-enterprise-architecture-controls.json
+    - docs/references/modern-enterprise-architecture-kit/architecture-decision-record.schema.json
+    - docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json
+    - docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+    - scripts/check-modern-architecture-kit.py
+context:
+  problem: 架构文档要求重大变更必须形成 ADR，但 starter kit 缺少机器可读 ADR 契约，基线变更也无法证明已链接决策记录。
+  drivers:
+    - 架构基线变更需要可审计决策依据
+    - 领域、平台、安全和治理团队需要统一的决策留痕字段
+    - 审计包需要能追踪控制项、风险、POA&M 和 ADR 的关系
+  constraints:
+    - 不能引入额外运行时依赖
+    - 必须保持 JSON Schema draft 2020-12 和严格 schema 模式
+    - 必须与现有 baseline-change-record、risk-register 和控制目录交叉校验
+options:
+  - option: markdown-only-adr
+    summary: 继续只维护 Markdown ADR
+    tradeoffs:
+      - 人类可读但机器无法强制决策字段、控制项和风险链接
+      - 无法被 starter kit checker 证明覆盖
+    decision: rejected
+  - option: machine-readable-adr-contract
+    summary: 新增 architecture-decision-record schema/example，并让 baseline-change-record 绑定该 ADR
+    tradeoffs:
+      - 多一组契约和校验规则
+      - 能把决策上下文、选项、取舍、控制项、风险和复审纳入门禁
+    decision: selected
+decision:
+  selectedOption: machine-readable-adr-contract
+  rationale: 重大架构变更属于企业治理对象，必须用机器可校验契约证明决策存在、被批准、关联控制项和风险，并可在后续复审。
+  implementationPlan:
+    - 新增 architecture-decision-record schema/example
+    - baseline-change-record 增加 decisionRecord 指针
+    - 控制目录新增 ADR 控制项
+    - checker 校验 ADR 与版本、基线变更、控制目录、风险登记和 POA&M 的一致性
+  guardrails:
+    - 每次 Minor、Major 或 Breaking 级基线变更必须有 ADR
+    - ADR 必须至少有两个备选方案且只有一个 selected
+    - ADR 链接的控制项和风险必须真实存在
+consequences:
+  positive:
+    - 架构决策从说明性文档升级为可验证证据
+    - 评审、风险接受和基线变更形成闭环
+  negative:
+    - 增加一个必须维护的治理契约
+    - 决策质量需要通过评审纪律保障，schema 只能证明字段和关系
+  risks:
+    - risk-legacy-manual-audit-export
+links:
+  controls:
+    - CTRL-ARCH-ADR-001
+    - CTRL-ARCH-BASELINE-CHANGE-001
+    - CTRL-ARCH-RISK-REGISTER-001
+  risks:
+    - risk-legacy-manual-audit-export
+  poamItems:
+    - legacy-manual-audit-export-risk
+  evidence:
+    - docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+review:
+  status: approved
+  reviewedBy: architecture-governance-board
+  reviewedOn: 2026-06-02
+  nextReviewOn: 2026-12-02
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

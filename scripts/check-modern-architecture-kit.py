@@ -70,6 +70,7 @@ PAIR_NAMES = [
     "audit-export-manifest",
     "control-assessment-report",
     "baseline-change-record",
+    "architecture-decision-record",
     "oscal-export-profile",
     "audit-export-gate",
     "audit-export-integrity",
@@ -963,6 +964,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     audit_export_manifest = examples.get("audit-export-manifest")
     control_assessment_report = examples.get("control-assessment-report")
     baseline_change_record = examples.get("baseline-change-record")
+    architecture_decision_record = examples.get("architecture-decision-record")
     oscal_export_profile = examples.get("oscal-export-profile")
     audit_export_gate = examples.get("audit-export-gate")
     audit_export_integrity = examples.get("audit-export-integrity")
@@ -1717,6 +1719,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-controls.json",
                 "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
@@ -1999,6 +2002,119 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             if generated_on is not None and review_on is not None and review_on <= generated_on:
                 errors.append("cross-file: risk-register.retention.reviewOn must be after generatedOn")
 
+    if isinstance(architecture_decision_record, dict):
+        if architecture_decision_record.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: architecture-decision-record.version must match currentVersion")
+        if architecture_decision_record.get("status") != "accepted":
+            errors.append("cross-file: architecture-decision-record.status must be accepted")
+        decided_on = parse_example_date(architecture_decision_record.get("decidedOn"))
+        decision_makers = architecture_decision_record.get("decisionMakers")
+        if isinstance(decision_makers, list):
+            roles = set()
+            for decision_maker in decision_makers:
+                if not isinstance(decision_maker, dict):
+                    continue
+                role = decision_maker.get("role")
+                if isinstance(role, str):
+                    roles.add(role)
+                if decision_maker.get("approval") != "approved":
+                    errors.append("cross-file: architecture-decision-record.decisionMakers.approval must be approved")
+            required_roles = {"architecture-governance", "platform", "security"}
+            if not required_roles.issubset(roles):
+                errors.append("cross-file: architecture-decision-record.decisionMakers must include architecture-governance, platform and security")
+        scope = architecture_decision_record.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: architecture-decision-record.scope.architectureVersion must match currentVersion")
+            if scope.get("changeRecord") != "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml":
+                errors.append(
+                    "cross-file: architecture-decision-record.scope.changeRecord must point to baseline-change-record.example.yaml"
+                )
+            affected_artifacts = scope.get("affectedArtifacts")
+            if isinstance(affected_artifacts, list):
+                required_affected_artifacts = {
+                    str(VERSION_MANIFEST_PATH.relative_to(ROOT)),
+                    str(CONTROL_CATALOG_PATH.relative_to(ROOT)),
+                    "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.schema.json",
+                    "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
+                    "docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json",
+                    "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
+                    "scripts/check-modern-architecture-kit.py",
+                }
+                artifact_set = {item for item in affected_artifacts if isinstance(item, str)}
+                if not required_affected_artifacts.issubset(artifact_set):
+                    errors.append("cross-file: architecture-decision-record.scope.affectedArtifacts must include ADR baseline artifacts")
+                for artifact_path in artifact_set:
+                    if not (ROOT / artifact_path).is_file():
+                        errors.append("cross-file: architecture-decision-record.scope.affectedArtifacts must exist")
+        options = architecture_decision_record.get("options")
+        selected_options: list[str] = []
+        if isinstance(options, list):
+            for option in options:
+                if isinstance(option, dict) and option.get("decision") == "selected":
+                    option_name = option.get("option")
+                    if isinstance(option_name, str):
+                        selected_options.append(option_name)
+            if len(selected_options) != 1:
+                errors.append("cross-file: architecture-decision-record.options must contain exactly one selected option")
+        decision = architecture_decision_record.get("decision")
+        if isinstance(decision, dict) and selected_options:
+            if decision.get("selectedOption") != selected_options[0]:
+                errors.append("cross-file: architecture-decision-record.decision.selectedOption must match selected option")
+        links = architecture_decision_record.get("links")
+        if isinstance(links, dict):
+            controls = links.get("controls")
+            if isinstance(controls, list):
+                for control_id in controls:
+                    if control_id not in catalog_control_ids:
+                        errors.append("cross-file: architecture-decision-record.links.controls must reference control catalog ids")
+            risk_ids = set()
+            risks = risk_register.get("risks") if isinstance(risk_register, dict) else []
+            if isinstance(risks, list):
+                risk_ids = {
+                    risk.get("riskId")
+                    for risk in risks
+                    if isinstance(risk, dict) and isinstance(risk.get("riskId"), str)
+                }
+            linked_risks = links.get("risks")
+            if isinstance(linked_risks, list):
+                for risk_id in linked_risks:
+                    if risk_id not in risk_ids:
+                        errors.append("cross-file: architecture-decision-record.links.risks must reference risk register ids")
+            poam_item_ids = set()
+            poam_items = poam_record.get("items") if isinstance(poam_record, dict) else []
+            if isinstance(poam_items, list):
+                poam_item_ids = {
+                    item.get("finding")
+                    for item in poam_items
+                    if isinstance(item, dict) and isinstance(item.get("finding"), str)
+                }
+            linked_poam_items = links.get("poamItems")
+            if isinstance(linked_poam_items, list):
+                for item_id in linked_poam_items:
+                    if item_id not in poam_item_ids:
+                        errors.append("cross-file: architecture-decision-record.links.poamItems must reference POA&M items")
+            evidence = links.get("evidence")
+            if isinstance(evidence, list):
+                for evidence_path in evidence:
+                    if isinstance(evidence_path, str) and not (ROOT / evidence_path).is_file():
+                        errors.append("cross-file: architecture-decision-record.links.evidence must exist")
+        review = architecture_decision_record.get("review")
+        if isinstance(review, dict):
+            if review.get("status") != "approved":
+                errors.append("cross-file: architecture-decision-record.review.status must be approved")
+            reviewed_on = parse_example_date(review.get("reviewedOn"))
+            next_review_on = parse_example_date(review.get("nextReviewOn"))
+            if decided_on is not None and reviewed_on is not None and reviewed_on < decided_on:
+                errors.append("cross-file: architecture-decision-record.review.reviewedOn must be on or after decidedOn")
+            if reviewed_on is not None and next_review_on is not None and next_review_on <= reviewed_on:
+                errors.append("cross-file: architecture-decision-record.review.nextReviewOn must be after reviewedOn")
+        retention = architecture_decision_record.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if decided_on is not None and review_on is not None and review_on <= decided_on:
+                errors.append("cross-file: architecture-decision-record.retention.reviewOn must be after decidedOn")
+
     if isinstance(baseline_change_record, dict):
         if baseline_change_record.get("version") != version_manifest.get("currentVersion"):
             errors.append("cross-file: baseline-change-record.version must match currentVersion")
@@ -2010,6 +2126,8 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
         approved_on = parse_example_date(baseline_change_record.get("approvedOn"))
         if requested_on is not None and approved_on is not None and approved_on < requested_on:
             errors.append("cross-file: baseline-change-record.approvedOn must be on or after requestedOn")
+        if baseline_change_record.get("decisionRecord") != "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml":
+            errors.append("cross-file: baseline-change-record.decisionRecord must point to architecture-decision-record.example.yaml")
         scope = baseline_change_record.get("scope")
         if isinstance(scope, dict):
             if scope.get("architectureDocument") != version_manifest.get("architectureDocument"):
@@ -2027,6 +2145,8 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 required_changed_artifacts = {
                     str(VERSION_MANIFEST_PATH.relative_to(ROOT)),
                     str(CONTROL_CATALOG_PATH.relative_to(ROOT)),
+                    "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.schema.json",
+                    "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
                     "docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json",
                     "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
                     "scripts/check-modern-architecture-kit.py",
@@ -2100,6 +2220,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "auditExportManifest": "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml",
                 "controlAssessmentReport": "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
                 "baselineChangeRecord": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
+                "architectureDecisionRecord": "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
                 "auditExportGate": "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
                 "auditExportIntegrity": "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
                 "auditExportProvenance": "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
@@ -2117,6 +2238,10 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                     elif key == "riskRegister":
                         errors.append(
                             "cross-file: oscal-export-profile.sourceArtifacts.riskRegister must point to docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml"
+                        )
+                    elif key == "architectureDecisionRecord":
+                        errors.append(
+                            "cross-file: oscal-export-profile.sourceArtifacts.architectureDecisionRecord must point to docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml"
                         )
                     else:
                         errors.append(f"cross-file: oscal-export-profile.sourceArtifacts.{key} must point to {expected_path}")
@@ -2237,6 +2362,8 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: audit-export-gate.expectations.riskRegisterRequired must be true")
             if expectations.get("riskRegisterLinksPoam") is not True:
                 errors.append("cross-file: audit-export-gate.expectations.riskRegisterLinksPoam must be true")
+            if expectations.get("architectureDecisionRecordRequired") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.architectureDecisionRecordRequired must be true")
         outputs = audit_export_gate.get("outputs")
         if isinstance(outputs, list):
             output_paths = {item.get("path") for item in outputs if isinstance(item, dict) and isinstance(item.get("path"), str)}

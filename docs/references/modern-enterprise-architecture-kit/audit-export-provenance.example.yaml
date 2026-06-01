@@ -1,12 +1,12 @@
 statement: modern-enterprise-architecture-audit-export-provenance
-version: V2.22
+version: V2.23
 owner: governance-team
 generatedOn: 2026-06-02
 scope:
-  architectureVersion: V2.22
+  architectureVersion: V2.23
   package: modern-enterprise-architecture-audit-export
-  controlCount: 37
-  starterKitPairs: 53
+  controlCount: 38
+  starterKitPairs: 54
 format:
   statementType: https://in-toto.io/Statement/v1
   predicateType: https://slsa.dev/provenance/v1

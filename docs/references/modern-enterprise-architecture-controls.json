@@ -1,9 +1,9 @@
 {
-  "version": "V2.22",
+  "version": "V2.23",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、POA&M 整改计划、企业架构风险登记、审计导出门禁、导出完整性清单、provenance statement、签名策略和签名验签回执",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、架构决策记录、OSCAL 交换映射、POA&M 整改计划、企业架构风险登记、审计导出门禁、导出完整性清单、provenance statement、签名策略和签名验签回执",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -989,7 +989,7 @@
       "id": "CTRL-ARCH-BASELINE-CHANGE-001",
       "category": "baseline-change-control",
       "title": "架构基线变更必须有影响分析、批准、验证和回滚记录",
-      "statement": "每次架构基线升级必须形成机器可读变更记录，声明版本、前序版本、变更级别、影响范围、审批、验证命令、回滚计划和留存复审。",
+      "statement": "每次架构基线升级必须形成机器可读变更记录，声明版本、前序版本、变更级别、决策记录、影响范围、审批、验证命令、回滚计划和留存复审。",
       "requiredArtifacts": [
         "docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json",
         "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml"
@@ -997,7 +997,7 @@
       "schemaRequirements": [
         {
           "path": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json",
-          "required": ["record", "version", "previousVersion", "changeLevel", "status", "owner", "requestedBy", "requestedOn", "approvedOn", "scope", "impact", "validation", "rollback", "approvals", "retention"],
+          "required": ["record", "version", "previousVersion", "changeLevel", "status", "owner", "requestedBy", "requestedOn", "approvedOn", "decisionRecord", "scope", "impact", "validation", "rollback", "approvals", "retention"],
           "nestedRequired": {
             "scope": ["architectureDocument", "versionManifest", "controlCatalog", "controlCount", "starterKitPairs", "changedArtifacts"],
             "impact": ["summary", "security", "privacy", "data", "ai", "availability", "compatibility"],
@@ -1010,16 +1010,59 @@
       "exampleRequirements": [
         {
           "path": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
-          "fields": ["record", "version", "previousVersion", "scope.controlCount", "scope.starterKitPairs", "validation.result", "rollback.supported", "approvals"]
+          "fields": ["record", "version", "previousVersion", "decisionRecord", "scope.controlCount", "scope.starterKitPairs", "validation.result", "rollback.supported", "approvals"]
         }
       ],
       "checkerEvidence": [
         "baseline-change-record.version must match currentVersion",
         "baseline-change-record.scope.controlCount must match control catalog length",
         "baseline-change-record.scope.starterKitPairs must match starter kit pair count",
+        "baseline-change-record.decisionRecord must point to architecture-decision-record.example.yaml",
         "baseline-change-record.validation.commands must include required gates",
         "baseline-change-record.rollback.supported must be true",
         "baseline-change-record.approvals must include architecture-governance, platform and security"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-ADR-001",
+      "category": "architecture-decision-governance",
+      "title": "重大架构决策必须形成机器可读 ADR",
+      "statement": "重大架构变更必须形成机器可读 ADR，声明上下文、备选方案、取舍、决策、影响、关联控制项、风险、POA&M、证据、复审和留存，并与基线变更记录互相绑定。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
+        "scripts/check-modern-architecture-kit.py"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.schema.json",
+          "required": ["adr", "version", "status", "owner", "decidedOn", "decisionMakers", "scope", "context", "options", "decision", "consequences", "links", "review", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureVersion", "changeRecord", "domain", "affectedArtifacts"],
+            "context": ["problem", "drivers", "constraints"],
+            "decision": ["selectedOption", "rationale", "implementationPlan", "guardrails"],
+            "consequences": ["positive", "negative", "risks"],
+            "links": ["controls", "risks", "poamItems", "evidence"],
+            "review": ["status", "reviewedBy", "reviewedOn", "nextReviewOn"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
+          "fields": ["adr", "version", "status", "scope.changeRecord", "options", "decision.selectedOption", "links.controls", "links.risks", "links.poamItems", "review.status"]
+        }
+      ],
+      "checkerEvidence": [
+        "architecture-decision-record.version must match currentVersion",
+        "architecture-decision-record.status must be accepted",
+        "architecture-decision-record.scope.changeRecord must point to baseline-change-record.example.yaml",
+        "architecture-decision-record.links.controls must reference control catalog ids",
+        "architecture-decision-record.links.risks must reference risk register ids",
+        "architecture-decision-record.links.poamItems must reference POA&M items",
+        "architecture-decision-record.review.status must be approved",
+        "architecture-decision-record.retention.reviewOn must be after decidedOn"
       ]
     },
     {
@@ -1037,7 +1080,7 @@
           "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
           "nestedRequired": {
             "target": ["standard", "format", "machineReadable"],
-            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy", "auditExportSignatureReceipt", "poamRecord", "riskRegister"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "architectureDecisionRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy", "auditExportSignatureReceipt", "poamRecord", "riskRegister"],
             "controls": ["count", "selectionSource"],
             "assessment": ["source", "result", "openFindings", "poamRequired"],
             "validation": ["command", "result", "output"],
@@ -1048,12 +1091,13 @@
       "exampleRequirements": [
         {
           "path": "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
-          "fields": ["profile", "version", "target.machineReadable", "sourceArtifacts.controlCatalog", "sourceArtifacts.riskRegister", "modelMapping", "controls.count", "assessment.result", "validation.output"]
+          "fields": ["profile", "version", "target.machineReadable", "sourceArtifacts.controlCatalog", "sourceArtifacts.architectureDecisionRecord", "sourceArtifacts.riskRegister", "modelMapping", "controls.count", "assessment.result", "validation.output"]
         }
       ],
       "checkerEvidence": [
         "oscal-export-profile.version must match currentVersion",
         "oscal-export-profile.sourceArtifacts.poamRecord must point to docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
+        "oscal-export-profile.sourceArtifacts.architectureDecisionRecord must point to docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
         "oscal-export-profile.sourceArtifacts.riskRegister must point to docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
         "oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results, POA&M and risk register",
         "oscal-export-profile.controls.count must match control catalog length",
@@ -1080,7 +1124,7 @@
           "nestedRequired": {
             "command": ["local", "preflight", "export"],
             "qualityGate": ["requiredInMakeTest", "zeroDependency", "blocksOnMismatch"],
-            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches", "signatureReceiptRequired", "signatureReceiptExternal", "poamRecordRequired", "poamMatchesAssessment", "riskRegisterRequired", "riskRegisterLinksPoam"],
+            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches", "signatureReceiptRequired", "signatureReceiptExternal", "poamRecordRequired", "poamMatchesAssessment", "riskRegisterRequired", "riskRegisterLinksPoam", "architectureDecisionRecordRequired"],
             "ciIntegration": ["localGate", "makefileTarget", "script"],
             "retention": ["period", "reviewOn"]
           }
@@ -1089,7 +1133,7 @@
       "exampleRequirements": [
         {
           "path": "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
-          "fields": ["gate", "version", "command.local", "qualityGate.requiredInMakeTest", "outputs", "expectations.controlCount", "ciIntegration.localGate", "retention.reviewOn"]
+          "fields": ["gate", "version", "command.local", "qualityGate.requiredInMakeTest", "outputs", "expectations.controlCount", "expectations.architectureDecisionRecordRequired", "ciIntegration.localGate", "retention.reviewOn"]
         }
       ],
       "checkerEvidence": [
@@ -1109,6 +1153,7 @@
         "audit-export-gate.expectations.poamMatchesAssessment must be true",
         "audit-export-gate.expectations.riskRegisterRequired must be true",
         "audit-export-gate.expectations.riskRegisterLinksPoam must be true",
+        "audit-export-gate.expectations.architectureDecisionRecordRequired must be true",
         "audit-export-gate.qualityGate.requiredInMakeTest must be true",
         "audit-export-gate.ciIntegration.localGate must be make test",
         "audit export gate runtime invariant check failed"

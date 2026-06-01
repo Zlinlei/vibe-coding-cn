@@ -69,6 +69,7 @@
         "auditExportManifest",
         "controlAssessmentReport",
         "baselineChangeRecord",
+        "architectureDecisionRecord",
         "auditExportGate",
         "auditExportIntegrity",
         "auditExportProvenance",
@@ -99,6 +100,10 @@
           "minLength": 1
         },
         "baselineChangeRecord": {
+          "type": "string",
+          "minLength": 1
+        },
+        "architectureDecisionRecord": {
           "type": "string",
           "minLength": 1
         },

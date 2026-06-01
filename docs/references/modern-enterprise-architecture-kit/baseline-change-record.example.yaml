@@ -1,21 +1,25 @@
-record: modern-enterprise-architecture-v2-22-baseline-change
-version: V2.22
-previousVersion: V2.21
+record: modern-enterprise-architecture-v2-23-baseline-change
+version: V2.23
+previousVersion: V2.22
 changeLevel: Minor
 status: implemented
 owner: governance-team
 requestedBy: architecture-governance-board
 requestedOn: 2026-06-02
 approvedOn: 2026-06-02
+decisionRecord: docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml
 scope:
   architectureDocument: docs/references/modern-enterprise-architecture-template.md
   versionManifest: docs/references/modern-enterprise-architecture-version.json
   controlCatalog: docs/references/modern-enterprise-architecture-controls.json
-  controlCount: 37
-  starterKitPairs: 53
+  controlCount: 38
+  starterKitPairs: 54
   changedArtifacts:
     - docs/references/modern-enterprise-architecture-version.json
     - docs/references/modern-enterprise-architecture-controls.json
+    - docs/references/modern-enterprise-architecture-template.md
+    - docs/references/modern-enterprise-architecture-kit/architecture-decision-record.schema.json
+    - docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml
     - docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json
     - docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
     - docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml
@@ -40,7 +44,7 @@ scope:
     - scripts/check-modern-architecture-audit-export.py
     - scripts/export-modern-architecture-audit.py
 impact:
-  summary: add enterprise architecture risk register contract and risk evidence closure
+  summary: add machine-readable architecture decision record contract and bind baseline changes to ADR evidence
   security: low
   privacy: low
   data: low
@@ -62,12 +66,13 @@ validation:
     - build/modern-enterprise-architecture-audit/audit-export-provenance.json
     - build/modern-enterprise-architecture-audit/audit-export-signing-policy.json
     - docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml
     - docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
     - docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml
 rollback:
   supported: true
-  previousCommit: a0ccb81
-  plan: revert the risk register commit and restore V2.21 manifest, control catalog and starter kit counts
+  previousCommit: bc674a5
+  plan: revert the architecture decision record commit and restore V2.22 manifest, control catalog and starter kit counts
   owner: governance-team
 approvals:
   - role: architecture-governance

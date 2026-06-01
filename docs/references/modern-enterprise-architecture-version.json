@@ -1,13 +1,13 @@
 {
-  "currentVersion": "V2.22",
+  "currentVersion": "V2.23",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "changeLevel": "Minor",
-  "summary": "补齐企业架构风险登记和风险到控制、POA&M、审计导出的证据闭环",
+  "summary": "补齐机器可读架构决策记录和基线变更 ADR 绑定",
   "architectureDocument": "docs/references/modern-enterprise-architecture-template.md",
   "starterKit": {
     "path": "docs/references/modern-enterprise-architecture-kit",
-    "expectedPairCount": 53,
+    "expectedPairCount": 54,
     "pairs": [
       "domain",
       "service",
@@ -54,6 +54,7 @@
       "audit-export-manifest",
       "control-assessment-report",
       "baseline-change-record",
+      "architecture-decision-record",
       "oscal-export-profile",
       "audit-export-gate",
       "audit-export-integrity",
@@ -66,16 +67,16 @@
   },
   "controlCatalog": {
     "path": "docs/references/modern-enterprise-architecture-controls.json",
-    "expectedControlCount": 37
+    "expectedControlCount": 38
   },
   "requiredMentions": [
     {
       "path": "docs/references/modern-enterprise-architecture-template.md",
       "contains": [
-        "**文档版本**：V2.22",
-        "| `V2.22` | `Baseline Candidate` |",
-        "| `V2.22` | 2026-06-02 | Minor |",
-        "### 0.7 V2.22 可执行企业标准路线图",
+        "**文档版本**：V2.23",
+        "| `V2.23` | `Baseline Candidate` |",
+        "| `V2.23` | 2026-06-02 | Minor |",
+        "### 0.7 V2.23 可执行企业标准路线图",
         "控制项覆盖清单",
         "严格 schema 模式",
         "控制证据映射",
@@ -83,6 +84,7 @@
         "审计导出自动化",
         "控制评估报告",
         "架构基线变更记录",
+        "架构决策记录",
         "OSCAL 交换映射",
         "审计导出门禁",
         "审计导出完整性清单",
@@ -94,19 +96,20 @@
         "可靠性等级",
         "GitOps 运行安全",
         "供应链 source/vulnerability/scorecard 证据",
-        "53 组 schema/example"
+        "54 组 schema/example"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-kit/README.md",
       "contains": [
-        "V2.22",
+        "V2.23",
         "严格",
         "控制证据映射",
         "审计导出清单",
         "审计导出自动化",
         "控制评估报告",
         "架构基线变更记录",
+        "架构决策记录",
         "OSCAL 交换映射",
         "审计导出门禁",
         "审计导出完整性清单",
@@ -117,53 +120,53 @@
         "风险登记",
         "可靠性",
         "GitOps",
-        "53 组"
+        "54 组"
       ]
     },
     {
       "path": "docs/README.md",
       "contains": [
-        "V2.22",
-        "53 组"
+        "V2.23",
+        "54 组"
       ]
     },
     {
       "path": "docs/references/README.md",
       "contains": [
-        "V2.22",
-        "53 组"
+        "V2.23",
+        "54 组"
       ]
     },
     {
       "path": "metadata/taxonomy.yml",
       "contains": [
-        "V2.22",
-        "53 组"
+        "V2.23",
+        "54 组"
       ]
     },
     {
       "path": "assets/ai-citation/llms-full.txt",
       "contains": [
-        "V2.22",
-        "53 组"
+        "V2.23",
+        "54 组"
       ]
     },
     {
       "path": "AGENTS.md",
       "contains": [
-        "V2.22"
+        "V2.23"
       ]
     },
     {
       "path": "docs/references/AGENTS.md",
       "contains": [
-        "V2.22"
+        "V2.23"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-controls.json",
       "contains": [
-        "V2.22",
+        "V2.23",
         "CTRL-ARCH-RELIABILITY-001",
         "CTRL-ARCH-SCHEMA-STRICT-001",
         "CTRL-ARCH-EXTENSION-POLICY-001",
@@ -187,6 +190,7 @@
         "CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001",
         "CTRL-ARCH-CONTROL-ASSESSMENT-001",
         "CTRL-ARCH-BASELINE-CHANGE-001",
+        "CTRL-ARCH-ADR-001",
         "CTRL-ARCH-OSCAL-EXPORT-001",
         "CTRL-ARCH-AUDIT-EXPORT-GATE-001",
         "CTRL-ARCH-AUDIT-EXPORT-INTEGRITY-001",

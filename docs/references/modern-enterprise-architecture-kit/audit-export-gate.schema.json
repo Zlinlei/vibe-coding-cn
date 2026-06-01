@@ -128,7 +128,8 @@
         "poamRecordRequired",
         "poamMatchesAssessment",
         "riskRegisterRequired",
-        "riskRegisterLinksPoam"
+        "riskRegisterLinksPoam",
+        "architectureDecisionRecordRequired"
       ],
       "properties": {
         "architectureVersion": {
@@ -194,6 +195,9 @@
           "type": "boolean"
         },
         "riskRegisterLinksPoam": {
+          "type": "boolean"
+        },
+        "architectureDecisionRecordRequired": {
           "type": "boolean"
         }
       }

@@ -13,6 +13,7 @@
     "requestedBy",
     "requestedOn",
     "approvedOn",
+    "decisionRecord",
     "scope",
     "impact",
     "validation",
@@ -66,6 +67,10 @@
     "approvedOn": {
       "type": "string",
       "format": "date"
+    },
+    "decisionRecord": {
+      "type": "string",
+      "minLength": 1
     },
     "scope": {
       "type": "object",

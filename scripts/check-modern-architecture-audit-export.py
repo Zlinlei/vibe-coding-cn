@@ -303,6 +303,7 @@ def validate_packet(
         "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
+        "docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml",
         "scripts/check-modern-architecture-audit-export.py",
     }
     if not required_artifacts.issubset(artifact_paths):
@@ -362,6 +363,8 @@ def validate_packet(
                     errors.append("auditExportGate expectations.riskRegisterRequired must be true")
                 if expectations.get("riskRegisterLinksPoam") is not True:
                     errors.append("auditExportGate expectations.riskRegisterLinksPoam must be true")
+                if expectations.get("architectureDecisionRecordRequired") is not True:
+                    errors.append("auditExportGate expectations.architectureDecisionRecordRequired must be true")
         audit_export_provenance = evidence.get("auditExportProvenance")
         if audit_export_provenance != examples.get("audit-export-provenance"):
             errors.append("audit-export.json evidence.auditExportProvenance must match starter kit example")
@@ -377,6 +380,9 @@ def validate_packet(
         risk_register = evidence.get("riskRegister")
         if risk_register != examples.get("risk-register"):
             errors.append("audit-export.json evidence.riskRegister must match starter kit example")
+        architecture_decision_record = evidence.get("architectureDecisionRecord")
+        if architecture_decision_record != examples.get("architecture-decision-record"):
+            errors.append("audit-export.json evidence.architectureDecisionRecord must match starter kit example")
 
     if oscal.get("version") != expected_version:
         errors.append("oscal-summary.json version must match currentVersion")

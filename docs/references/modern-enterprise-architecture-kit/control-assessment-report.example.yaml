@@ -1,5 +1,5 @@
 report: modern-enterprise-architecture-control-assessment
-version: V2.22
+version: V2.23
 owner: governance-team
 assessedOn: 2026-06-02
 assessor:
@@ -7,15 +7,15 @@ assessor:
   independence: independent-review
   method: automated-gate-plus-manual-sampling
 scope:
-  architectureVersion: V2.22
+  architectureVersion: V2.23
   controlCatalog: docs/references/modern-enterprise-architecture-controls.json
-  controlCount: 37
+  controlCount: 38
   evidenceMap: docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml
   auditExportManifest: docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml
 summary:
   result: pass
-  assessedControls: 37
-  passedControls: 37
+  assessedControls: 38
+  passedControls: 38
   failedControls: 0
   openFindings: 0
   blockingFindings: 0
@@ -195,6 +195,14 @@ controlResults:
     assessor: architecture-governance-board
     evidence:
       - docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json
+  - id: CTRL-ARCH-ADR-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/architecture-decision-record.schema.json
+      - docs/references/modern-enterprise-architecture-kit/architecture-decision-record.example.yaml
+      - scripts/check-modern-architecture-kit.py
   - id: CTRL-ARCH-OSCAL-EXPORT-001
     status: pass
     testedOn: 2026-06-02

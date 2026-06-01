@@ -1,8 +1,8 @@
 # 现代企业数字化平台 Starter Kit
 
-本目录把《现代企业数字化平台架构说明文档》的 V2.22 起点转成可执行资产，当前包含 53 组 schema/example。
+本目录把《现代企业数字化平台架构说明文档》的 V2.23 起点转成可执行资产，当前包含 54 组 schema/example。
 
-V2.22 在严格 schema 模式之上补齐企业架构风险登记，把风险、控制项、POA&M、残余风险、复审和审计导出证据闭环。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
+V2.23 在严格 schema 模式之上补齐架构决策记录，把 ADR 上下文、备选方案、取舍、控制项、风险、POA&M、复审和基线变更绑定纳入证据闭环。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
 
 ## 文件说明
 
@@ -53,6 +53,7 @@ V2.22 在严格 schema 模式之上补齐企业架构风险登记，把风险、
 | `audit-export-manifest.schema.json` / `audit-export-manifest.example.yaml` | 审计导出包的版本、范围、内容、验证、签名和留存模板。 |
 | `control-assessment-report.schema.json` / `control-assessment-report.example.yaml` | 控制评估结论、发现项、整改、剩余风险和签署模板。 |
 | `baseline-change-record.schema.json` / `baseline-change-record.example.yaml` | 架构基线变更范围、影响、审批、验证、回滚和留存模板。 |
+| `architecture-decision-record.schema.json` / `architecture-decision-record.example.yaml` | 架构决策上下文、备选方案、取舍、控制项、风险、POA&M、复审和留存模板。 |
 | `oscal-export-profile.schema.json` / `oscal-export-profile.example.yaml` | OSCAL catalog、component-definition、SSP、assessment-results 和 POA&M 交换映射模板。 |
 | `poam-record.schema.json` / `poam-record.example.yaml` | POA&M 发现项、责任人、整改行动、里程碑、证据、签署和复审模板。 |
 | `risk-register.schema.json` / `risk-register.example.yaml` | 企业架构风险、处理策略、关联控制项、关联 POA&M、缓解行动、残余风险和复审模板。 |
@@ -86,7 +87,7 @@ make check-modern-architecture-audit-export
 
 6. 目标项目落地时，应把这些 schema 接入 CI、Developer Portal、catalog 生成和发布准入。
 
-## V2.22 校验范围
+## V2.23 校验范围
 
 - 检查每组 `*.schema.json` 和 `*.example.yaml` 是否同时存在。
 - 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称、控制项数量和索引提及是否一致。
@@ -96,7 +97,7 @@ make check-modern-architecture-audit-export
 - 检查示例 YAML 的类型、必填字段、枚举、命名格式、数组最小长度和日期格式。
 - 检查 starter kit 示例中的领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告是否保持关键字段一致。
 - 检查服务可靠性等级、GitOps ServiceAccount、生产供应链策略、AI 工具风险映射、AI 预算 owner、供应链漏洞和 Scorecard 结果是否形成可阻断门禁。
-- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘、平台产品指标、隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测、成本分摊证据、访问复核、密钥轮换、漏洞修复、事故复盘、证据新鲜度、控制证据映射、审计导出清单、审计导出自动化命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、POA&M 整改计划、企业架构风险登记、审计导出门禁、审计导出完整性清单、审计导出 provenance statement、审计导出签名策略和审计导出签名验签回执是否形成 schema、example、checker 和导出包证据链。
+- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘、平台产品指标、隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测、成本分摊证据、访问复核、密钥轮换、漏洞修复、事故复盘、证据新鲜度、控制证据映射、审计导出清单、审计导出自动化命令、控制评估报告、架构基线变更记录、架构决策记录、OSCAL 交换映射、POA&M 整改计划、企业架构风险登记、审计导出门禁、审计导出完整性清单、审计导出 provenance statement、审计导出签名策略和审计导出签名验签回执是否形成 schema、example、checker 和导出包证据链。
 - 检查审计导出 JSON、Markdown、OSCAL 摘要、POA&M 整改视图、风险登记视图、完整性清单、provenance statement、签名策略和签名验签回执契约的版本、pair 数、控制数、评估状态和输出不变量是否一致。
 
 ## 边界
