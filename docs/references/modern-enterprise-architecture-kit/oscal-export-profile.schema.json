@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OSCAL Export Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile",
+    "version",
+    "owner",
+    "generatedOn",
+    "target",
+    "sourceArtifacts",
+    "modelMapping",
+    "controls",
+    "assessment",
+    "validation",
+    "retention"
+  ],
+  "properties": {
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^V\\d+\\.\\d+$"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generatedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "standard",
+        "format",
+        "machineReadable"
+      ],
+      "properties": {
+        "standard": {
+          "type": "string",
+          "enum": [
+            "NIST OSCAL"
+          ]
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "json"
+          ]
+        },
+        "machineReadable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "sourceArtifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "versionManifest",
+        "controlCatalog",
+        "controlEvidenceMap",
+        "auditExportManifest",
+        "controlAssessmentReport",
+        "baselineChangeRecord"
+      ],
+      "properties": {
+        "versionManifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controlCatalog": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controlEvidenceMap": {
+          "type": "string",
+          "minLength": 1
+        },
+        "auditExportManifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controlAssessmentReport": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baselineChangeRecord": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "modelMapping": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "model",
+          "source",
+          "output",
+          "required"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "enum": [
+              "catalog",
+              "component-definition",
+              "system-security-plan",
+              "assessment-results",
+              "plan-of-action-and-milestones"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "output": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "selectionSource"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "selectionSource": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "result",
+        "openFindings",
+        "poamRequired"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "openFindings": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "poamRequired": {
+          "type": "boolean"
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "result",
+        "output"
+      ],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "output": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period",
+        "reviewOn"
+      ],
+      "properties": {
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

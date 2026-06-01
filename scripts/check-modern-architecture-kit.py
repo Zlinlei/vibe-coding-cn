@@ -67,6 +67,7 @@ PAIR_NAMES = [
     "audit-export-manifest",
     "control-assessment-report",
     "baseline-change-record",
+    "oscal-export-profile",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -867,6 +868,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     audit_export_manifest = examples.get("audit-export-manifest")
     control_assessment_report = examples.get("control-assessment-report")
     baseline_change_record = examples.get("baseline-change-record")
+    oscal_export_profile = examples.get("oscal-export-profile")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1613,6 +1615,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-controls.json",
                 "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
             }
@@ -1792,6 +1795,86 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             review_on = parse_example_date(retention.get("reviewOn"))
             if approved_on is not None and review_on is not None and review_on <= approved_on:
                 errors.append("cross-file: baseline-change-record.retention.reviewOn must be after approvedOn")
+
+    if isinstance(oscal_export_profile, dict):
+        if oscal_export_profile.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: oscal-export-profile.version must match currentVersion")
+        target = oscal_export_profile.get("target")
+        if isinstance(target, dict):
+            if target.get("standard") != "NIST OSCAL":
+                errors.append("cross-file: oscal-export-profile.target.standard must be NIST OSCAL")
+            if target.get("machineReadable") is not True:
+                errors.append("cross-file: oscal-export-profile.target.machineReadable must be true")
+        source_artifacts = oscal_export_profile.get("sourceArtifacts")
+        if isinstance(source_artifacts, dict):
+            expected_sources = {
+                "versionManifest": str(VERSION_MANIFEST_PATH.relative_to(ROOT)),
+                "controlCatalog": str(CONTROL_CATALOG_PATH.relative_to(ROOT)),
+                "controlEvidenceMap": "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
+                "auditExportManifest": "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml",
+                "controlAssessmentReport": "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
+                "baselineChangeRecord": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
+            }
+            for key, expected_path in expected_sources.items():
+                if source_artifacts.get(key) != expected_path:
+                    errors.append(f"cross-file: oscal-export-profile.sourceArtifacts.{key} must point to {expected_path}")
+                if not (ROOT / expected_path).is_file():
+                    errors.append("cross-file: oscal-export-profile.sourceArtifacts paths must exist")
+        model_mapping = oscal_export_profile.get("modelMapping")
+        if isinstance(model_mapping, list):
+            required_models = {
+                "catalog",
+                "component-definition",
+                "system-security-plan",
+                "assessment-results",
+                "plan-of-action-and-milestones",
+            }
+            mapped_models = set()
+            for item in model_mapping:
+                if not isinstance(item, dict):
+                    continue
+                model = item.get("model")
+                if isinstance(model, str):
+                    mapped_models.add(model)
+                if item.get("required") is not True:
+                    errors.append("cross-file: oscal-export-profile.modelMapping.required must be true")
+                source_path = item.get("source")
+                if isinstance(source_path, str) and not (ROOT / source_path).is_file():
+                    errors.append("cross-file: oscal-export-profile.modelMapping.source must exist")
+            if mapped_models != required_models:
+                errors.append("cross-file: oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results and POA&M")
+        controls = oscal_export_profile.get("controls")
+        if isinstance(controls, dict):
+            if controls.get("count") != len(catalog_control_ids):
+                errors.append("cross-file: oscal-export-profile.controls.count must match control catalog length")
+            if controls.get("selectionSource") != str(CONTROL_CATALOG_PATH.relative_to(ROOT)):
+                errors.append("cross-file: oscal-export-profile.controls.selectionSource must point to control catalog")
+        assessment = oscal_export_profile.get("assessment")
+        if isinstance(assessment, dict):
+            assessment_summary = control_assessment_report.get("summary") if isinstance(control_assessment_report, dict) else {}
+            if assessment.get("source") != "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml":
+                errors.append("cross-file: oscal-export-profile.assessment.source must point to control assessment report")
+            if isinstance(assessment_summary, dict):
+                if assessment.get("result") != assessment_summary.get("result"):
+                    errors.append("cross-file: oscal-export-profile.assessment.result must match control assessment summary")
+                if assessment.get("openFindings") != assessment_summary.get("openFindings"):
+                    errors.append("cross-file: oscal-export-profile.assessment.openFindings must match control assessment summary")
+                if assessment.get("poamRequired") != (assessment_summary.get("openFindings") != 0):
+                    errors.append("cross-file: oscal-export-profile.assessment.poamRequired must match open findings")
+        validation = oscal_export_profile.get("validation")
+        if isinstance(validation, dict):
+            if validation.get("command") != "make export-modern-architecture-audit":
+                errors.append("cross-file: oscal-export-profile.validation.command must be make export-modern-architecture-audit")
+            if validation.get("result") != "pass":
+                errors.append("cross-file: oscal-export-profile.validation.result must be pass")
+            if validation.get("output") != "build/modern-enterprise-architecture-audit/oscal-summary.json":
+                errors.append("cross-file: oscal-export-profile.validation.output must be oscal-summary.json")
+        generated_on = parse_example_date(oscal_export_profile.get("generatedOn"))
+        retention = oscal_export_profile.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if generated_on is not None and review_on is not None and review_on <= generated_on:
+                errors.append("cross-file: oscal-export-profile.retention.reviewOn must be after generatedOn")
 
     return errors
 

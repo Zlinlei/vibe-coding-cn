@@ -1,0 +1,51 @@
+profile: modern-enterprise-architecture-oscal-export
+version: V2.15
+owner: governance-team
+generatedOn: 2026-06-02
+target:
+  standard: NIST OSCAL
+  format: json
+  machineReadable: true
+sourceArtifacts:
+  versionManifest: docs/references/modern-enterprise-architecture-version.json
+  controlCatalog: docs/references/modern-enterprise-architecture-controls.json
+  controlEvidenceMap: docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml
+  auditExportManifest: docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml
+  controlAssessmentReport: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
+  baselineChangeRecord: docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+modelMapping:
+  - model: catalog
+    source: docs/references/modern-enterprise-architecture-controls.json
+    output: build/modern-enterprise-architecture-audit/oscal-summary.json#/catalog
+    required: true
+  - model: component-definition
+    source: docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml
+    output: build/modern-enterprise-architecture-audit/oscal-summary.json#/componentDefinition
+    required: true
+  - model: system-security-plan
+    source: docs/references/modern-enterprise-architecture-template.md
+    output: build/modern-enterprise-architecture-audit/oscal-summary.json#/systemSecurityPlan
+    required: true
+  - model: assessment-results
+    source: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
+    output: build/modern-enterprise-architecture-audit/oscal-summary.json#/assessmentResults
+    required: true
+  - model: plan-of-action-and-milestones
+    source: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
+    output: build/modern-enterprise-architecture-audit/oscal-summary.json#/poam
+    required: true
+controls:
+  count: 30
+  selectionSource: docs/references/modern-enterprise-architecture-controls.json
+assessment:
+  source: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
+  result: pass
+  openFindings: 0
+  poamRequired: false
+validation:
+  command: make export-modern-architecture-audit
+  result: pass
+  output: build/modern-enterprise-architecture-audit/oscal-summary.json
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

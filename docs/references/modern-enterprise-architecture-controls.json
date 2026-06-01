@@ -1,14 +1,14 @@
 {
-  "version": "V2.14",
+  "version": "V2.15",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告和架构基线变更记录",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录和 OSCAL 交换映射",
   "alignment": [
     {
       "source": "NIST OSCAL",
       "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
-      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告和基线变更记录"
+      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告、基线变更记录和 OSCAL 交换映射"
     },
     {
       "source": "SLSA v1.2",
@@ -1008,6 +1008,44 @@
         "baseline-change-record.validation.commands must include required gates",
         "baseline-change-record.rollback.supported must be true",
         "baseline-change-record.approvals must include architecture-governance, platform and security"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-OSCAL-EXPORT-001",
+      "category": "audit-interoperability",
+      "title": "审计证据必须有 OSCAL 交换映射和机器可读导出摘要",
+      "statement": "企业架构控制、证据、评估结果、整改项和基线变更必须能映射到 OSCAL catalog、component-definition、system-security-plan、assessment-results 和 POA&M 交换视图。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.schema.json",
+          "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
+          "nestedRequired": {
+            "target": ["standard", "format", "machineReadable"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord"],
+            "controls": ["count", "selectionSource"],
+            "assessment": ["source", "result", "openFindings", "poamRequired"],
+            "validation": ["command", "result", "output"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
+          "fields": ["profile", "version", "target.machineReadable", "sourceArtifacts.controlCatalog", "modelMapping", "controls.count", "assessment.result", "validation.output"]
+        }
+      ],
+      "checkerEvidence": [
+        "oscal-export-profile.version must match currentVersion",
+        "oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results and POA&M",
+        "oscal-export-profile.controls.count must match control catalog length",
+        "oscal-export-profile.assessment.result must match control assessment summary",
+        "oscal-export-profile.validation.command must be make export-modern-architecture-audit",
+        "oscal-export-profile.validation.output must be oscal-summary.json"
       ]
     }
   ]

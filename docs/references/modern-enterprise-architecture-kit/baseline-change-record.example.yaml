@@ -1,6 +1,6 @@
-record: modern-enterprise-architecture-v2-14-baseline-change
-version: V2.14
-previousVersion: V2.13
+record: modern-enterprise-architecture-v2-15-baseline-change
+version: V2.15
+previousVersion: V2.14
 changeLevel: Minor
 status: implemented
 owner: governance-team
@@ -11,16 +11,18 @@ scope:
   architectureDocument: docs/references/modern-enterprise-architecture-template.md
   versionManifest: docs/references/modern-enterprise-architecture-version.json
   controlCatalog: docs/references/modern-enterprise-architecture-controls.json
-  controlCount: 29
-  starterKitPairs: 45
+  controlCount: 30
+  starterKitPairs: 46
   changedArtifacts:
     - docs/references/modern-enterprise-architecture-version.json
     - docs/references/modern-enterprise-architecture-controls.json
     - docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json
     - docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/oscal-export-profile.schema.json
+    - docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml
     - scripts/check-modern-architecture-kit.py
 impact:
-  summary: add machine-readable baseline change control for versioned architecture changes
+  summary: add OSCAL exchange profile and machine-readable OSCAL summary output
   security: low
   privacy: low
   data: low
@@ -38,8 +40,8 @@ validation:
     - build/modern-enterprise-architecture-audit/audit-export.md
 rollback:
   supported: true
-  previousCommit: 4ce00ad
-  plan: revert the baseline-change-record commit and restore V2.13 manifest, control catalog and starter kit counts
+  previousCommit: 7dba68f
+  plan: revert the OSCAL export profile commit and restore V2.14 manifest, control catalog and starter kit counts
   owner: governance-team
 approvals:
   - role: architecture-governance

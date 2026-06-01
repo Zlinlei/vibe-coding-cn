@@ -1,13 +1,13 @@
 {
-  "currentVersion": "V2.14",
+  "currentVersion": "V2.15",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "changeLevel": "Minor",
-  "summary": "补齐架构基线变更记录和回滚证明",
+  "summary": "补齐 OSCAL 交换映射和导出摘要",
   "architectureDocument": "docs/references/modern-enterprise-architecture-template.md",
   "starterKit": {
     "path": "docs/references/modern-enterprise-architecture-kit",
-    "expectedPairCount": 45,
+    "expectedPairCount": 46,
     "pairs": [
       "domain",
       "service",
@@ -53,21 +53,22 @@
       "control-evidence-map",
       "audit-export-manifest",
       "control-assessment-report",
-      "baseline-change-record"
+      "baseline-change-record",
+      "oscal-export-profile"
     ]
   },
   "controlCatalog": {
     "path": "docs/references/modern-enterprise-architecture-controls.json",
-    "expectedControlCount": 29
+    "expectedControlCount": 30
   },
   "requiredMentions": [
     {
       "path": "docs/references/modern-enterprise-architecture-template.md",
       "contains": [
-        "**文档版本**：V2.14",
-        "| `V2.14` | `Baseline Candidate` |",
-        "| `V2.14` | 2026-06-02 | Minor |",
-        "### 0.7 V2.14 可执行企业标准路线图",
+        "**文档版本**：V2.15",
+        "| `V2.15` | `Baseline Candidate` |",
+        "| `V2.15` | 2026-06-02 | Minor |",
+        "### 0.7 V2.15 可执行企业标准路线图",
         "控制项覆盖清单",
         "严格 schema 模式",
         "控制证据映射",
@@ -75,71 +76,73 @@
         "审计导出自动化",
         "控制评估报告",
         "架构基线变更记录",
+        "OSCAL 交换映射",
         "可靠性等级",
         "GitOps 运行安全",
         "供应链 source/vulnerability/scorecard 证据",
-        "45 组 schema/example"
+        "46 组 schema/example"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-kit/README.md",
       "contains": [
-        "V2.14",
+        "V2.15",
         "严格",
         "控制证据映射",
         "审计导出清单",
         "审计导出自动化",
         "控制评估报告",
         "架构基线变更记录",
+        "OSCAL 交换映射",
         "可靠性",
         "GitOps",
-        "45 组"
+        "46 组"
       ]
     },
     {
       "path": "docs/README.md",
       "contains": [
-        "V2.14",
-        "45 组"
+        "V2.15",
+        "46 组"
       ]
     },
     {
       "path": "docs/references/README.md",
       "contains": [
-        "V2.14",
-        "45 组"
+        "V2.15",
+        "46 组"
       ]
     },
     {
       "path": "metadata/taxonomy.yml",
       "contains": [
-        "V2.14",
-        "45 组"
+        "V2.15",
+        "46 组"
       ]
     },
     {
       "path": "assets/ai-citation/llms-full.txt",
       "contains": [
-        "V2.14",
-        "45 组"
+        "V2.15",
+        "46 组"
       ]
     },
     {
       "path": "AGENTS.md",
       "contains": [
-        "V2.14"
+        "V2.15"
       ]
     },
     {
       "path": "docs/references/AGENTS.md",
       "contains": [
-        "V2.14"
+        "V2.15"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-controls.json",
       "contains": [
-        "V2.14",
+        "V2.15",
         "CTRL-ARCH-RELIABILITY-001",
         "CTRL-ARCH-SCHEMA-STRICT-001",
         "CTRL-ARCH-EXTENSION-POLICY-001",
@@ -163,6 +166,7 @@
         "CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001",
         "CTRL-ARCH-CONTROL-ASSESSMENT-001",
         "CTRL-ARCH-BASELINE-CHANGE-001",
+        "CTRL-ARCH-OSCAL-EXPORT-001",
         "schemaRequirements",
         "checkerEvidence"
       ]

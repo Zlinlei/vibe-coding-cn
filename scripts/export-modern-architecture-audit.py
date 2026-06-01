@@ -25,6 +25,7 @@ REQUIRED_EXPORT_ARTIFACTS = [
     "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
+    "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
     "scripts/check-modern-architecture-kit.py",
     "scripts/export-modern-architecture-audit.py",
 ]
@@ -118,6 +119,7 @@ def build_packet(checker: Any) -> dict[str, Any]:
             "auditExportManifest": examples.get("audit-export-manifest"),
             "controlAssessmentReport": examples.get("control-assessment-report"),
             "baselineChangeRecord": examples.get("baseline-change-record"),
+            "oscalExportProfile": examples.get("oscal-export-profile"),
         },
         "artifacts": artifacts,
         "verification": {
@@ -162,6 +164,41 @@ def write_markdown(packet: dict[str, Any], path: Path) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_oscal_summary(packet: dict[str, Any], path: Path) -> None:
+    evidence = packet.get("evidence", {})
+    assessment = evidence.get("controlAssessmentReport") if isinstance(evidence, dict) else {}
+    oscal_profile = evidence.get("oscalExportProfile") if isinstance(evidence, dict) else {}
+    assessment_summary = assessment.get("summary") if isinstance(assessment, dict) else {}
+    findings = assessment.get("findings") if isinstance(assessment, dict) else []
+
+    summary = {
+        "oscalSummary": "modern-enterprise-architecture",
+        "version": packet["version"],
+        "generatedAt": packet["generatedAt"],
+        "catalog": {
+            "controls": packet["controls"],
+        },
+        "componentDefinition": {
+            "source": "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
+            "controlCount": packet["controlCount"],
+        },
+        "systemSecurityPlan": {
+            "source": "docs/references/modern-enterprise-architecture-template.md",
+            "status": packet["status"],
+        },
+        "assessmentResults": {
+            "source": "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
+            "summary": assessment_summary,
+        },
+        "poam": {
+            "required": bool(isinstance(assessment_summary, dict) and assessment_summary.get("openFindings", 0) != 0),
+            "findings": findings if isinstance(findings, list) else [],
+        },
+        "profile": oscal_profile,
+    }
+    path.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Export modern enterprise architecture audit packet")
     parser.add_argument(
@@ -183,11 +220,14 @@ def main() -> int:
     packet = build_packet(checker)
     json_path = out_dir / "audit-export.json"
     markdown_path = out_dir / "audit-export.md"
+    oscal_path = out_dir / "oscal-summary.json"
     write_json(packet, json_path)
     write_markdown(packet, markdown_path)
+    write_oscal_summary(packet, oscal_path)
 
     print(f"OK modern architecture audit export written: {relative(json_path)}")
     print(f"OK modern architecture audit report written: {relative(markdown_path)}")
+    print(f"OK modern architecture OSCAL summary written: {relative(oscal_path)}")
     return 0
 
 
