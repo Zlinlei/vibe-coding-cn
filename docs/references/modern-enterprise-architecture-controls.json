@@ -1,14 +1,14 @@
 {
-  "version": "V2.12",
+  "version": "V2.13",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单和可运行审计导出命令",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令和控制评估报告",
   "alignment": [
     {
       "source": "NIST OSCAL",
       "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
-      "rationale": "采用机器可读控制目录和评估证据思想，记录控制项、证据、验证入口和审计导出清单"
+      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单和控制评估报告"
     },
     {
       "source": "SLSA v1.2",
@@ -935,6 +935,42 @@
         "Makefile must expose export-modern-architecture-audit",
         "scripts README must mention export-modern-architecture-audit.py",
         "AGENTS.md must mention export-modern-architecture-audit"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-CONTROL-ASSESSMENT-001",
+      "category": "audit-assessment",
+      "title": "控制评估报告必须给出结论、发现项、整改和签署",
+      "statement": "控制证据不能只停留在映射和导出层，必须形成控制评估报告，声明评估范围、评估人、控制结果、发现项、整改时限、剩余风险和签署状态。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/control-assessment-report.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/control-assessment-report.schema.json",
+          "required": ["report", "version", "owner", "assessedOn", "assessor", "scope", "summary", "controlResults", "findings", "signOff"],
+          "nestedRequired": {
+            "assessor": ["name", "independence", "method"],
+            "scope": ["architectureVersion", "controlCatalog", "controlCount", "evidenceMap", "auditExportManifest"],
+            "summary": ["result", "assessedControls", "passedControls", "failedControls", "openFindings", "blockingFindings", "residualRisk"],
+            "signOff": ["status", "approver", "signedOn", "nextAssessmentOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
+          "fields": ["report", "version", "scope.controlCount", "summary.result", "summary.openFindings", "controlResults", "signOff.status"]
+        }
+      ],
+      "checkerEvidence": [
+        "control-assessment-report.version must match currentVersion",
+        "control-assessment-report.scope.controlCount must match control catalog length",
+        "control-assessment-report.controlResults must cover every control catalog id",
+        "control-assessment-report.summary.result must be pass",
+        "control-assessment-report.summary.openFindings must be 0",
+        "control-assessment-report.signOff.status must be approved"
       ]
     }
   ]

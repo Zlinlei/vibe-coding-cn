@@ -1,13 +1,13 @@
 {
-  "currentVersion": "V2.12",
+  "currentVersion": "V2.13",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "changeLevel": "Minor",
-  "summary": "补齐审计导出自动化命令",
+  "summary": "补齐控制评估报告和审计签署闭环",
   "architectureDocument": "docs/references/modern-enterprise-architecture-template.md",
   "starterKit": {
     "path": "docs/references/modern-enterprise-architecture-kit",
-    "expectedPairCount": 43,
+    "expectedPairCount": 44,
     "pairs": [
       "domain",
       "service",
@@ -51,89 +51,92 @@
       "incident-postmortem",
       "evidence-freshness-policy",
       "control-evidence-map",
-      "audit-export-manifest"
+      "audit-export-manifest",
+      "control-assessment-report"
     ]
   },
   "controlCatalog": {
     "path": "docs/references/modern-enterprise-architecture-controls.json",
-    "expectedControlCount": 27
+    "expectedControlCount": 28
   },
   "requiredMentions": [
     {
       "path": "docs/references/modern-enterprise-architecture-template.md",
       "contains": [
-        "**文档版本**：V2.12",
-        "| `V2.12` | `Baseline Candidate` |",
-        "| `V2.12` | 2026-06-02 | Minor |",
-        "### 0.7 V2.12 可执行企业标准路线图",
+        "**文档版本**：V2.13",
+        "| `V2.13` | `Baseline Candidate` |",
+        "| `V2.13` | 2026-06-02 | Minor |",
+        "### 0.7 V2.13 可执行企业标准路线图",
         "控制项覆盖清单",
         "严格 schema 模式",
         "控制证据映射",
         "审计导出清单",
         "审计导出自动化",
+        "控制评估报告",
         "可靠性等级",
         "GitOps 运行安全",
         "供应链 source/vulnerability/scorecard 证据",
-        "43 组 schema/example"
+        "44 组 schema/example"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-kit/README.md",
       "contains": [
-        "V2.12",
+        "V2.13",
         "严格",
         "控制证据映射",
         "审计导出清单",
         "审计导出自动化",
+        "控制评估报告",
         "可靠性",
         "GitOps",
-        "43 组"
+        "44 组"
       ]
     },
     {
       "path": "docs/README.md",
       "contains": [
-        "V2.12",
-        "43 组"
+        "V2.13",
+        "44 组"
       ]
     },
     {
       "path": "docs/references/README.md",
       "contains": [
-        "V2.12",
-        "43 组"
+        "V2.13",
+        "44 组"
       ]
     },
     {
       "path": "metadata/taxonomy.yml",
       "contains": [
-        "V2.12",
-        "43 组"
+        "V2.13",
+        "44 组"
       ]
     },
     {
       "path": "assets/ai-citation/llms-full.txt",
       "contains": [
-        "V2.12",
-        "43 组"
+        "V2.13",
+        "44 组"
       ]
     },
     {
       "path": "AGENTS.md",
       "contains": [
-        "V2.12"
+        "V2.13"
       ]
     },
     {
       "path": "docs/references/AGENTS.md",
       "contains": [
-        "V2.12"
+        "V2.13"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-controls.json",
       "contains": [
-        "V2.12",
+        "V2.13",
         "CTRL-ARCH-RELIABILITY-001",
         "CTRL-ARCH-SCHEMA-STRICT-001",
         "CTRL-ARCH-EXTENSION-POLICY-001",
@@ -155,6 +158,7 @@
         "CTRL-ARCH-CONTROL-EVIDENCE-MAP-001",
         "CTRL-ARCH-AUDIT-EXPORT-MANIFEST-001",
         "CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001",
+        "CTRL-ARCH-CONTROL-ASSESSMENT-001",
         "schemaRequirements",
         "checkerEvidence"
       ]

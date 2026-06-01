@@ -65,6 +65,7 @@ PAIR_NAMES = [
     "evidence-freshness-policy",
     "control-evidence-map",
     "audit-export-manifest",
+    "control-assessment-report",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -863,6 +864,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     evidence_freshness_policy = examples.get("evidence-freshness-policy")
     control_evidence_map = examples.get("control-evidence-map")
     audit_export_manifest = examples.get("audit-export-manifest")
+    control_assessment_report = examples.get("control-assessment-report")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1608,6 +1610,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-version.json",
                 "docs/references/modern-enterprise-architecture-controls.json",
                 "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
             }
@@ -1628,6 +1631,83 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             review_on = parse_example_date(retention.get("reviewOn"))
             if generated_on is not None and review_on is not None and review_on <= generated_on:
                 errors.append("cross-file: audit-export-manifest.retention.reviewOn must be after generatedOn")
+
+    if isinstance(control_assessment_report, dict):
+        if control_assessment_report.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: control-assessment-report.version must match currentVersion")
+        scope = control_assessment_report.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: control-assessment-report.scope.architectureVersion must match currentVersion")
+            if scope.get("controlCount") != len(catalog_control_ids):
+                errors.append("cross-file: control-assessment-report.scope.controlCount must match control catalog length")
+            if scope.get("controlCatalog") != str(CONTROL_CATALOG_PATH.relative_to(ROOT)):
+                errors.append("cross-file: control-assessment-report.scope.controlCatalog must point to control catalog")
+            if scope.get("evidenceMap") != "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml":
+                errors.append("cross-file: control-assessment-report.scope.evidenceMap must point to control evidence map example")
+            if scope.get("auditExportManifest") != "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml":
+                errors.append("cross-file: control-assessment-report.scope.auditExportManifest must point to audit export manifest example")
+        summary = control_assessment_report.get("summary")
+        control_results = control_assessment_report.get("controlResults")
+        result_ids: list[str] = []
+        pass_count = 0
+        fail_count = 0
+        if isinstance(control_results, list):
+            for item in control_results:
+                if not isinstance(item, dict):
+                    continue
+                control_id = item.get("id")
+                if isinstance(control_id, str):
+                    result_ids.append(control_id)
+                status = item.get("status")
+                if status == "pass":
+                    pass_count += 1
+                if status == "fail":
+                    fail_count += 1
+                evidence_items = item.get("evidence")
+                if isinstance(evidence_items, list):
+                    for evidence_path in evidence_items:
+                        if isinstance(evidence_path, str) and not (ROOT / evidence_path).is_file():
+                            errors.append("cross-file: control-assessment-report.controlResults.evidence must exist")
+            if sorted(result_ids) != sorted(catalog_control_ids):
+                errors.append("cross-file: control-assessment-report.controlResults must cover every control catalog id")
+            if len(result_ids) != len(set(result_ids)):
+                errors.append("cross-file: control-assessment-report.controlResults must not contain duplicate control ids")
+        if isinstance(summary, dict):
+            if summary.get("result") != "pass":
+                errors.append("cross-file: control-assessment-report.summary.result must be pass")
+            if summary.get("assessedControls") != len(catalog_control_ids):
+                errors.append("cross-file: control-assessment-report.summary.assessedControls must match control catalog length")
+            if summary.get("passedControls") != pass_count:
+                errors.append("cross-file: control-assessment-report.summary.passedControls must match pass results")
+            if summary.get("failedControls") != fail_count:
+                errors.append("cross-file: control-assessment-report.summary.failedControls must match fail results")
+            if summary.get("openFindings") != 0:
+                errors.append("cross-file: control-assessment-report.summary.openFindings must be 0")
+            if summary.get("blockingFindings") != 0:
+                errors.append("cross-file: control-assessment-report.summary.blockingFindings must be 0")
+        findings = control_assessment_report.get("findings")
+        if isinstance(findings, list):
+            for finding in findings:
+                if not isinstance(finding, dict):
+                    continue
+                if finding.get("status") == "open":
+                    errors.append("cross-file: control-assessment-report.findings.status must not be open")
+                due_date = parse_example_date(finding.get("dueDate"))
+                closed_on = parse_example_date(finding.get("closedOn"))
+                if closed_on is not None and due_date is not None and closed_on > due_date:
+                    errors.append("cross-file: control-assessment-report.findings.closedOn must be on or before dueDate")
+        assessed_on = parse_example_date(control_assessment_report.get("assessedOn"))
+        sign_off = control_assessment_report.get("signOff")
+        if isinstance(sign_off, dict):
+            if sign_off.get("status") != "approved":
+                errors.append("cross-file: control-assessment-report.signOff.status must be approved")
+            signed_on = parse_example_date(sign_off.get("signedOn"))
+            next_assessment_on = parse_example_date(sign_off.get("nextAssessmentOn"))
+            if assessed_on is not None and signed_on is not None and signed_on < assessed_on:
+                errors.append("cross-file: control-assessment-report.signOff.signedOn must be on or after assessedOn")
+            if signed_on is not None and next_assessment_on is not None and next_assessment_on <= signed_on:
+                errors.append("cross-file: control-assessment-report.signOff.nextAssessmentOn must be after signedOn")
 
     return errors
 

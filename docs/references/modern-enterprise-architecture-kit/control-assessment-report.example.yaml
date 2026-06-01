@@ -1,0 +1,205 @@
+report: modern-enterprise-architecture-control-assessment
+version: V2.13
+owner: governance-team
+assessedOn: 2026-06-02
+assessor:
+  name: architecture-governance-board
+  independence: independent-review
+  method: automated-gate-plus-manual-sampling
+scope:
+  architectureVersion: V2.13
+  controlCatalog: docs/references/modern-enterprise-architecture-controls.json
+  controlCount: 28
+  evidenceMap: docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml
+  auditExportManifest: docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml
+summary:
+  result: pass
+  assessedControls: 28
+  passedControls: 28
+  failedControls: 0
+  openFindings: 0
+  blockingFindings: 0
+  residualRisk: low
+controlResults:
+  - id: CTRL-ARCH-VERSION-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-version.json
+  - id: CTRL-ARCH-RELIABILITY-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/service.schema.json
+  - id: CTRL-ARCH-DATA-GOVERNANCE-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/data-product.schema.json
+  - id: CTRL-ARCH-AI-RUNTIME-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/ai-product.schema.json
+  - id: CTRL-ARCH-GITOPS-SECURITY-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/gitops-deployment.schema.json
+  - id: CTRL-ARCH-SUPPLY-CHAIN-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/supply-chain-attestation.schema.json
+  - id: CTRL-ARCH-PRODUCTION-READINESS-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/production-readiness.schema.json
+  - id: CTRL-ARCH-SCHEMA-STRICT-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - scripts/check-modern-architecture-kit.py
+  - id: CTRL-ARCH-EXTENSION-POLICY-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/extension-policy.schema.json
+  - id: CTRL-ARCH-FEATURE-FLAG-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/feature-flag-control.schema.json
+  - id: CTRL-ARCH-AI-THREAT-MODEL-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/ai-threat-model.schema.json
+  - id: CTRL-ARCH-LINEAGE-EVIDENCE-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/lineage-event.schema.json
+  - id: CTRL-ARCH-PLATFORM-METRICS-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/platform-product-metrics.schema.json
+  - id: CTRL-ARCH-PRIVACY-IMPACT-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/privacy-impact-assessment.schema.json
+  - id: CTRL-ARCH-TENANT-BOUNDARY-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/tenant-boundary.schema.json
+  - id: CTRL-ARCH-RECOVERY-DRILL-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/recovery-drill-evidence.schema.json
+  - id: CTRL-ARCH-POLICY-TEST-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/policy-test-report.schema.json
+  - id: CTRL-ARCH-GENAI-OBSERVABILITY-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/genai-observability-contract.schema.json
+  - id: CTRL-ARCH-COST-ALLOCATION-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/cost-allocation-evidence.schema.json
+  - id: CTRL-ARCH-ACCESS-REVIEW-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/identity-access-review.schema.json
+  - id: CTRL-ARCH-SECRETS-ROTATION-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/secrets-rotation-evidence.schema.json
+  - id: CTRL-ARCH-VULNERABILITY-REMEDIATION-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/vulnerability-remediation-evidence.schema.json
+  - id: CTRL-ARCH-INCIDENT-POSTMORTEM-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/incident-postmortem.schema.json
+  - id: CTRL-ARCH-EVIDENCE-FRESHNESS-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/evidence-freshness-policy.schema.json
+  - id: CTRL-ARCH-CONTROL-EVIDENCE-MAP-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/control-evidence-map.schema.json
+  - id: CTRL-ARCH-AUDIT-EXPORT-MANIFEST-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/audit-export-manifest.schema.json
+  - id: CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - scripts/export-modern-architecture-audit.py
+  - id: CTRL-ARCH-CONTROL-ASSESSMENT-001
+    status: pass
+    testedOn: 2026-06-02
+    assessor: architecture-governance-board
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/control-assessment-report.schema.json
+findings:
+  - finding: legacy-manual-audit-export-risk
+    controlId: CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001
+    severity: low
+    status: closed
+    owner: governance-team
+    remediation: audit export command added and validated before V2.13 assessment
+    dueDate: 2026-06-02
+    closedOn: 2026-06-02
+signOff:
+  status: approved
+  approver: architecture-governance-board
+  signedOn: 2026-06-02
+  nextAssessmentOn: 2026-09-02
