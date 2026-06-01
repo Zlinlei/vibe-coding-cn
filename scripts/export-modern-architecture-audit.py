@@ -24,6 +24,7 @@ REQUIRED_EXPORT_ARTIFACTS = [
     "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
+    "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
     "scripts/check-modern-architecture-kit.py",
     "scripts/export-modern-architecture-audit.py",
 ]
@@ -116,6 +117,7 @@ def build_packet(checker: Any) -> dict[str, Any]:
             "controlEvidenceMap": examples.get("control-evidence-map"),
             "auditExportManifest": examples.get("audit-export-manifest"),
             "controlAssessmentReport": examples.get("control-assessment-report"),
+            "baselineChangeRecord": examples.get("baseline-change-record"),
         },
         "artifacts": artifacts,
         "verification": {

@@ -1,14 +1,14 @@
 {
-  "version": "V2.13",
+  "version": "V2.14",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令和控制评估报告",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告和架构基线变更记录",
   "alignment": [
     {
       "source": "NIST OSCAL",
       "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
-      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单和控制评估报告"
+      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告和基线变更记录"
     },
     {
       "source": "SLSA v1.2",
@@ -971,6 +971,43 @@
         "control-assessment-report.summary.result must be pass",
         "control-assessment-report.summary.openFindings must be 0",
         "control-assessment-report.signOff.status must be approved"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-BASELINE-CHANGE-001",
+      "category": "baseline-change-control",
+      "title": "架构基线变更必须有影响分析、批准、验证和回滚记录",
+      "statement": "每次架构基线升级必须形成机器可读变更记录，声明版本、前序版本、变更级别、影响范围、审批、验证命令、回滚计划和留存复审。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json",
+          "required": ["record", "version", "previousVersion", "changeLevel", "status", "owner", "requestedBy", "requestedOn", "approvedOn", "scope", "impact", "validation", "rollback", "approvals", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureDocument", "versionManifest", "controlCatalog", "controlCount", "starterKitPairs", "changedArtifacts"],
+            "impact": ["summary", "security", "privacy", "data", "ai", "availability", "compatibility"],
+            "validation": ["result", "commands", "evidence"],
+            "rollback": ["supported", "previousCommit", "plan", "owner"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
+          "fields": ["record", "version", "previousVersion", "scope.controlCount", "scope.starterKitPairs", "validation.result", "rollback.supported", "approvals"]
+        }
+      ],
+      "checkerEvidence": [
+        "baseline-change-record.version must match currentVersion",
+        "baseline-change-record.scope.controlCount must match control catalog length",
+        "baseline-change-record.scope.starterKitPairs must match starter kit pair count",
+        "baseline-change-record.validation.commands must include required gates",
+        "baseline-change-record.rollback.supported must be true",
+        "baseline-change-record.approvals must include architecture-governance, platform and security"
       ]
     }
   ]

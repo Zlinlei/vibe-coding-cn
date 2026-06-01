@@ -1,0 +1,59 @@
+record: modern-enterprise-architecture-v2-14-baseline-change
+version: V2.14
+previousVersion: V2.13
+changeLevel: Minor
+status: implemented
+owner: governance-team
+requestedBy: architecture-governance-board
+requestedOn: 2026-06-02
+approvedOn: 2026-06-02
+scope:
+  architectureDocument: docs/references/modern-enterprise-architecture-template.md
+  versionManifest: docs/references/modern-enterprise-architecture-version.json
+  controlCatalog: docs/references/modern-enterprise-architecture-controls.json
+  controlCount: 29
+  starterKitPairs: 45
+  changedArtifacts:
+    - docs/references/modern-enterprise-architecture-version.json
+    - docs/references/modern-enterprise-architecture-controls.json
+    - docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json
+    - docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+    - scripts/check-modern-architecture-kit.py
+impact:
+  summary: add machine-readable baseline change control for versioned architecture changes
+  security: low
+  privacy: low
+  data: low
+  ai: low
+  availability: low
+  compatibility: low
+validation:
+  result: pass
+  commands:
+    - make check-modern-architecture-kit
+    - make export-modern-architecture-audit
+    - make test
+  evidence:
+    - build/modern-enterprise-architecture-audit/audit-export.json
+    - build/modern-enterprise-architecture-audit/audit-export.md
+rollback:
+  supported: true
+  previousCommit: 4ce00ad
+  plan: revert the baseline-change-record commit and restore V2.13 manifest, control catalog and starter kit counts
+  owner: governance-team
+approvals:
+  - role: architecture-governance
+    approver: architecture-governance-board
+    status: approved
+    approvedOn: 2026-06-02
+  - role: platform
+    approver: platform-team
+    status: approved
+    approvedOn: 2026-06-02
+  - role: security
+    approver: security-team
+    status: approved
+    approvedOn: 2026-06-02
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

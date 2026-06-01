@@ -66,6 +66,7 @@ PAIR_NAMES = [
     "control-evidence-map",
     "audit-export-manifest",
     "control-assessment-report",
+    "baseline-change-record",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -865,6 +866,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     control_evidence_map = examples.get("control-evidence-map")
     audit_export_manifest = examples.get("audit-export-manifest")
     control_assessment_report = examples.get("control-assessment-report")
+    baseline_change_record = examples.get("baseline-change-record")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1708,6 +1710,88 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: control-assessment-report.signOff.signedOn must be on or after assessedOn")
             if signed_on is not None and next_assessment_on is not None and next_assessment_on <= signed_on:
                 errors.append("cross-file: control-assessment-report.signOff.nextAssessmentOn must be after signedOn")
+
+    if isinstance(baseline_change_record, dict):
+        if baseline_change_record.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: baseline-change-record.version must match currentVersion")
+        if baseline_change_record.get("changeLevel") != version_manifest.get("changeLevel"):
+            errors.append("cross-file: baseline-change-record.changeLevel must match version manifest changeLevel")
+        if baseline_change_record.get("status") != "implemented":
+            errors.append("cross-file: baseline-change-record.status must be implemented")
+        requested_on = parse_example_date(baseline_change_record.get("requestedOn"))
+        approved_on = parse_example_date(baseline_change_record.get("approvedOn"))
+        if requested_on is not None and approved_on is not None and approved_on < requested_on:
+            errors.append("cross-file: baseline-change-record.approvedOn must be on or after requestedOn")
+        scope = baseline_change_record.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureDocument") != version_manifest.get("architectureDocument"):
+                errors.append("cross-file: baseline-change-record.scope.architectureDocument must match version manifest")
+            if scope.get("versionManifest") != str(VERSION_MANIFEST_PATH.relative_to(ROOT)):
+                errors.append("cross-file: baseline-change-record.scope.versionManifest must point to version manifest")
+            if scope.get("controlCatalog") != str(CONTROL_CATALOG_PATH.relative_to(ROOT)):
+                errors.append("cross-file: baseline-change-record.scope.controlCatalog must point to control catalog")
+            if scope.get("controlCount") != len(catalog_control_ids):
+                errors.append("cross-file: baseline-change-record.scope.controlCount must match control catalog length")
+            if scope.get("starterKitPairs") != len(PAIR_NAMES):
+                errors.append("cross-file: baseline-change-record.scope.starterKitPairs must match starter kit pair count")
+            changed_artifacts = scope.get("changedArtifacts")
+            if isinstance(changed_artifacts, list):
+                required_changed_artifacts = {
+                    str(VERSION_MANIFEST_PATH.relative_to(ROOT)),
+                    str(CONTROL_CATALOG_PATH.relative_to(ROOT)),
+                    "docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json",
+                    "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
+                    "scripts/check-modern-architecture-kit.py",
+                }
+                artifact_set = {item for item in changed_artifacts if isinstance(item, str)}
+                if not required_changed_artifacts.issubset(artifact_set):
+                    errors.append("cross-file: baseline-change-record.scope.changedArtifacts must include required baseline artifacts")
+                for artifact_path in artifact_set:
+                    if not (ROOT / artifact_path).is_file():
+                        errors.append("cross-file: baseline-change-record.scope.changedArtifacts must exist")
+        validation = baseline_change_record.get("validation")
+        if isinstance(validation, dict):
+            if validation.get("result") != "pass":
+                errors.append("cross-file: baseline-change-record.validation.result must be pass")
+            commands = validation.get("commands")
+            if isinstance(commands, list):
+                required_commands = {
+                    "make check-modern-architecture-kit",
+                    "make export-modern-architecture-audit",
+                    "make test",
+                }
+                command_set = {item for item in commands if isinstance(item, str)}
+                if not required_commands.issubset(command_set):
+                    errors.append("cross-file: baseline-change-record.validation.commands must include required gates")
+        rollback = baseline_change_record.get("rollback")
+        if isinstance(rollback, dict):
+            if rollback.get("supported") is not True:
+                errors.append("cross-file: baseline-change-record.rollback.supported must be true")
+            previous_commit = rollback.get("previousCommit")
+            if not isinstance(previous_commit, str) or not re.fullmatch(r"[0-9a-f]{7,40}", previous_commit):
+                errors.append("cross-file: baseline-change-record.rollback.previousCommit must be a git commit hash")
+        approvals = baseline_change_record.get("approvals")
+        if isinstance(approvals, list):
+            roles = set()
+            for approval in approvals:
+                if not isinstance(approval, dict):
+                    continue
+                role = approval.get("role")
+                if isinstance(role, str):
+                    roles.add(role)
+                if approval.get("status") != "approved":
+                    errors.append("cross-file: baseline-change-record.approvals.status must be approved")
+                approval_date = parse_example_date(approval.get("approvedOn"))
+                if approved_on is not None and approval_date is not None and approval_date < approved_on:
+                    errors.append("cross-file: baseline-change-record.approvals.approvedOn must be on or after approvedOn")
+            required_roles = {"architecture-governance", "platform", "security"}
+            if not required_roles.issubset(roles):
+                errors.append("cross-file: baseline-change-record.approvals must include architecture-governance, platform and security")
+        retention = baseline_change_record.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if approved_on is not None and review_on is not None and review_on <= approved_on:
+                errors.append("cross-file: baseline-change-record.retention.reviewOn must be after approvedOn")
 
     return errors
 

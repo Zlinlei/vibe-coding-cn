@@ -1,13 +1,13 @@
 package: modern-enterprise-architecture-audit-export
-version: V2.13
+version: V2.14
 generatedOn: 2026-06-02
 owner: governance-team
 scope:
-  architectureVersion: V2.13
+  architectureVersion: V2.14
   environment: starter-kit
   subject: modern-enterprise-architecture
-  controlCount: 28
-  starterKitPairs: 44
+  controlCount: 29
+  starterKitPairs: 45
 contents:
   - artifact: architecture-document
     path: docs/references/modern-enterprise-architecture-template.md
@@ -29,6 +29,10 @@ contents:
     path: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
     type: yaml
     required: true
+  - artifact: baseline-change-record
+    path: docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
+    type: yaml
+    required: true
   - artifact: starter-kit-readme
     path: docs/references/modern-enterprise-architecture-kit/README.md
     type: markdown
@@ -44,8 +48,8 @@ contents:
 verification:
   command: make check-modern-architecture-kit
   result: pass
-  runId: local-v2-13-starter-gate
-  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-13.md
+  runId: local-v2-14-starter-gate
+  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-14.md
 signing:
   required: true
   method: sigstore-or-enterprise-signing
