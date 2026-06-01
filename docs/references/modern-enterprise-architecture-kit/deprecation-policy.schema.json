@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Deprecation Policy",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "object",
+    "owner",
+    "replacement",
+    "consumers",
+    "noticeDate",
+    "migrationDeadline",
+    "rollback",
+    "removalGate"
+  ],
+  "properties": {
+    "object": { "type": "string" },
+    "owner": { "type": "string" },
+    "replacement": { "type": "string" },
+    "consumers": { "type": "array", "items": { "type": "string" } },
+    "noticeDate": { "type": "string" },
+    "migrationDeadline": { "type": "string" },
+    "rollback": { "type": "string" },
+    "removalGate": { "type": "array", "items": { "type": "string" } }
+  }
+}

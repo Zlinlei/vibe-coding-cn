@@ -1,0 +1,23 @@
+aiProduct: customer-service-agent
+owner: team-support-ai
+lifecycle: beta
+riskTier: R3
+businessGoal: assist support agents with grounded answers
+model:
+  gatewayRoute: support-safe-default
+prompts:
+  system: prompts/system.prompt.md
+rag:
+  sources: rag/sources.yaml
+  vectorIndex: vector:customer-support-policy:v12
+tools:
+  - tool: refund-preview
+    requiresHumanApproval: true
+evals:
+  regression: evals/regression.yaml
+  redTeam: evals/red-team.yaml
+guardrails:
+  policy: guardrails/policy.rego
+observability:
+  traceRetentionDays: 180
+  replayEnabled: true

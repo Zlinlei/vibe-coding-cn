@@ -1,0 +1,15 @@
+domain: order
+name: Order Domain
+owner: team-order
+lifecycle: production
+boundedContext: docs/domain-model.md
+capabilities:
+  - order-command
+  - order-query
+upstream:
+  - customer
+downstream:
+  - payment
+  - fulfillment
+sloTier: tier-1
+dataClassification: internal

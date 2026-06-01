@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Reliability Tiering Policy",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "tier",
+    "availabilityTarget",
+    "rto",
+    "rpo",
+    "onCall",
+    "drillCadence",
+    "errorBudgetPolicy"
+  ],
+  "properties": {
+    "tier": { "type": "string", "enum": ["tier-1", "tier-2", "tier-3"] },
+    "availabilityTarget": { "type": "string" },
+    "rto": { "type": "string" },
+    "rpo": { "type": "string" },
+    "onCall": { "type": "string" },
+    "drillCadence": { "type": "string" },
+    "errorBudgetPolicy": { "type": "object" }
+  }
+}

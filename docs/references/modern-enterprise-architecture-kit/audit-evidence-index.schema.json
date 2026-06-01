@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit Evidence Index",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "evidence",
+    "type",
+    "owner",
+    "subject",
+    "location",
+    "retention",
+    "relatedVersion",
+    "reviewDate"
+  ],
+  "properties": {
+    "evidence": { "type": "string" },
+    "type": { "type": "string" },
+    "owner": { "type": "string" },
+    "subject": { "type": "string" },
+    "location": { "type": "string" },
+    "retention": { "type": "string" },
+    "relatedVersion": { "type": "string" },
+    "reviewDate": { "type": "string" }
+  }
+}

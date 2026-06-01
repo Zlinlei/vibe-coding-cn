@@ -1,0 +1,13 @@
+name: order-command-service
+kind: component
+type: service
+domain: order
+owner: team-order
+lifecycle: production
+tier: tier-1
+runtime:
+  platform: kubernetes
+  namespace: order-prod
+  deployment: order-command-service
+  imageRepository: registry.company.com/order/order-command-service
+  gitopsPath: infra/gitops/environments/prod/order/order-command-service

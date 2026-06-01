@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Data Product Contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "dataProduct",
+    "domain",
+    "owner",
+    "lifecycle",
+    "schema",
+    "semanticGrain",
+    "freshness",
+    "quality",
+    "classification",
+    "lineage",
+    "aiUsage"
+  ],
+  "properties": {
+    "dataProduct": { "type": "string" },
+    "domain": { "type": "string" },
+    "owner": { "type": "string" },
+    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
+    "schema": { "type": "string" },
+    "semanticGrain": { "type": "string" },
+    "freshness": { "type": "string" },
+    "quality": { "type": "object" },
+    "classification": { "type": "object" },
+    "lineage": { "type": "object" },
+    "aiUsage": { "type": "object" }
+  }
+}

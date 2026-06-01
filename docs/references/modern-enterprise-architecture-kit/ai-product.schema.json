@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI Product Contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "aiProduct",
+    "owner",
+    "lifecycle",
+    "riskTier",
+    "businessGoal",
+    "model",
+    "prompts",
+    "rag",
+    "tools",
+    "evals",
+    "guardrails",
+    "observability"
+  ],
+  "properties": {
+    "aiProduct": { "type": "string" },
+    "owner": { "type": "string" },
+    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
+    "riskTier": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
+    "businessGoal": { "type": "string" },
+    "model": { "type": "object" },
+    "prompts": { "type": "object" },
+    "rag": { "type": "object" },
+    "tools": { "type": "array" },
+    "evals": { "type": "object" },
+    "guardrails": { "type": "object" },
+    "observability": { "type": "object" }
+  }
+}

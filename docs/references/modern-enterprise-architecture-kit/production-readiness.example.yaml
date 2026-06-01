@@ -1,0 +1,17 @@
+gate: production-readiness
+owner: governance-team
+appliesTo:
+  - tier-1-service
+  - tier-2-service
+requiredEvidence:
+  - service.yaml
+  - catalog entry
+  - runbook
+  - rollback plan
+  - SLO dashboard
+  - SBOM and provenance
+blockingRules:
+  - missing owner
+  - missing rollback plan
+  - unsigned artifact
+expiry: 2026-12-01

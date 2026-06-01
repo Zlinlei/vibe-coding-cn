@@ -1,0 +1,10 @@
+tier: tier-1
+availabilityTarget: 99.9%
+rto: 1h
+rpo: 15m
+onCall: 7x24
+drillCadence: quarterly
+errorBudgetPolicy:
+  attentionAt: 50%
+  restrictAt: 75%
+  freezeAt: 100%

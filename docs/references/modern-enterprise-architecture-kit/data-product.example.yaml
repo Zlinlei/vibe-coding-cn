@@ -1,0 +1,25 @@
+dataProduct: order-facts
+domain: order
+owner: team-order
+lifecycle: production
+schema: schema/order-facts.schema.yaml
+semanticGrain: one row per order state transition
+freshness: 15m
+quality:
+  completeness: ">= 99.5%"
+  uniqueness: order_event_id
+classification:
+  level: confidential
+  pii:
+    - customer_id
+lineage:
+  upstream:
+    - order-command-service
+  downstream:
+    - revenue-dashboard
+aiUsage:
+  allowed:
+    - rag
+    - evaluation
+  disallowed:
+    - foundation-model-training

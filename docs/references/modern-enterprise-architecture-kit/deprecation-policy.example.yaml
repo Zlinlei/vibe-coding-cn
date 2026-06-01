@@ -1,0 +1,13 @@
+object: api:order:v1
+owner: team-order
+replacement: api:order:v2
+consumers:
+  - checkout-web
+  - partner-api
+noticeDate: 2026-06-01
+migrationDeadline: 2026-09-01
+rollback: keep v1 route behind feature flag until all consumers migrate
+removalGate:
+  - no production traffic for 30 days
+  - all consumers acknowledged migration
+  - audit evidence archived

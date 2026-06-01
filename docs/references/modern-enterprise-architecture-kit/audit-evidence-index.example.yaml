@@ -1,0 +1,8 @@
+evidence: order-command-service-release-2026-06-01
+type: service-release
+owner: team-order
+subject: order-command-service
+location: governance/evidence/releases/order-command-service-2026-06-01.md
+retention: 2y
+relatedVersion: V2.0
+reviewDate: 2026-12-01

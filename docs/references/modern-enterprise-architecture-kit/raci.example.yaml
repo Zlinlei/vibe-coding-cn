@@ -1,0 +1,15 @@
+decision: high-risk-ai-product-release
+accountable: business-owner-support
+responsible:
+  - team-support-ai
+consulted:
+  - security-team
+  - data-platform-team
+  - customer-domain-team
+informed:
+  - platform-team
+  - governance-team
+evidence:
+  - risk assessment
+  - evaluation report
+  - human approval policy

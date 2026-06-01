@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Catalog Component",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "name",
+    "kind",
+    "type",
+    "domain",
+    "owner",
+    "lifecycle",
+    "tier",
+    "runtime"
+  ],
+  "properties": {
+    "name": { "type": "string" },
+    "kind": { "type": "string" },
+    "type": { "type": "string" },
+    "domain": { "type": "string" },
+    "owner": { "type": "string" },
+    "lifecycle": { "type": "string" },
+    "tier": { "type": "string" },
+    "runtime": { "type": "object" }
+  }
+}

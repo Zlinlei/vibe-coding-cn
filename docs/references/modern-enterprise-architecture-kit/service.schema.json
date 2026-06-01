@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Service Contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "service",
+    "domain",
+    "owner",
+    "lifecycle",
+    "runtime",
+    "resources",
+    "dependencies",
+    "slo",
+    "runbook",
+    "rollback"
+  ],
+  "properties": {
+    "service": { "type": "string" },
+    "domain": { "type": "string" },
+    "owner": { "type": "string" },
+    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
+    "runtime": { "type": "object" },
+    "resources": { "type": "object" },
+    "dependencies": { "type": "object" },
+    "slo": { "type": "object" },
+    "runbook": { "type": "string" },
+    "rollback": { "type": "string" }
+  }
+}

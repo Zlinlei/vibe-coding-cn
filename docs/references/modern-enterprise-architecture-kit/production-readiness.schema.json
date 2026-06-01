@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Production Readiness Gate",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "gate",
+    "owner",
+    "appliesTo",
+    "requiredEvidence",
+    "blockingRules",
+    "expiry"
+  ],
+  "properties": {
+    "gate": { "type": "string" },
+    "owner": { "type": "string" },
+    "appliesTo": { "type": "array", "items": { "type": "string" } },
+    "requiredEvidence": { "type": "array", "items": { "type": "string" } },
+    "blockingRules": { "type": "array", "items": { "type": "string" } },
+    "expiry": { "type": "string" }
+  }
+}

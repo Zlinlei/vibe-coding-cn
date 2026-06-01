@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Domain Contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "domain",
+    "name",
+    "owner",
+    "lifecycle",
+    "boundedContext",
+    "capabilities",
+    "sloTier"
+  ],
+  "properties": {
+    "domain": { "type": "string" },
+    "name": { "type": "string" },
+    "owner": { "type": "string" },
+    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
+    "boundedContext": { "type": "string" },
+    "capabilities": { "type": "array", "items": { "type": "string" } },
+    "upstream": { "type": "array", "items": { "type": "string" } },
+    "downstream": { "type": "array", "items": { "type": "string" } },
+    "sloTier": { "type": "string", "enum": ["tier-1", "tier-2", "tier-3"] },
+    "dataClassification": { "type": "string" }
+  }
+}

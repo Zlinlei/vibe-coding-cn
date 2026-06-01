@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RACI Decision Matrix",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "decision",
+    "accountable",
+    "responsible",
+    "consulted",
+    "informed",
+    "evidence"
+  ],
+  "properties": {
+    "decision": { "type": "string" },
+    "accountable": { "type": "string" },
+    "responsible": { "type": "array", "items": { "type": "string" } },
+    "consulted": { "type": "array", "items": { "type": "string" } },
+    "informed": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "array", "items": { "type": "string" } }
+  }
+}
