@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit Export Signature Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt",
+    "version",
+    "owner",
+    "verifiedOn",
+    "scope",
+    "policyBinding",
+    "payload",
+    "signature",
+    "verification",
+    "retention"
+  ],
+  "properties": {
+    "receipt": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^V\\d+\\.\\d+$"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verifiedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architectureVersion",
+        "package",
+        "controlCount",
+        "starterKitPairs"
+      ],
+      "properties": {
+        "architectureVersion": {
+          "type": "string",
+          "pattern": "^V\\d+\\.\\d+$"
+        },
+        "package": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controlCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "starterKitPairs": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "policyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signingPolicy",
+        "signingPolicyVersion",
+        "signingPolicyStatus"
+      ],
+      "properties": {
+        "signingPolicy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signingPolicyVersion": {
+          "type": "string",
+          "pattern": "^V\\d+\\.\\d+$"
+        },
+        "signingPolicyStatus": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "digestAlgorithm",
+        "sha256",
+        "digestSource"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digestAlgorithm": {
+          "type": "string",
+          "enum": [
+            "sha256"
+          ]
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "digestSource": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "bundlePath",
+        "bundleSha256",
+        "certificateIdentity",
+        "oidcIssuer",
+        "transparencyLogRequired",
+        "transparencyLogEntries"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bundlePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bundleSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "certificateIdentity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "oidcIssuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transparencyLogRequired": {
+          "type": "boolean"
+        },
+        "transparencyLogEntries": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "result",
+        "verifiedBy",
+        "tool",
+        "toolVersionRequired",
+        "output"
+      ],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "verifiedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tool": {
+          "type": "string",
+          "minLength": 1
+        },
+        "toolVersionRequired": {
+          "type": "boolean"
+        },
+        "output": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period",
+        "reviewOn"
+      ],
+      "properties": {
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

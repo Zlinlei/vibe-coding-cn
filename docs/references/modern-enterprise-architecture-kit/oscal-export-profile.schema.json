@@ -72,7 +72,8 @@
         "auditExportGate",
         "auditExportIntegrity",
         "auditExportProvenance",
-        "auditExportSigningPolicy"
+        "auditExportSigningPolicy",
+        "auditExportSignatureReceipt"
       ],
       "properties": {
         "versionManifest": {
@@ -112,6 +113,10 @@
           "minLength": 1
         },
         "auditExportSigningPolicy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "auditExportSignatureReceipt": {
           "type": "string",
           "minLength": 1
         }

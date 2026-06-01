@@ -300,6 +300,7 @@ def validate_packet(
         "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
         "scripts/check-modern-architecture-audit-export.py",
     }
     if not required_artifacts.issubset(artifact_paths):
@@ -347,12 +348,19 @@ def validate_packet(
                     errors.append("auditExportGate expectations.signingPolicyRequired must be true")
                 if expectations.get("signingPayloadDigestMatches") is not True:
                     errors.append("auditExportGate expectations.signingPayloadDigestMatches must be true")
+                if expectations.get("signatureReceiptRequired") is not True:
+                    errors.append("auditExportGate expectations.signatureReceiptRequired must be true")
+                if expectations.get("signatureReceiptExternal") is not True:
+                    errors.append("auditExportGate expectations.signatureReceiptExternal must be true")
         audit_export_provenance = evidence.get("auditExportProvenance")
         if audit_export_provenance != examples.get("audit-export-provenance"):
             errors.append("audit-export.json evidence.auditExportProvenance must match starter kit example")
         audit_export_signing_policy = evidence.get("auditExportSigningPolicy")
         if audit_export_signing_policy != examples.get("audit-export-signing-policy"):
             errors.append("audit-export.json evidence.auditExportSigningPolicy must match starter kit example")
+        audit_export_signature_receipt = evidence.get("auditExportSignatureReceipt")
+        if audit_export_signature_receipt != examples.get("audit-export-signature-receipt"):
+            errors.append("audit-export.json evidence.auditExportSignatureReceipt must match starter kit example")
 
     if oscal.get("version") != expected_version:
         errors.append("oscal-summary.json version must match currentVersion")
@@ -453,7 +461,8 @@ def main() -> int:
     control_count = loaded_packet.get("controlCount")
     print(
         "OK modern architecture audit export gate checked: "
-        f"{version}, {pair_count} schema/example pairs, {control_count} controls, integrity, provenance and signing policy"
+        f"{version}, {pair_count} schema/example pairs, {control_count} controls, integrity, provenance, "
+        "signing policy and signature receipt contract"
     )
     return 0
 

@@ -31,6 +31,7 @@ REQUIRED_EXPORT_ARTIFACTS = [
     "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
+    "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
     "scripts/check-modern-architecture-kit.py",
     "scripts/export-modern-architecture-audit.py",
     "scripts/check-modern-architecture-audit-export.py",
@@ -146,6 +147,7 @@ def build_packet(checker: Any) -> dict[str, Any]:
             "auditExportIntegrity": examples.get("audit-export-integrity"),
             "auditExportProvenance": examples.get("audit-export-provenance"),
             "auditExportSigningPolicy": examples.get("audit-export-signing-policy"),
+            "auditExportSignatureReceipt": examples.get("audit-export-signature-receipt"),
         },
         "artifacts": artifacts,
         "verification": {
@@ -389,7 +391,7 @@ def parse_args() -> argparse.Namespace:
         default=str(DEFAULT_OUT_DIR),
         help=(
             "Output directory for audit-export.json, audit-export.md, oscal-summary.json, "
-            "integrity manifest, provenance statement and signing policy"
+            "integrity manifest, provenance statement, signing policy and signature receipt contract"
         ),
     )
     return parser.parse_args()
@@ -423,6 +425,7 @@ def main() -> int:
     print(f"OK modern architecture audit integrity manifest written: {relative(integrity_path)}")
     print(f"OK modern architecture audit provenance statement written: {relative(provenance_path)}")
     print(f"OK modern architecture audit signing policy written: {relative(signing_policy_path)}")
+    print("OK modern architecture audit signature receipt contract packaged in audit-export.json")
     return 0
 
 

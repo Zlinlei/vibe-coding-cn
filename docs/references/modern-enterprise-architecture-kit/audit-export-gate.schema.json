@@ -122,7 +122,9 @@
         "provenanceStatementRequired",
         "provenanceSubjectDigestsMatch",
         "signingPolicyRequired",
-        "signingPayloadDigestMatches"
+        "signingPayloadDigestMatches",
+        "signatureReceiptRequired",
+        "signatureReceiptExternal"
       ],
       "properties": {
         "architectureVersion": {
@@ -170,6 +172,12 @@
           "type": "boolean"
         },
         "signingPayloadDigestMatches": {
+          "type": "boolean"
+        },
+        "signatureReceiptRequired": {
+          "type": "boolean"
+        },
+        "signatureReceiptExternal": {
           "type": "boolean"
         }
       }

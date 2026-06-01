@@ -1,13 +1,13 @@
 {
-  "currentVersion": "V2.19",
+  "currentVersion": "V2.20",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "changeLevel": "Minor",
-  "summary": "补齐审计导出签名策略和 provenance payload 签名交接",
+  "summary": "补齐审计导出签名验签回执和外部签名证据闭环",
   "architectureDocument": "docs/references/modern-enterprise-architecture-template.md",
   "starterKit": {
     "path": "docs/references/modern-enterprise-architecture-kit",
-    "expectedPairCount": 50,
+    "expectedPairCount": 51,
     "pairs": [
       "domain",
       "service",
@@ -58,21 +58,22 @@
       "audit-export-gate",
       "audit-export-integrity",
       "audit-export-provenance",
-      "audit-export-signing-policy"
+      "audit-export-signing-policy",
+      "audit-export-signature-receipt"
     ]
   },
   "controlCatalog": {
     "path": "docs/references/modern-enterprise-architecture-controls.json",
-    "expectedControlCount": 34
+    "expectedControlCount": 35
   },
   "requiredMentions": [
     {
       "path": "docs/references/modern-enterprise-architecture-template.md",
       "contains": [
-        "**文档版本**：V2.19",
-        "| `V2.19` | `Baseline Candidate` |",
-        "| `V2.19` | 2026-06-02 | Minor |",
-        "### 0.7 V2.19 可执行企业标准路线图",
+        "**文档版本**：V2.20",
+        "| `V2.20` | `Baseline Candidate` |",
+        "| `V2.20` | 2026-06-02 | Minor |",
+        "### 0.7 V2.20 可执行企业标准路线图",
         "控制项覆盖清单",
         "严格 schema 模式",
         "控制证据映射",
@@ -85,16 +86,17 @@
         "审计导出完整性清单",
         "审计导出 provenance statement",
         "审计导出签名策略",
+        "审计导出签名验签回执",
         "可靠性等级",
         "GitOps 运行安全",
         "供应链 source/vulnerability/scorecard 证据",
-        "50 组 schema/example"
+        "51 组 schema/example"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-kit/README.md",
       "contains": [
-        "V2.19",
+        "V2.20",
         "严格",
         "控制证据映射",
         "审计导出清单",
@@ -106,55 +108,56 @@
         "审计导出完整性清单",
         "审计导出 provenance statement",
         "审计导出签名策略",
+        "审计导出签名验签回执",
         "可靠性",
         "GitOps",
-        "50 组"
+        "51 组"
       ]
     },
     {
       "path": "docs/README.md",
       "contains": [
-        "V2.19",
-        "50 组"
+        "V2.20",
+        "51 组"
       ]
     },
     {
       "path": "docs/references/README.md",
       "contains": [
-        "V2.19",
-        "50 组"
+        "V2.20",
+        "51 组"
       ]
     },
     {
       "path": "metadata/taxonomy.yml",
       "contains": [
-        "V2.19",
-        "50 组"
+        "V2.20",
+        "51 组"
       ]
     },
     {
       "path": "assets/ai-citation/llms-full.txt",
       "contains": [
-        "V2.19",
-        "50 组"
+        "V2.20",
+        "51 组"
       ]
     },
     {
       "path": "AGENTS.md",
       "contains": [
-        "V2.19"
+        "V2.20"
       ]
     },
     {
       "path": "docs/references/AGENTS.md",
       "contains": [
-        "V2.19"
+        "V2.20"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-controls.json",
       "contains": [
-        "V2.19",
+        "V2.20",
         "CTRL-ARCH-RELIABILITY-001",
         "CTRL-ARCH-SCHEMA-STRICT-001",
         "CTRL-ARCH-EXTENSION-POLICY-001",
@@ -183,6 +186,7 @@
         "CTRL-ARCH-AUDIT-EXPORT-INTEGRITY-001",
         "CTRL-ARCH-AUDIT-EXPORT-PROVENANCE-001",
         "CTRL-ARCH-AUDIT-EXPORT-SIGNING-POLICY-001",
+        "CTRL-ARCH-AUDIT-EXPORT-SIGNATURE-RECEIPT-001",
         "schemaRequirements",
         "checkerEvidence"
       ]

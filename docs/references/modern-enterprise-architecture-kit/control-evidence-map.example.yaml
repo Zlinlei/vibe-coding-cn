@@ -1,8 +1,8 @@
 map: modern-enterprise-architecture-control-evidence
-version: V2.19
+version: V2.20
 owner: governance-team
 generatedOn: 2026-06-02
-controlCount: 34
+controlCount: 35
 freshness:
   maxAgeDays: 90
   expiryAction: block
@@ -356,6 +356,20 @@ controls:
         source: git
         verifiedOn: 2026-06-02
       - path: scripts/check-modern-architecture-audit-export.py
+        type: checker
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-AUDIT-EXPORT-SIGNATURE-RECEIPT-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+      - path: scripts/check-modern-architecture-kit.py
         type: checker
         source: git
         verifiedOn: 2026-06-02

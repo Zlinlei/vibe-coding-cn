@@ -75,6 +75,7 @@ PAIR_NAMES = [
     "audit-export-integrity",
     "audit-export-provenance",
     "audit-export-signing-policy",
+    "audit-export-signature-receipt",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -950,6 +951,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     audit_export_integrity = examples.get("audit-export-integrity")
     audit_export_provenance = examples.get("audit-export-provenance")
     audit_export_signing_policy = examples.get("audit-export-signing-policy")
+    audit_export_signature_receipt = examples.get("audit-export-signature-receipt")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1701,6 +1703,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
                 "scripts/check-modern-architecture-audit-export.py",
@@ -1907,6 +1910,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "auditExportIntegrity": "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
                 "auditExportProvenance": "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
                 "auditExportSigningPolicy": "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
+                "auditExportSignatureReceipt": "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
             }
             for key, expected_path in expected_sources.items():
                 if source_artifacts.get(key) != expected_path:
@@ -2006,6 +2010,10 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: audit-export-gate.expectations.signingPolicyRequired must be true")
             if expectations.get("signingPayloadDigestMatches") is not True:
                 errors.append("cross-file: audit-export-gate.expectations.signingPayloadDigestMatches must be true")
+            if expectations.get("signatureReceiptRequired") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.signatureReceiptRequired must be true")
+            if expectations.get("signatureReceiptExternal") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.signatureReceiptExternal must be true")
         outputs = audit_export_gate.get("outputs")
         if isinstance(outputs, list):
             output_paths = {item.get("path") for item in outputs if isinstance(item, dict) and isinstance(item.get("path"), str)}
@@ -2220,6 +2228,65 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             review_on = parse_example_date(retention.get("reviewOn"))
             if generated_on is not None and review_on is not None and review_on <= generated_on:
                 errors.append("cross-file: audit-export-signing-policy.retention.reviewOn must be after generatedOn")
+
+    if isinstance(audit_export_signature_receipt, dict):
+        if audit_export_signature_receipt.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: audit-export-signature-receipt.version must match currentVersion")
+        scope = audit_export_signature_receipt.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: audit-export-signature-receipt.scope.architectureVersion must match currentVersion")
+            if scope.get("controlCount") != len(catalog_control_ids):
+                errors.append("cross-file: audit-export-signature-receipt.scope.controlCount must match control catalog length")
+            if scope.get("starterKitPairs") != len(PAIR_NAMES):
+                errors.append("cross-file: audit-export-signature-receipt.scope.starterKitPairs must match starter kit pair count")
+        policy_binding = audit_export_signature_receipt.get("policyBinding")
+        if isinstance(policy_binding, dict):
+            if policy_binding.get("signingPolicy") != "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml":
+                errors.append("cross-file: audit-export-signature-receipt.policyBinding.signingPolicy must point to signing policy example")
+            if policy_binding.get("signingPolicyVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: audit-export-signature-receipt.policyBinding.signingPolicyVersion must match currentVersion")
+            if policy_binding.get("signingPolicyStatus") != "external-signature-required":
+                errors.append("cross-file: audit-export-signature-receipt.policyBinding.signingPolicyStatus must be external-signature-required")
+        payload = audit_export_signature_receipt.get("payload")
+        signing_payload = audit_export_signing_policy.get("payload") if isinstance(audit_export_signing_policy, dict) else {}
+        if isinstance(payload, dict):
+            if isinstance(signing_payload, dict) and payload.get("path") != signing_payload.get("path"):
+                errors.append("cross-file: audit-export-signature-receipt.payload.path must match signing policy payload path")
+            if payload.get("digestAlgorithm") != "sha256":
+                errors.append("cross-file: audit-export-signature-receipt.payload.digestAlgorithm must be sha256")
+            if payload.get("digestSource") != "build/modern-enterprise-architecture-audit/audit-export-signing-policy.json#/payload/sha256":
+                errors.append("cross-file: audit-export-signature-receipt.payload.digestSource must point to generated signing policy payload sha256")
+        signature = audit_export_signature_receipt.get("signature")
+        signing_signature = audit_export_signing_policy.get("signature") if isinstance(audit_export_signing_policy, dict) else {}
+        if isinstance(signature, dict):
+            if isinstance(signing_signature, dict) and signature.get("method") != signing_signature.get("method"):
+                errors.append("cross-file: audit-export-signature-receipt.signature.method must match signing policy method")
+            if isinstance(signing_signature, dict) and signature.get("bundlePath") != signing_signature.get("bundlePath"):
+                errors.append("cross-file: audit-export-signature-receipt.signature.bundlePath must match signing policy bundlePath")
+            if isinstance(signing_signature, dict) and signature.get("oidcIssuer") != signing_signature.get("issuer"):
+                errors.append("cross-file: audit-export-signature-receipt.signature.oidcIssuer must match signing policy issuer")
+            if signature.get("transparencyLogRequired") is not True:
+                errors.append("cross-file: audit-export-signature-receipt.signature.transparencyLogRequired must be true")
+            if not isinstance(signature.get("transparencyLogEntries"), int) or signature.get("transparencyLogEntries") < 1:
+                errors.append("cross-file: audit-export-signature-receipt.signature.transparencyLogEntries must be at least 1")
+        verification = audit_export_signature_receipt.get("verification")
+        if isinstance(verification, dict):
+            verify_command = verification.get("command")
+            if not isinstance(verify_command, str) or "cosign verify-blob --bundle" not in verify_command:
+                errors.append("cross-file: audit-export-signature-receipt.verification.command must use cosign verify-blob --bundle")
+            if verification.get("result") != "pass":
+                errors.append("cross-file: audit-export-signature-receipt.verification.result must be pass")
+            if verification.get("tool") != "cosign":
+                errors.append("cross-file: audit-export-signature-receipt.verification.tool must be cosign")
+            if verification.get("toolVersionRequired") is not True:
+                errors.append("cross-file: audit-export-signature-receipt.verification.toolVersionRequired must be true")
+        verified_on = parse_example_date(audit_export_signature_receipt.get("verifiedOn"))
+        retention = audit_export_signature_receipt.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if verified_on is not None and review_on is not None and review_on <= verified_on:
+                errors.append("cross-file: audit-export-signature-receipt.retention.reviewOn must be after verifiedOn")
 
     return errors
 

@@ -1,9 +1,9 @@
 {
-  "version": "V2.19",
+  "version": "V2.20",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁、导出完整性清单、provenance statement 和签名策略",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁、导出完整性清单、provenance statement、签名策略和签名验签回执",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -18,7 +18,7 @@
     {
       "source": "Sigstore Cosign",
       "url": "https://docs.sigstore.dev/cosign/signing/signing_with_blobs/",
-      "rationale": "审计导出签名策略采用 Cosign blob signing 的 bundle 交接口径，要求签名、证书和透明日志证明可被后续验签"
+      "rationale": "审计导出签名策略和验签回执采用 Cosign blob signing 的 bundle 交接口径，要求签名、证书和透明日志证明可被后续验签"
     },
     {
       "source": "NIST SSDF SP 800-218",
@@ -1037,7 +1037,7 @@
           "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
           "nestedRequired": {
             "target": ["standard", "format", "machineReadable"],
-            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy", "auditExportSignatureReceipt"],
             "controls": ["count", "selectionSource"],
             "assessment": ["source", "result", "openFindings", "poamRequired"],
             "validation": ["command", "result", "output"],
@@ -1078,7 +1078,7 @@
           "nestedRequired": {
             "command": ["local", "preflight", "export"],
             "qualityGate": ["requiredInMakeTest", "zeroDependency", "blocksOnMismatch"],
-            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches"],
+            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches", "signatureReceiptRequired", "signatureReceiptExternal"],
             "ciIntegration": ["localGate", "makefileTarget", "script"],
             "retention": ["period", "reviewOn"]
           }
@@ -1101,6 +1101,8 @@
         "audit-export-gate.expectations.provenanceSubjectDigestsMatch must be true",
         "audit-export-gate.expectations.signingPolicyRequired must be true",
         "audit-export-gate.expectations.signingPayloadDigestMatches must be true",
+        "audit-export-gate.expectations.signatureReceiptRequired must be true",
+        "audit-export-gate.expectations.signatureReceiptExternal must be true",
         "audit-export-gate.qualityGate.requiredInMakeTest must be true",
         "audit-export-gate.ciIntegration.localGate must be make test",
         "audit export gate runtime invariant check failed"
@@ -1226,6 +1228,47 @@
         "audit-export-signing-policy.commands.sign must use cosign sign-blob --bundle",
         "audit-export-signing-policy.localGate.doesNotForgeSignature must be true",
         "audit export gate runtime invariant check failed"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AUDIT-EXPORT-SIGNATURE-RECEIPT-001",
+      "category": "audit-export",
+      "title": "审计导出签名必须有外部验签回执",
+      "statement": "审计导出完成外部签名后必须形成机器可读验签回执，记录签名策略绑定、payload 摘要、bundle 摘要、证书身份、OIDC issuer、透明日志条目、验签命令、验签结果和留存复审。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
+        "scripts/check-modern-architecture-kit.py"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.schema.json",
+          "required": ["receipt", "version", "owner", "verifiedOn", "scope", "policyBinding", "payload", "signature", "verification", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureVersion", "package", "controlCount", "starterKitPairs"],
+            "policyBinding": ["signingPolicy", "signingPolicyVersion", "signingPolicyStatus"],
+            "payload": ["path", "digestAlgorithm", "sha256", "digestSource"],
+            "signature": ["method", "bundlePath", "bundleSha256", "certificateIdentity", "oidcIssuer", "transparencyLogRequired", "transparencyLogEntries"],
+            "verification": ["command", "result", "verifiedBy", "tool", "toolVersionRequired", "output"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
+          "fields": ["receipt", "version", "policyBinding.signingPolicy", "payload.sha256", "signature.bundleSha256", "signature.oidcIssuer", "signature.transparencyLogEntries", "verification.command", "verification.result"]
+        }
+      ],
+      "checkerEvidence": [
+        "audit-export-signature-receipt.version must match currentVersion",
+        "audit-export-signature-receipt.policyBinding.signingPolicy must point to signing policy example",
+        "audit-export-signature-receipt.payload.path must match signing policy payload path",
+        "audit-export-signature-receipt.signature.bundlePath must match signing policy bundlePath",
+        "audit-export-signature-receipt.signature.oidcIssuer must match signing policy issuer",
+        "audit-export-signature-receipt.verification.command must use cosign verify-blob --bundle",
+        "audit-export-signature-receipt.verification.tool must be cosign",
+        "audit-export-signature-receipt.retention.reviewOn must be after verifiedOn"
       ]
     }
   ]
