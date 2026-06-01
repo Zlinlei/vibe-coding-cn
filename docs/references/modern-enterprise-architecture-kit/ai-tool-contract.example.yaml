@@ -1,0 +1,18 @@
+tool: refund-preview
+owner: team-support-ai
+domain: order
+backingApi: order-command-api
+riskTier: R3
+sideEffectLevel: preview
+inputSchema: contracts/ai/tools/refund-preview.input.schema.json
+outputSchema: contracts/ai/tools/refund-preview.output.schema.json
+auth:
+  type: delegated-user
+  scope: order.refund.preview
+runtimeControls:
+  requiresHumanApproval: true
+  timeoutMs: 3000
+  rateLimit: 30 per minute per user
+audit:
+  eventName: ai.tool.refund-preview.invoked
+  retention: 2y

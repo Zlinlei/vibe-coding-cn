@@ -1,0 +1,18 @@
+scorecard: order-command-service-production
+subject: order-command-service
+owner: team-order
+lifecycle: production
+minimumScore: 85
+checks:
+  - check: service contract present
+    weight: 20
+    evidence: domains/order/services/order-command-service/service.yaml
+  - check: signed image and provenance present
+    weight: 30
+    evidence: governance/evidence/releases/order-command-service-2026-06-01.md
+  - check: runbook and rollback present
+    weight: 20
+    evidence: domains/order/services/order-command-service/docs/runbook.md
+review:
+  cadence: quarterly
+  nextReviewDate: 2026-09-01

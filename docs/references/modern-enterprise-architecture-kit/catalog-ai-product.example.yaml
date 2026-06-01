@@ -1,0 +1,13 @@
+name: customer-service-agent
+kind: ai-product
+owner: team-support-ai
+lifecycle: beta
+riskTier: R3
+source:
+  aiProductPath: ai/applications/customer-service-agent/ai-product.yaml
+  contractPath: contracts/ai/customer-service-agent.yaml
+runtime:
+  gatewayRoute: support-safe-default
+  ragIndex: vector:customer-support-policy:v12
+  toolRegistry: contracts/ai/tools
+scorecard: catalog/scorecards/customer-service-agent.yaml

@@ -1,0 +1,23 @@
+deployment: order-command-service
+environment: prod
+domain: order
+service: order-command-service
+namespace: order-prod
+image:
+  repository: registry.company.com/order/order-command-service
+  digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+replicas: 3
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+strategy:
+  type: canary
+  maxUnavailable: "0"
+policy:
+  requiresSignedImage: true
+  requiresProvenance: true
+  requiresSbom: true

@@ -1,0 +1,20 @@
+fineTuningJob: support-answer-style-v3
+owner: team-support-ai
+baseModel: foundation-chat-model-v5
+trainingData:
+  dataProduct: support-answer-examples
+  snapshot: data/snapshots/support-answer-examples-2026-06-01
+  classification: confidential
+authorization:
+  approval: governance/ai-governance/fine-tuning-approval-2026-06-01.md
+  disallowedUse:
+    - foundation-model-training
+tracking:
+  experiment: mlflow://experiments/support-answer-style-v3
+  registry: catalog/models/support-answer-style-v3
+evaluation:
+  baseline: evals/baseline.yaml
+  regression: evals/regression.yaml
+  redTeam: evals/red-team.yaml
+releaseGate: governance/architecture-gates/ai-release.yaml
+rollback: ai/model-registry/support-answer-style-v2

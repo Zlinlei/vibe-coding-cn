@@ -1,0 +1,10 @@
+name: order-facts
+kind: data-product
+domain: order
+owner: team-order
+lifecycle: production
+source:
+  contract: contracts/datasets/order-facts.yaml
+  dataProductPath: domains/order/data-products/order-facts/data-product.yaml
+classification: confidential
+qualityScore: 92

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI Tool Contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "tool",
+    "owner",
+    "domain",
+    "backingApi",
+    "riskTier",
+    "sideEffectLevel",
+    "inputSchema",
+    "outputSchema",
+    "auth",
+    "runtimeControls",
+    "audit"
+  ],
+  "properties": {
+    "tool": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "backingApi": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-api$" },
+    "riskTier": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
+    "sideEffectLevel": { "type": "string", "enum": ["read-only", "preview", "write", "external-action"] },
+    "inputSchema": { "type": "string", "minLength": 1 },
+    "outputSchema": { "type": "string", "minLength": 1 },
+    "auth": {
+      "type": "object",
+      "required": ["type", "scope"],
+      "properties": {
+        "type": { "type": "string", "enum": ["delegated-user", "service-account", "none"] },
+        "scope": { "type": "string", "minLength": 1 }
+      }
+    },
+    "runtimeControls": {
+      "type": "object",
+      "required": ["requiresHumanApproval", "timeoutMs", "rateLimit"],
+      "properties": {
+        "requiresHumanApproval": { "type": "boolean" },
+        "timeoutMs": { "type": "integer" },
+        "rateLimit": { "type": "string", "minLength": 1 }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": ["eventName", "retention"],
+      "properties": {
+        "eventName": { "type": "string", "minLength": 1 },
+        "retention": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

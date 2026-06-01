@@ -20,7 +20,7 @@ modern-enterprise-architecture-kit/
 - schema 必须使用 JSON Schema draft 2020-12，根类型必须是 `object`。
 - 每个 schema 必须声明 `required`，关键嵌套对象也应声明自己的 `required`。
 - schema 中的关键命名、日期、数组和字符串约束应尽量用 `pattern`、`format`、`minItems` 和 `minLength` 表达。
-- 示例必须通过同名 schema 校验，并保持领域、服务、数据产品和 catalog 组件之间的基础一致性。
+- 示例必须通过同名 schema 校验，并保持领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog 和 scorecard 之间的基础一致性。
 - 示例只放最低可执行字段，不写敏感信息、真实域名、真实密钥或真实客户数据。
 - 修改本目录后必须运行 `make check-modern-architecture-kit` 和 `make test`。
 

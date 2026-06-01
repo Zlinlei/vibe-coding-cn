@@ -1,0 +1,18 @@
+indexId: vector:customer-support-policy:v12
+owner: team-support-ai
+sources:
+  - data-products/support-policy-docs
+  - data-products/refund-policy-facts
+embeddingModel: embedding-default-v3
+chunking:
+  strategy: semantic-section
+  maxTokens: 800
+accessControl:
+  policy: contracts/ai/rag/support-policy.access.rego
+  filterRequired: true
+refresh:
+  cadence: daily
+  ownerApproval: true
+deletion:
+  supportsSubjectDelete: true
+  retention: 180d

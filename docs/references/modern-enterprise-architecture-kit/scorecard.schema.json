@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture Scorecard",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "scorecard",
+    "subject",
+    "owner",
+    "lifecycle",
+    "minimumScore",
+    "checks",
+    "review"
+  ],
+  "properties": {
+    "scorecard": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "subject": { "type": "string", "minLength": 1 },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
+    "minimumScore": { "type": "integer" },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["check", "weight", "evidence"],
+        "properties": {
+          "check": { "type": "string", "minLength": 1 },
+          "weight": { "type": "integer" },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["cadence", "nextReviewDate"],
+      "properties": {
+        "cadence": { "type": "string", "minLength": 1 },
+        "nextReviewDate": { "type": "string", "format": "date" }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+api: order-command-api
+domain: order
+owner: team-order
+producerService: order-command-service
+version: v2
+protocol: openapi
+spec: contracts/apis/order-command.openapi.yaml
+auth:
+  type: oauth2
+  scope: order.write
+compatibility:
+  breakingChangePolicy: require consumer impact review and version bump
+  deprecationPolicy: governance/migration/deprecation-policy.md
+consumers:
+  - checkout-web
+  - partner-api

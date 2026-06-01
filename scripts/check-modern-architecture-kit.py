@@ -21,14 +21,23 @@ KIT_DIR = ROOT / "docs/references/modern-enterprise-architecture-kit"
 PAIR_NAMES = [
     "domain",
     "service",
+    "api-contract",
+    "event-contract",
     "data-product",
     "ai-product",
+    "ai-tool-contract",
+    "rag-index-contract",
+    "fine-tuning-contract",
     "catalog-component",
+    "catalog-data-product",
+    "catalog-ai-product",
+    "gitops-deployment",
     "production-readiness",
     "raci",
     "tiering-policy",
     "deprecation-policy",
     "audit-evidence-index",
+    "scorecard",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -393,8 +402,18 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     domain = examples.get("domain")
     service = examples.get("service")
+    api_contract = examples.get("api-contract")
+    event_contract = examples.get("event-contract")
     data_product = examples.get("data-product")
     catalog_component = examples.get("catalog-component")
+    catalog_data_product = examples.get("catalog-data-product")
+    ai_product = examples.get("ai-product")
+    ai_tool_contract = examples.get("ai-tool-contract")
+    rag_index_contract = examples.get("rag-index-contract")
+    fine_tuning_contract = examples.get("fine-tuning-contract")
+    catalog_ai_product = examples.get("catalog-ai-product")
+    gitops_deployment = examples.get("gitops-deployment")
+    scorecard = examples.get("scorecard")
 
     if isinstance(domain, dict) and isinstance(service, dict):
         if service.get("domain") != domain.get("domain"):
@@ -402,11 +421,35 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
         if service.get("owner") != domain.get("owner"):
             errors.append("cross-file: service.owner must match domain.owner in starter kit examples")
 
+    if isinstance(service, dict) and isinstance(api_contract, dict):
+        if api_contract.get("domain") != service.get("domain"):
+            errors.append("cross-file: api-contract.domain must match service.domain")
+        if api_contract.get("owner") != service.get("owner"):
+            errors.append("cross-file: api-contract.owner must match service.owner")
+        if api_contract.get("producerService") != service.get("service"):
+            errors.append("cross-file: api-contract.producerService must match service.service")
+
+    if isinstance(service, dict) and isinstance(event_contract, dict):
+        if event_contract.get("domain") != service.get("domain"):
+            errors.append("cross-file: event-contract.domain must match service.domain")
+        if event_contract.get("owner") != service.get("owner"):
+            errors.append("cross-file: event-contract.owner must match service.owner")
+        if event_contract.get("producerService") != service.get("service"):
+            errors.append("cross-file: event-contract.producerService must match service.service")
+
     if isinstance(domain, dict) and isinstance(data_product, dict):
         if data_product.get("domain") != domain.get("domain"):
             errors.append("cross-file: data-product.domain must match domain.domain")
         if data_product.get("owner") != domain.get("owner"):
             errors.append("cross-file: data-product.owner must match domain.owner in starter kit examples")
+
+    if isinstance(data_product, dict) and isinstance(catalog_data_product, dict):
+        if catalog_data_product.get("name") != data_product.get("dataProduct"):
+            errors.append("cross-file: catalog-data-product.name must match data-product.dataProduct")
+        if catalog_data_product.get("domain") != data_product.get("domain"):
+            errors.append("cross-file: catalog-data-product.domain must match data-product.domain")
+        if catalog_data_product.get("owner") != data_product.get("owner"):
+            errors.append("cross-file: catalog-data-product.owner must match data-product.owner")
 
     if isinstance(service, dict) and isinstance(catalog_component, dict):
         if catalog_component.get("name") != service.get("service"):
@@ -420,6 +463,67 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
         if isinstance(runtime, dict) and isinstance(service_runtime, dict):
             if runtime.get("imageRepository") != service_runtime.get("imageRepository"):
                 errors.append("cross-file: catalog runtime imageRepository must match service runtime imageRepository")
+
+    if isinstance(service, dict) and isinstance(gitops_deployment, dict):
+        if gitops_deployment.get("domain") != service.get("domain"):
+            errors.append("cross-file: gitops-deployment.domain must match service.domain")
+        if gitops_deployment.get("service") != service.get("service"):
+            errors.append("cross-file: gitops-deployment.service must match service.service")
+        if gitops_deployment.get("deployment") != service.get("service"):
+            errors.append("cross-file: gitops-deployment.deployment must match service.service")
+        service_runtime = service.get("runtime")
+        deployment_image = gitops_deployment.get("image")
+        if isinstance(service_runtime, dict) and isinstance(deployment_image, dict):
+            if deployment_image.get("repository") != service_runtime.get("imageRepository"):
+                errors.append("cross-file: gitops-deployment.image.repository must match service.runtime.imageRepository")
+
+    if isinstance(api_contract, dict) and isinstance(ai_tool_contract, dict):
+        if ai_tool_contract.get("backingApi") != api_contract.get("api"):
+            errors.append("cross-file: ai-tool-contract.backingApi must match api-contract.api")
+
+    if isinstance(ai_product, dict) and isinstance(ai_tool_contract, dict):
+        tools = ai_product.get("tools")
+        registered_tools = []
+        if isinstance(tools, list):
+            registered_tools = [item.get("tool") for item in tools if isinstance(item, dict)]
+        if ai_tool_contract.get("tool") not in registered_tools:
+            errors.append("cross-file: ai-tool-contract.tool must be listed in ai-product.tools")
+
+    if isinstance(ai_product, dict) and isinstance(rag_index_contract, dict):
+        rag = ai_product.get("rag")
+        if isinstance(rag, dict) and rag_index_contract.get("indexId") != rag.get("vectorIndex"):
+            errors.append("cross-file: rag-index-contract.indexId must match ai-product.rag.vectorIndex")
+
+    if isinstance(ai_product, dict) and isinstance(fine_tuning_contract, dict):
+        if fine_tuning_contract.get("owner") != ai_product.get("owner"):
+            errors.append("cross-file: fine-tuning-contract.owner must match ai-product.owner")
+
+    if isinstance(ai_product, dict) and isinstance(catalog_ai_product, dict):
+        if catalog_ai_product.get("name") != ai_product.get("aiProduct"):
+            errors.append("cross-file: catalog-ai-product.name must match ai-product.aiProduct")
+        if catalog_ai_product.get("owner") != ai_product.get("owner"):
+            errors.append("cross-file: catalog-ai-product.owner must match ai-product.owner")
+        if catalog_ai_product.get("lifecycle") != ai_product.get("lifecycle"):
+            errors.append("cross-file: catalog-ai-product.lifecycle must match ai-product.lifecycle")
+        if catalog_ai_product.get("riskTier") != ai_product.get("riskTier"):
+            errors.append("cross-file: catalog-ai-product.riskTier must match ai-product.riskTier")
+        runtime = catalog_ai_product.get("runtime")
+        model = ai_product.get("model")
+        rag = ai_product.get("rag")
+        if isinstance(runtime, dict) and isinstance(model, dict):
+            if runtime.get("gatewayRoute") != model.get("gatewayRoute"):
+                errors.append("cross-file: catalog-ai-product.runtime.gatewayRoute must match ai-product.model.gatewayRoute")
+        if isinstance(runtime, dict) and isinstance(rag, dict):
+            if runtime.get("ragIndex") != rag.get("vectorIndex"):
+                errors.append("cross-file: catalog-ai-product.runtime.ragIndex must match ai-product.rag.vectorIndex")
+
+    if isinstance(service, dict) and isinstance(scorecard, dict):
+        if scorecard.get("subject") != service.get("service"):
+            errors.append("cross-file: scorecard.subject must match service.service")
+        if scorecard.get("owner") != service.get("owner"):
+            errors.append("cross-file: scorecard.owner must match service.owner")
+        if scorecard.get("lifecycle") != service.get("lifecycle"):
+            errors.append("cross-file: scorecard.lifecycle must match service.lifecycle")
 
     return errors
 
@@ -472,6 +576,11 @@ def main() -> int:
     unexpected = sorted(discovered_schemas - set(PAIR_NAMES))
     if unexpected:
         errors.append(f"{KIT_DIR.relative_to(ROOT)}: schemas missing from checker: {', '.join(unexpected)}")
+
+    discovered_examples = {path.stem.removesuffix(".example") for path in KIT_DIR.glob("*.example.yaml")}
+    unexpected_examples = sorted(discovered_examples - set(PAIR_NAMES))
+    if unexpected_examples:
+        errors.append(f"{KIT_DIR.relative_to(ROOT)}: examples missing from checker: {', '.join(unexpected_examples)}")
 
     if errors:
         print("MODERN_ARCHITECTURE_KIT_ERRORS")

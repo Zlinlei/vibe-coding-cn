@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fine Tuning Contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "fineTuningJob",
+    "owner",
+    "baseModel",
+    "trainingData",
+    "authorization",
+    "tracking",
+    "evaluation",
+    "releaseGate",
+    "rollback"
+  ],
+  "properties": {
+    "fineTuningJob": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "baseModel": { "type": "string", "minLength": 1 },
+    "trainingData": {
+      "type": "object",
+      "required": ["dataProduct", "snapshot", "classification"],
+      "properties": {
+        "dataProduct": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "snapshot": { "type": "string", "minLength": 1 },
+        "classification": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "required": ["approval", "disallowedUse"],
+      "properties": {
+        "approval": { "type": "string", "minLength": 1 },
+        "disallowedUse": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "tracking": {
+      "type": "object",
+      "required": ["experiment", "registry"],
+      "properties": {
+        "experiment": { "type": "string", "minLength": 1 },
+        "registry": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["baseline", "regression", "redTeam"],
+      "properties": {
+        "baseline": { "type": "string", "minLength": 1 },
+        "regression": { "type": "string", "minLength": 1 },
+        "redTeam": { "type": "string", "minLength": 1 }
+      }
+    },
+    "releaseGate": { "type": "string", "minLength": 1 },
+    "rollback": { "type": "string", "minLength": 1 }
+  }
+}

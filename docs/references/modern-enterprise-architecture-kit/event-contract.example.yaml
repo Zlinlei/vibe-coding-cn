@@ -1,0 +1,15 @@
+event: order-created
+domain: order
+owner: team-order
+producerService: order-command-service
+topic: order.events.created
+schema: contracts/events/order-created.asyncapi.yaml
+version: v1
+compatibility: backward
+delivery:
+  semantics: at-least-once
+  idempotencyKey: order_event_id
+  retryPolicy: retry with dead letter topic after 10 attempts
+consumers:
+  - payment-service
+  - fulfillment-service
