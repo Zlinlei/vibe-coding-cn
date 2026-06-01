@@ -73,6 +73,7 @@ PAIR_NAMES = [
     "oscal-export-profile",
     "audit-export-gate",
     "audit-export-integrity",
+    "audit-export-provenance",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -697,10 +698,12 @@ def validate_audit_export_gate_runtime() -> list[str]:
             markdown_path = out_dir / "audit-export.md"
             oscal_path = out_dir / "oscal-summary.json"
             integrity_path = out_dir / "audit-export-integrity.json"
+            provenance_path = out_dir / "audit-export-provenance.json"
             exporter.write_json(packet, json_path)
             exporter.write_markdown(packet, markdown_path)
             exporter.write_oscal_summary(packet, oscal_path)
             exporter.write_integrity_manifest(packet, [json_path, markdown_path, oscal_path], integrity_path)
+            exporter.write_provenance_statement(packet, [json_path, markdown_path, oscal_path, integrity_path], provenance_path)
             errors.extend(
                 gate.validate_packet(
                     load_json_object(json_path),
@@ -708,6 +711,8 @@ def validate_audit_export_gate_runtime() -> list[str]:
                     checker,
                     load_json_object(integrity_path),
                     [json_path, markdown_path, oscal_path],
+                    load_json_object(provenance_path),
+                    [json_path, markdown_path, oscal_path, integrity_path],
                 )
             )
             if not markdown_path.is_file() or markdown_path.stat().st_size == 0:
@@ -938,6 +943,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     oscal_export_profile = examples.get("oscal-export-profile")
     audit_export_gate = examples.get("audit-export-gate")
     audit_export_integrity = examples.get("audit-export-integrity")
+    audit_export_provenance = examples.get("audit-export-provenance")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1687,6 +1693,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
                 "scripts/check-modern-architecture-audit-export.py",
@@ -1891,6 +1898,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "baselineChangeRecord": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
                 "auditExportGate": "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
                 "auditExportIntegrity": "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
+                "auditExportProvenance": "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
             }
             for key, expected_path in expected_sources.items():
                 if source_artifacts.get(key) != expected_path:
@@ -1982,6 +1990,10 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: audit-export-gate.expectations.integrityManifestRequired must be true")
             if expectations.get("generatedOutputDigestsMatch") is not True:
                 errors.append("cross-file: audit-export-gate.expectations.generatedOutputDigestsMatch must be true")
+            if expectations.get("provenanceStatementRequired") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.provenanceStatementRequired must be true")
+            if expectations.get("provenanceSubjectDigestsMatch") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.provenanceSubjectDigestsMatch must be true")
         outputs = audit_export_gate.get("outputs")
         if isinstance(outputs, list):
             output_paths = {item.get("path") for item in outputs if isinstance(item, dict) and isinstance(item.get("path"), str)}
@@ -1990,9 +2002,12 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "build/modern-enterprise-architecture-audit/audit-export.md",
                 "build/modern-enterprise-architecture-audit/oscal-summary.json",
                 "build/modern-enterprise-architecture-audit/audit-export-integrity.json",
+                "build/modern-enterprise-architecture-audit/audit-export-provenance.json",
             }
             if not required_outputs.issubset(output_paths):
-                errors.append("cross-file: audit-export-gate.outputs must include audit JSON, Markdown, OSCAL summary and integrity manifest")
+                errors.append(
+                    "cross-file: audit-export-gate.outputs must include audit JSON, Markdown, OSCAL summary, integrity manifest and provenance statement"
+                )
             for item in outputs:
                 if isinstance(item, dict) and item.get("required") is not True:
                     errors.append("cross-file: audit-export-gate.outputs.required must be true")
@@ -2078,6 +2093,72 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             review_on = parse_example_date(retention.get("reviewOn"))
             if generated_on is not None and review_on is not None and review_on <= generated_on:
                 errors.append("cross-file: audit-export-integrity.retention.reviewOn must be after generatedOn")
+
+    if isinstance(audit_export_provenance, dict):
+        if audit_export_provenance.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: audit-export-provenance.version must match currentVersion")
+        scope = audit_export_provenance.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: audit-export-provenance.scope.architectureVersion must match currentVersion")
+            if scope.get("controlCount") != len(catalog_control_ids):
+                errors.append("cross-file: audit-export-provenance.scope.controlCount must match control catalog length")
+            if scope.get("starterKitPairs") != len(PAIR_NAMES):
+                errors.append("cross-file: audit-export-provenance.scope.starterKitPairs must match starter kit pair count")
+        provenance_format = audit_export_provenance.get("format")
+        if isinstance(provenance_format, dict):
+            if provenance_format.get("statementType") != "https://in-toto.io/Statement/v1":
+                errors.append("cross-file: audit-export-provenance.format.statementType must be in-toto Statement v1")
+            if provenance_format.get("predicateType") != "https://slsa.dev/provenance/v1":
+                errors.append("cross-file: audit-export-provenance.format.predicateType must be SLSA provenance v1")
+        subjects = audit_export_provenance.get("subjects")
+        if isinstance(subjects, list):
+            subject_paths = {item.get("path") for item in subjects if isinstance(item, dict) and isinstance(item.get("path"), str)}
+            required_subjects = {
+                "build/modern-enterprise-architecture-audit/audit-export.json",
+                "build/modern-enterprise-architecture-audit/audit-export.md",
+                "build/modern-enterprise-architecture-audit/oscal-summary.json",
+                "build/modern-enterprise-architecture-audit/audit-export-integrity.json",
+            }
+            if not required_subjects.issubset(subject_paths):
+                errors.append(
+                    "cross-file: audit-export-provenance.subjects must include audit JSON, Markdown, OSCAL summary and integrity manifest"
+                )
+            for item in subjects:
+                if not isinstance(item, dict):
+                    continue
+                if item.get("required") is not True:
+                    errors.append("cross-file: audit-export-provenance.subjects.required must be true")
+                    break
+                if item.get("digestAlgorithm") != "sha256":
+                    errors.append("cross-file: audit-export-provenance.subjects.digestAlgorithm must be sha256")
+                    break
+        build_definition = audit_export_provenance.get("buildDefinition")
+        if isinstance(build_definition, dict):
+            if build_definition.get("buildType") != "https://github.com/tradecatlabs/vibe-coding-cn/modern-enterprise-architecture/audit-export@v2":
+                errors.append("cross-file: audit-export-provenance.buildDefinition.buildType must identify audit export builder")
+            if build_definition.get("exportCommand") != "make export-modern-architecture-audit":
+                errors.append("cross-file: audit-export-provenance.buildDefinition.exportCommand must be make export-modern-architecture-audit")
+            if build_definition.get("verificationCommand") != "make check-modern-architecture-audit-export":
+                errors.append(
+                    "cross-file: audit-export-provenance.buildDefinition.verificationCommand must be make check-modern-architecture-audit-export"
+                )
+            if build_definition.get("resolvedDependenciesRequired") is not True:
+                errors.append("cross-file: audit-export-provenance.buildDefinition.resolvedDependenciesRequired must be true")
+        run_details = audit_export_provenance.get("runDetails")
+        if isinstance(run_details, dict):
+            if run_details.get("builderId") != "vibe-coding-cn:scripts/export-modern-architecture-audit.py":
+                errors.append("cross-file: audit-export-provenance.runDetails.builderId must identify exporter script")
+            if run_details.get("sourceRepositoryRequired") is not True:
+                errors.append("cross-file: audit-export-provenance.runDetails.sourceRepositoryRequired must be true")
+            if run_details.get("sourceCommitRequired") is not True:
+                errors.append("cross-file: audit-export-provenance.runDetails.sourceCommitRequired must be true")
+        generated_on = parse_example_date(audit_export_provenance.get("generatedOn"))
+        retention = audit_export_provenance.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if generated_on is not None and review_on is not None and review_on <= generated_on:
+                errors.append("cross-file: audit-export-provenance.retention.reviewOn must be after generatedOn")
 
     return errors
 

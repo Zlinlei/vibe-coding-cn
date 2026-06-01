@@ -1,13 +1,13 @@
 manifest: modern-enterprise-architecture-audit-export-integrity
-version: V2.17
+version: V2.18
 owner: governance-team
 generatedOn: 2026-06-02
 algorithm: sha256
 scope:
-  architectureVersion: V2.17
+  architectureVersion: V2.18
   package: modern-enterprise-architecture-audit-export
-  controlCount: 32
-  starterKitPairs: 48
+  controlCount: 33
+  starterKitPairs: 49
 outputs:
   - path: build/modern-enterprise-architecture-audit/audit-export.json
     type: json

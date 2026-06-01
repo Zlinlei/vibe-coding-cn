@@ -1,22 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Audit Export Gate",
+  "title": "Audit Export Provenance",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "gate",
+    "statement",
     "version",
     "owner",
     "generatedOn",
-    "command",
-    "qualityGate",
-    "outputs",
-    "expectations",
-    "ciIntegration",
+    "scope",
+    "format",
+    "subjects",
+    "buildDefinition",
+    "runDetails",
     "retention"
   ],
   "properties": {
-    "gate": {
+    "statement": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]*$"
     },
@@ -32,50 +32,53 @@
       "type": "string",
       "format": "date"
     },
-    "command": {
+    "scope": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "local",
-        "preflight",
-        "export"
+        "architectureVersion",
+        "package",
+        "controlCount",
+        "starterKitPairs"
       ],
       "properties": {
-        "local": {
+        "architectureVersion": {
+          "type": "string",
+          "pattern": "^V\\d+\\.\\d+$"
+        },
+        "package": {
           "type": "string",
           "minLength": 1
         },
-        "preflight": {
+        "controlCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "starterKitPairs": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "format": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statementType",
+        "predicateType"
+      ],
+      "properties": {
+        "statementType": {
           "type": "string",
           "minLength": 1
         },
-        "export": {
+        "predicateType": {
           "type": "string",
           "minLength": 1
         }
       }
     },
-    "qualityGate": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "requiredInMakeTest",
-        "zeroDependency",
-        "blocksOnMismatch"
-      ],
-      "properties": {
-        "requiredInMakeTest": {
-          "type": "boolean"
-        },
-        "zeroDependency": {
-          "type": "boolean"
-        },
-        "blocksOnMismatch": {
-          "type": "boolean"
-        }
-      }
-    },
-    "outputs": {
+    "subjects": {
       "type": "array",
       "minItems": 1,
       "items": {
@@ -85,7 +88,7 @@
           "path",
           "type",
           "required",
-          "invariant"
+          "digestAlgorithm"
         ],
         "properties": {
           "path": {
@@ -99,93 +102,60 @@
           "required": {
             "type": "boolean"
           },
-          "invariant": {
+          "digestAlgorithm": {
             "type": "string",
-            "minLength": 1
+            "enum": [
+              "sha256"
+            ]
           }
         }
       }
     },
-    "expectations": {
+    "buildDefinition": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "architectureVersion",
-        "starterKitPairs",
-        "controlCount",
+        "buildType",
+        "exportCommand",
         "verificationCommand",
-        "verificationResult",
-        "oscalControlCountMatchesCatalog",
-        "poamRequiredFollowsOpenFindings",
-        "integrityManifestRequired",
-        "generatedOutputDigestsMatch",
-        "provenanceStatementRequired",
-        "provenanceSubjectDigestsMatch"
+        "resolvedDependenciesRequired"
       ],
       "properties": {
-        "architectureVersion": {
+        "buildType": {
           "type": "string",
-          "pattern": "^V\\d+\\.\\d+$"
+          "minLength": 1
         },
-        "starterKitPairs": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "controlCount": {
-          "type": "integer",
-          "minimum": 1
+        "exportCommand": {
+          "type": "string",
+          "minLength": 1
         },
         "verificationCommand": {
           "type": "string",
           "minLength": 1
         },
-        "verificationResult": {
-          "type": "string",
-          "enum": [
-            "pass",
-            "fail"
-          ]
-        },
-        "oscalControlCountMatchesCatalog": {
-          "type": "boolean"
-        },
-        "poamRequiredFollowsOpenFindings": {
-          "type": "boolean"
-        },
-        "integrityManifestRequired": {
-          "type": "boolean"
-        },
-        "generatedOutputDigestsMatch": {
-          "type": "boolean"
-        },
-        "provenanceStatementRequired": {
-          "type": "boolean"
-        },
-        "provenanceSubjectDigestsMatch": {
+        "resolvedDependenciesRequired": {
           "type": "boolean"
         }
       }
     },
-    "ciIntegration": {
+    "runDetails": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "localGate",
-        "makefileTarget",
-        "script"
+        "builderId",
+        "sourceRepositoryRequired",
+        "sourceCommitRequired"
       ],
       "properties": {
-        "localGate": {
+        "builderId": {
           "type": "string",
           "minLength": 1
         },
-        "makefileTarget": {
-          "type": "string",
-          "minLength": 1
+        "sourceRepositoryRequired": {
+          "type": "boolean"
         },
-        "script": {
-          "type": "string",
-          "minLength": 1
+        "sourceCommitRequired": {
+          "type": "boolean"
         }
       }
     },

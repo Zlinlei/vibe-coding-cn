@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,6 +29,7 @@ REQUIRED_EXPORT_ARTIFACTS = [
     "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
+    "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
     "scripts/check-modern-architecture-kit.py",
     "scripts/export-modern-architecture-audit.py",
     "scripts/check-modern-architecture-audit-export.py",
@@ -56,6 +58,22 @@ def relative(path: Path) -> str:
         return str(path.relative_to(ROOT))
     except ValueError:
         return str(path)
+
+
+def git_output(*args: str) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", *args],
+            cwd=ROOT,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+    value = completed.stdout.strip()
+    return value or "unknown"
 
 
 def collect_artifact(path_value: str) -> dict[str, Any]:
@@ -125,6 +143,7 @@ def build_packet(checker: Any) -> dict[str, Any]:
             "oscalExportProfile": examples.get("oscal-export-profile"),
             "auditExportGate": examples.get("audit-export-gate"),
             "auditExportIntegrity": examples.get("audit-export-integrity"),
+            "auditExportProvenance": examples.get("audit-export-provenance"),
         },
         "artifacts": artifacts,
         "verification": {
@@ -234,12 +253,93 @@ def write_integrity_manifest(packet: dict[str, Any], generated_outputs: list[Pat
     )
 
 
+def build_provenance_statement(packet: dict[str, Any], generated_outputs: list[Path]) -> dict[str, Any]:
+    source_commit = git_output("rev-parse", "HEAD")
+    source_remote = git_output("config", "--get", "remote.origin.url")
+    source_status = git_output("status", "--short")
+    source_dirty = source_status != "unknown" and source_status != ""
+    return {
+        "_type": "https://in-toto.io/Statement/v1",
+        "predicateType": "https://slsa.dev/provenance/v1",
+        "subject": [
+            {
+                "name": relative(path),
+                "digest": {
+                    "sha256": sha256_file(path),
+                },
+                "bytes": path.stat().st_size,
+            }
+            for path in generated_outputs
+        ],
+        "predicate": {
+            "buildDefinition": {
+                "buildType": "https://github.com/tradecatlabs/vibe-coding-cn/modern-enterprise-architecture/audit-export@v2",
+                "externalParameters": {
+                    "architectureVersion": packet["version"],
+                    "exportCommand": "make export-modern-architecture-audit",
+                    "verificationCommand": "make check-modern-architecture-audit-export",
+                },
+                "internalParameters": {
+                    "starterKitPairs": packet["starterKitPairs"],
+                    "controlCount": packet["controlCount"],
+                },
+                "resolvedDependencies": [
+                    {
+                        "name": "source-repository",
+                        "uri": source_remote,
+                        "digest": {
+                            "gitCommit": source_commit,
+                        },
+                    },
+                    *[
+                        {
+                            "name": artifact["path"],
+                            "uri": artifact["path"],
+                            "digest": {
+                                "sha256": artifact["sha256"],
+                            },
+                        }
+                        for artifact in packet["artifacts"]
+                    ],
+                ],
+            },
+            "runDetails": {
+                "builder": {
+                    "id": "vibe-coding-cn:scripts/export-modern-architecture-audit.py",
+                },
+                "metadata": {
+                    "invocationId": f"{packet['version']}-modern-enterprise-architecture-audit-export",
+                    "startedOn": packet["generatedAt"],
+                    "finishedOn": packet["generatedAt"],
+                    "sourceDirty": source_dirty,
+                },
+                "byproducts": [
+                    {
+                        "name": "audit-export-integrity",
+                        "uri": "build/modern-enterprise-architecture-audit/audit-export-integrity.json",
+                    }
+                ],
+            },
+        },
+    }
+
+
+def write_provenance_statement(packet: dict[str, Any], generated_outputs: list[Path], path: Path) -> None:
+    path.write_text(
+        json.dumps(build_provenance_statement(packet, generated_outputs), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Export modern enterprise architecture audit packet")
     parser.add_argument(
         "--out-dir",
         default=str(DEFAULT_OUT_DIR),
-        help="Output directory for audit-export.json, audit-export.md, oscal-summary.json and integrity manifest",
+        help=(
+            "Output directory for audit-export.json, audit-export.md, oscal-summary.json, "
+            "integrity manifest and provenance statement"
+        ),
     )
     return parser.parse_args()
 
@@ -257,15 +357,18 @@ def main() -> int:
     markdown_path = out_dir / "audit-export.md"
     oscal_path = out_dir / "oscal-summary.json"
     integrity_path = out_dir / "audit-export-integrity.json"
+    provenance_path = out_dir / "audit-export-provenance.json"
     write_json(packet, json_path)
     write_markdown(packet, markdown_path)
     write_oscal_summary(packet, oscal_path)
     write_integrity_manifest(packet, [json_path, markdown_path, oscal_path], integrity_path)
+    write_provenance_statement(packet, [json_path, markdown_path, oscal_path, integrity_path], provenance_path)
 
     print(f"OK modern architecture audit export written: {relative(json_path)}")
     print(f"OK modern architecture audit report written: {relative(markdown_path)}")
     print(f"OK modern architecture OSCAL summary written: {relative(oscal_path)}")
     print(f"OK modern architecture audit integrity manifest written: {relative(integrity_path)}")
+    print(f"OK modern architecture audit provenance statement written: {relative(provenance_path)}")
     return 0
 
 

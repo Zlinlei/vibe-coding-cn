@@ -1,13 +1,13 @@
 {
-  "currentVersion": "V2.17",
+  "currentVersion": "V2.18",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "changeLevel": "Minor",
-  "summary": "补齐审计导出完整性清单和生成物哈希校验",
+  "summary": "补齐审计导出 provenance statement 和生成上下文追溯",
   "architectureDocument": "docs/references/modern-enterprise-architecture-template.md",
   "starterKit": {
     "path": "docs/references/modern-enterprise-architecture-kit",
-    "expectedPairCount": 48,
+    "expectedPairCount": 49,
     "pairs": [
       "domain",
       "service",
@@ -56,21 +56,22 @@
       "baseline-change-record",
       "oscal-export-profile",
       "audit-export-gate",
-      "audit-export-integrity"
+      "audit-export-integrity",
+      "audit-export-provenance"
     ]
   },
   "controlCatalog": {
     "path": "docs/references/modern-enterprise-architecture-controls.json",
-    "expectedControlCount": 32
+    "expectedControlCount": 33
   },
   "requiredMentions": [
     {
       "path": "docs/references/modern-enterprise-architecture-template.md",
       "contains": [
-        "**文档版本**：V2.17",
-        "| `V2.17` | `Baseline Candidate` |",
-        "| `V2.17` | 2026-06-02 | Minor |",
-        "### 0.7 V2.17 可执行企业标准路线图",
+        "**文档版本**：V2.18",
+        "| `V2.18` | `Baseline Candidate` |",
+        "| `V2.18` | 2026-06-02 | Minor |",
+        "### 0.7 V2.18 可执行企业标准路线图",
         "控制项覆盖清单",
         "严格 schema 模式",
         "控制证据映射",
@@ -81,16 +82,17 @@
         "OSCAL 交换映射",
         "审计导出门禁",
         "审计导出完整性清单",
+        "审计导出 provenance statement",
         "可靠性等级",
         "GitOps 运行安全",
         "供应链 source/vulnerability/scorecard 证据",
-        "48 组 schema/example"
+        "49 组 schema/example"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-kit/README.md",
       "contains": [
-        "V2.17",
+        "V2.18",
         "严格",
         "控制证据映射",
         "审计导出清单",
@@ -100,55 +102,56 @@
         "OSCAL 交换映射",
         "审计导出门禁",
         "审计导出完整性清单",
+        "审计导出 provenance statement",
         "可靠性",
         "GitOps",
-        "48 组"
+        "49 组"
       ]
     },
     {
       "path": "docs/README.md",
       "contains": [
-        "V2.17",
-        "48 组"
+        "V2.18",
+        "49 组"
       ]
     },
     {
       "path": "docs/references/README.md",
       "contains": [
-        "V2.17",
-        "48 组"
+        "V2.18",
+        "49 组"
       ]
     },
     {
       "path": "metadata/taxonomy.yml",
       "contains": [
-        "V2.17",
-        "48 组"
+        "V2.18",
+        "49 组"
       ]
     },
     {
       "path": "assets/ai-citation/llms-full.txt",
       "contains": [
-        "V2.17",
-        "48 组"
+        "V2.18",
+        "49 组"
       ]
     },
     {
       "path": "AGENTS.md",
       "contains": [
-        "V2.17"
+        "V2.18"
       ]
     },
     {
       "path": "docs/references/AGENTS.md",
       "contains": [
-        "V2.17"
+        "V2.18"
       ]
     },
     {
       "path": "docs/references/modern-enterprise-architecture-controls.json",
       "contains": [
-        "V2.17",
+        "V2.18",
         "CTRL-ARCH-RELIABILITY-001",
         "CTRL-ARCH-SCHEMA-STRICT-001",
         "CTRL-ARCH-EXTENSION-POLICY-001",
@@ -175,6 +178,7 @@
         "CTRL-ARCH-OSCAL-EXPORT-001",
         "CTRL-ARCH-AUDIT-EXPORT-GATE-001",
         "CTRL-ARCH-AUDIT-EXPORT-INTEGRITY-001",
+        "CTRL-ARCH-AUDIT-EXPORT-PROVENANCE-001",
         "schemaRequirements",
         "checkerEvidence"
       ]

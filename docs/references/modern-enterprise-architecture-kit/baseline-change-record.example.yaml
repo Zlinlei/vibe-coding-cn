@@ -1,6 +1,6 @@
-record: modern-enterprise-architecture-v2-17-baseline-change
-version: V2.17
-previousVersion: V2.16
+record: modern-enterprise-architecture-v2-18-baseline-change
+version: V2.18
+previousVersion: V2.17
 changeLevel: Minor
 status: implemented
 owner: governance-team
@@ -11,8 +11,8 @@ scope:
   architectureDocument: docs/references/modern-enterprise-architecture-template.md
   versionManifest: docs/references/modern-enterprise-architecture-version.json
   controlCatalog: docs/references/modern-enterprise-architecture-controls.json
-  controlCount: 32
-  starterKitPairs: 48
+  controlCount: 33
+  starterKitPairs: 49
   changedArtifacts:
     - docs/references/modern-enterprise-architecture-version.json
     - docs/references/modern-enterprise-architecture-controls.json
@@ -26,11 +26,13 @@ scope:
     - docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml
     - docs/references/modern-enterprise-architecture-kit/audit-export-integrity.schema.json
     - docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/audit-export-provenance.schema.json
+    - docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml
     - scripts/check-modern-architecture-kit.py
     - scripts/check-modern-architecture-audit-export.py
     - scripts/export-modern-architecture-audit.py
 impact:
-  summary: add audit export integrity manifest and generated output digest validation
+  summary: add audit export provenance statement and generated output source traceability
   security: low
   privacy: low
   data: low
@@ -49,10 +51,11 @@ validation:
     - build/modern-enterprise-architecture-audit/audit-export.md
     - build/modern-enterprise-architecture-audit/oscal-summary.json
     - build/modern-enterprise-architecture-audit/audit-export-integrity.json
+    - build/modern-enterprise-architecture-audit/audit-export-provenance.json
 rollback:
   supported: true
-  previousCommit: f110b1e
-  plan: revert the audit export integrity commit and restore V2.16 manifest, control catalog and starter kit counts
+  previousCommit: 6f36b75
+  plan: revert the audit export provenance commit and restore V2.17 manifest, control catalog and starter kit counts
   owner: governance-team
 approvals:
   - role: architecture-governance

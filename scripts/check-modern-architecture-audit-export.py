@@ -104,12 +104,99 @@ def validate_integrity_manifest(
     return errors
 
 
+def validate_provenance_statement(
+    provenance: dict[str, Any],
+    packet: dict[str, Any],
+    generated_outputs: list[Path],
+) -> list[str]:
+    errors: list[str] = []
+    if provenance.get("_type") != "https://in-toto.io/Statement/v1":
+        errors.append("audit-export-provenance.json _type must be https://in-toto.io/Statement/v1")
+    if provenance.get("predicateType") != "https://slsa.dev/provenance/v1":
+        errors.append("audit-export-provenance.json predicateType must be https://slsa.dev/provenance/v1")
+
+    subjects = provenance.get("subject")
+    if not isinstance(subjects, list):
+        errors.append("audit-export-provenance.json subject must be an array")
+        subjects = []
+    subjects_by_name = {item.get("name"): item for item in subjects if isinstance(item, dict)}
+    for path in generated_outputs:
+        path_value = relative(path)
+        subject = subjects_by_name.get(path_value)
+        if not isinstance(subject, dict):
+            errors.append(f"audit-export-provenance.json subject must include {path_value}")
+            continue
+        digest = subject.get("digest")
+        if not isinstance(digest, dict) or digest.get("sha256") != sha256_file(path):
+            errors.append(f"audit-export-provenance.json subject sha256 mismatch for {path_value}")
+        if subject.get("bytes") != path.stat().st_size:
+            errors.append(f"audit-export-provenance.json subject bytes mismatch for {path_value}")
+
+    predicate = provenance.get("predicate")
+    if not isinstance(predicate, dict):
+        errors.append("audit-export-provenance.json predicate must be an object")
+        return errors
+    build_definition = predicate.get("buildDefinition")
+    if not isinstance(build_definition, dict):
+        errors.append("audit-export-provenance.json predicate.buildDefinition must be an object")
+        build_definition = {}
+    if build_definition.get("buildType") != "https://github.com/tradecatlabs/vibe-coding-cn/modern-enterprise-architecture/audit-export@v2":
+        errors.append("audit-export-provenance.json buildDefinition.buildType must identify audit export builder")
+    external = build_definition.get("externalParameters")
+    if not isinstance(external, dict):
+        errors.append("audit-export-provenance.json buildDefinition.externalParameters must be an object")
+        external = {}
+    if external.get("architectureVersion") != packet.get("version"):
+        errors.append("audit-export-provenance.json externalParameters.architectureVersion must match audit-export.json version")
+    if external.get("exportCommand") != "make export-modern-architecture-audit":
+        errors.append("audit-export-provenance.json externalParameters.exportCommand must be make export-modern-architecture-audit")
+    if external.get("verificationCommand") != "make check-modern-architecture-audit-export":
+        errors.append(
+            "audit-export-provenance.json externalParameters.verificationCommand must be make check-modern-architecture-audit-export"
+        )
+    internal = build_definition.get("internalParameters")
+    if not isinstance(internal, dict):
+        errors.append("audit-export-provenance.json buildDefinition.internalParameters must be an object")
+        internal = {}
+    if internal.get("starterKitPairs") != packet.get("starterKitPairs"):
+        errors.append("audit-export-provenance.json internalParameters.starterKitPairs must match audit-export.json")
+    if internal.get("controlCount") != packet.get("controlCount"):
+        errors.append("audit-export-provenance.json internalParameters.controlCount must match audit-export.json")
+
+    dependencies = build_definition.get("resolvedDependencies")
+    if not isinstance(dependencies, list):
+        errors.append("audit-export-provenance.json buildDefinition.resolvedDependencies must be an array")
+        dependencies = []
+    dependency_names = {item.get("name") for item in dependencies if isinstance(item, dict)}
+    if "source-repository" not in dependency_names:
+        errors.append("audit-export-provenance.json resolvedDependencies must include source-repository")
+    artifact_paths = {item.get("path") for item in packet.get("artifacts", []) if isinstance(item, dict)}
+    if not artifact_paths.issubset(dependency_names):
+        errors.append("audit-export-provenance.json resolvedDependencies must include every audit-export artifact")
+
+    run_details = predicate.get("runDetails")
+    if not isinstance(run_details, dict):
+        errors.append("audit-export-provenance.json predicate.runDetails must be an object")
+        return errors
+    builder = run_details.get("builder")
+    if not isinstance(builder, dict) or builder.get("id") != "vibe-coding-cn:scripts/export-modern-architecture-audit.py":
+        errors.append("audit-export-provenance.json runDetails.builder.id must identify exporter script")
+    metadata = run_details.get("metadata")
+    if not isinstance(metadata, dict):
+        errors.append("audit-export-provenance.json runDetails.metadata must be an object")
+    elif metadata.get("invocationId") != f"{packet.get('version')}-modern-enterprise-architecture-audit-export":
+        errors.append("audit-export-provenance.json runDetails.metadata.invocationId must include architecture version")
+    return errors
+
+
 def validate_packet(
     packet: dict[str, Any],
     oscal: dict[str, Any],
     checker: Any,
     integrity: dict[str, Any] | None = None,
     generated_outputs: list[Path] | None = None,
+    provenance: dict[str, Any] | None = None,
+    provenance_outputs: list[Path] | None = None,
 ) -> list[str]:
     errors: list[str] = []
     version_manifest = checker.load_version_manifest()
@@ -146,6 +233,7 @@ def validate_packet(
     required_artifacts = {
         "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
         "scripts/check-modern-architecture-audit-export.py",
     }
     if not required_artifacts.issubset(artifact_paths):
@@ -175,12 +263,21 @@ def validate_packet(
                 output_paths = {item.get("path") for item in outputs if isinstance(item, dict)}
                 if "build/modern-enterprise-architecture-audit/audit-export-integrity.json" not in output_paths:
                     errors.append("auditExportGate outputs must include audit-export-integrity.json")
+                if "build/modern-enterprise-architecture-audit/audit-export-provenance.json" not in output_paths:
+                    errors.append("auditExportGate outputs must include audit-export-provenance.json")
             expectations = audit_export_gate.get("expectations")
             if isinstance(expectations, dict):
                 if expectations.get("integrityManifestRequired") is not True:
                     errors.append("auditExportGate expectations.integrityManifestRequired must be true")
                 if expectations.get("generatedOutputDigestsMatch") is not True:
                     errors.append("auditExportGate expectations.generatedOutputDigestsMatch must be true")
+                if expectations.get("provenanceStatementRequired") is not True:
+                    errors.append("auditExportGate expectations.provenanceStatementRequired must be true")
+                if expectations.get("provenanceSubjectDigestsMatch") is not True:
+                    errors.append("auditExportGate expectations.provenanceSubjectDigestsMatch must be true")
+        audit_export_provenance = evidence.get("auditExportProvenance")
+        if audit_export_provenance != examples.get("audit-export-provenance"):
+            errors.append("audit-export.json evidence.auditExportProvenance must match starter kit example")
 
     if oscal.get("version") != expected_version:
         errors.append("oscal-summary.json version must match currentVersion")
@@ -207,6 +304,10 @@ def validate_packet(
         errors.append("audit-export-integrity.json must be generated and validated")
     else:
         errors.extend(validate_integrity_manifest(integrity, packet, generated_outputs))
+    if provenance is None or provenance_outputs is None:
+        errors.append("audit-export-provenance.json must be generated and validated")
+    else:
+        errors.extend(validate_provenance_statement(provenance, packet, provenance_outputs))
 
     return errors
 
@@ -216,7 +317,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--out-dir",
         default=str(DEFAULT_OUT_DIR),
-        help="Output directory for audit-export.json, audit-export.md and oscal-summary.json",
+        help="Output directory for audit-export.json, audit-export.md, oscal-summary.json and provenance outputs",
     )
     return parser.parse_args()
 
@@ -236,15 +337,26 @@ def main() -> int:
     markdown_path = out_dir / "audit-export.md"
     oscal_path = out_dir / "oscal-summary.json"
     integrity_path = out_dir / "audit-export-integrity.json"
+    provenance_path = out_dir / "audit-export-provenance.json"
     exporter.write_json(packet, json_path)
     exporter.write_markdown(packet, markdown_path)
     exporter.write_oscal_summary(packet, oscal_path)
     exporter.write_integrity_manifest(packet, [json_path, markdown_path, oscal_path], integrity_path)
+    exporter.write_provenance_statement(packet, [json_path, markdown_path, oscal_path, integrity_path], provenance_path)
 
     loaded_packet = load_json(json_path)
     loaded_oscal = load_json(oscal_path)
     loaded_integrity = load_json(integrity_path)
-    errors = validate_packet(loaded_packet, loaded_oscal, checker, loaded_integrity, [json_path, markdown_path, oscal_path])
+    loaded_provenance = load_json(provenance_path)
+    errors = validate_packet(
+        loaded_packet,
+        loaded_oscal,
+        checker,
+        loaded_integrity,
+        [json_path, markdown_path, oscal_path],
+        loaded_provenance,
+        [json_path, markdown_path, oscal_path, integrity_path],
+    )
     if errors:
         print("MODERN_ARCHITECTURE_AUDIT_EXPORT_ERRORS")
         for error in errors:
@@ -257,7 +369,7 @@ def main() -> int:
     control_count = loaded_packet.get("controlCount")
     print(
         "OK modern architecture audit export gate checked: "
-        f"{version}, {pair_count} schema/example pairs, {control_count} controls, integrity manifest"
+        f"{version}, {pair_count} schema/example pairs, {control_count} controls, integrity and provenance"
     )
     return 0
 

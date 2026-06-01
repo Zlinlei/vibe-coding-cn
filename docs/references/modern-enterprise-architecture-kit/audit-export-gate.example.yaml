@@ -1,5 +1,5 @@
 gate: modern-enterprise-architecture-audit-export-gate
-version: V2.17
+version: V2.18
 owner: governance-team
 generatedOn: 2026-06-02
 command:
@@ -27,16 +27,22 @@ outputs:
     type: json
     required: true
     invariant: generated output digests match the exported audit files
+  - path: build/modern-enterprise-architecture-audit/audit-export-provenance.json
+    type: json
+    required: true
+    invariant: provenance subject digests, build definition and source dependencies match exported audit files
 expectations:
-  architectureVersion: V2.17
-  starterKitPairs: 48
-  controlCount: 32
+  architectureVersion: V2.18
+  starterKitPairs: 49
+  controlCount: 33
   verificationCommand: make check-modern-architecture-kit
   verificationResult: pass
   oscalControlCountMatchesCatalog: true
   poamRequiredFollowsOpenFindings: true
   integrityManifestRequired: true
   generatedOutputDigestsMatch: true
+  provenanceStatementRequired: true
+  provenanceSubjectDigestsMatch: true
 ciIntegration:
   localGate: make test
   makefileTarget: check-modern-architecture-audit-export
