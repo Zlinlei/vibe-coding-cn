@@ -14,13 +14,23 @@
     "runtime"
   ],
   "properties": {
-    "name": { "type": "string" },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
     "kind": { "type": "string" },
     "type": { "type": "string" },
-    "domain": { "type": "string" },
-    "owner": { "type": "string" },
-    "lifecycle": { "type": "string" },
-    "tier": { "type": "string" },
-    "runtime": { "type": "object" }
+    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
+    "tier": { "type": "string", "enum": ["tier-1", "tier-2", "tier-3"] },
+    "runtime": {
+      "type": "object",
+      "required": ["platform", "namespace", "deployment", "imageRepository", "gitopsPath"],
+      "properties": {
+        "platform": { "type": "string", "enum": ["kubernetes"] },
+        "namespace": { "type": "string", "minLength": 1 },
+        "deployment": { "type": "string", "minLength": 1 },
+        "imageRepository": { "type": "string", "minLength": 1 },
+        "gitopsPath": { "type": "string", "minLength": 1 }
+      }
+    }
   }
 }

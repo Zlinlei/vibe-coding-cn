@@ -17,16 +17,44 @@
     "aiUsage"
   ],
   "properties": {
-    "dataProduct": { "type": "string" },
-    "domain": { "type": "string" },
-    "owner": { "type": "string" },
+    "dataProduct": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
     "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
-    "schema": { "type": "string" },
-    "semanticGrain": { "type": "string" },
-    "freshness": { "type": "string" },
-    "quality": { "type": "object" },
-    "classification": { "type": "object" },
-    "lineage": { "type": "object" },
-    "aiUsage": { "type": "object" }
+    "schema": { "type": "string", "minLength": 1 },
+    "semanticGrain": { "type": "string", "minLength": 1 },
+    "freshness": { "type": "string", "pattern": "^\\d+[mhd]$" },
+    "quality": {
+      "type": "object",
+      "required": ["completeness", "uniqueness"],
+      "properties": {
+        "completeness": { "type": "string", "minLength": 1 },
+        "uniqueness": { "type": "string", "minLength": 1 }
+      }
+    },
+    "classification": {
+      "type": "object",
+      "required": ["level"],
+      "properties": {
+        "level": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
+        "pii": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "required": ["upstream", "downstream"],
+      "properties": {
+        "upstream": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "downstream": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "aiUsage": {
+      "type": "object",
+      "required": ["allowed", "disallowed"],
+      "properties": {
+        "allowed": { "type": "array", "items": { "type": "string" } },
+        "disallowed": { "type": "array", "items": { "type": "string" } }
+      }
+    }
   }
 }

@@ -9,7 +9,9 @@ the starter kit, then validates each example against its paired schema.
 from __future__ import annotations
 
 import json
+import re
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +31,8 @@ PAIR_NAMES = [
     "audit-evidence-index",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
+DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
 
 class KitValidationError(ValueError):
@@ -245,36 +249,83 @@ def matches_schema_type(expected: str, value: Any) -> bool:
 
 
 def validate_schema_document(schema: dict[str, Any], schema_path: Path) -> list[str]:
+    rel = str(schema_path.relative_to(ROOT))
     errors: list[str] = []
-    rel = schema_path.relative_to(ROOT)
+    if schema.get("$schema") != JSON_SCHEMA_DRAFT:
+        errors.append(f"{rel}: $schema must be {JSON_SCHEMA_DRAFT}")
+    if schema.get("type") != "object":
+        errors.append(f"{rel}: root type must be object")
+    errors.extend(validate_schema_fragment(schema, rel))
+    return errors
+
+
+def validate_schema_fragment(schema: dict[str, Any], location: str) -> list[str]:
+    errors: list[str] = []
 
     schema_type = schema.get("type")
-    if schema_type != "object":
-        errors.append(f"{rel}: root type must be object")
+    if schema_type not in SCHEMA_TYPES:
+        errors.append(f"{location}: unsupported type '{schema_type}'")
 
     required = schema.get("required")
-    if not isinstance(required, list) or not all(isinstance(item, str) for item in required):
-        errors.append(f"{rel}: required must be a string array")
+    if required is not None and (
+        not isinstance(required, list) or not all(isinstance(item, str) for item in required)
+    ):
+        errors.append(f"{location}: required must be a string array")
 
     properties = schema.get("properties", {})
-    if not isinstance(properties, dict):
-        errors.append(f"{rel}: properties must be an object")
-        return errors
+    if properties is not None and not isinstance(properties, dict):
+        errors.append(f"{location}: properties must be an object")
+        properties = {}
 
     if isinstance(required, list):
         missing_properties = sorted(set(required) - set(properties))
         if missing_properties:
-            errors.append(f"{rel}: required fields missing from properties: {', '.join(missing_properties)}")
+            errors.append(f"{location}: required fields missing from properties: {', '.join(missing_properties)}")
 
     for prop_name, prop_schema in properties.items():
         if not isinstance(prop_schema, dict):
-            errors.append(f"{rel}: property '{prop_name}' schema must be an object")
+            errors.append(f"{location}: property '{prop_name}' schema must be an object")
             continue
-        prop_type = prop_schema.get("type")
-        if prop_type not in SCHEMA_TYPES:
-            errors.append(f"{rel}: property '{prop_name}' has unsupported type '{prop_type}'")
+        errors.extend(validate_schema_fragment(prop_schema, f"{location}.properties.{prop_name}"))
+
+    item_schema = schema.get("items")
+    if item_schema is not None:
+        if not isinstance(item_schema, dict):
+            errors.append(f"{location}: items must be an object")
+        else:
+            errors.extend(validate_schema_fragment(item_schema, f"{location}.items"))
+
+    pattern = schema.get("pattern")
+    if pattern is not None:
+        if not isinstance(pattern, str):
+            errors.append(f"{location}: pattern must be a string")
+        else:
+            try:
+                re.compile(pattern)
+            except re.error as exc:
+                errors.append(f"{location}: invalid pattern: {exc}")
+
+    schema_format = schema.get("format")
+    if schema_format is not None and schema_format != "date":
+        errors.append(f"{location}: unsupported format '{schema_format}'")
+
+    for numeric_key in ("minLength", "minItems"):
+        if numeric_key in schema and (
+            not isinstance(schema[numeric_key], int) or isinstance(schema[numeric_key], bool) or schema[numeric_key] < 0
+        ):
+            errors.append(f"{location}: {numeric_key} must be a non-negative integer")
 
     return errors
+
+
+def is_iso_date(value: str) -> bool:
+    if not DATE_PATTERN.match(value):
+        return False
+    try:
+        date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
 
 
 def validate_instance(schema: dict[str, Any], value: Any, location: str) -> list[str]:
@@ -290,6 +341,16 @@ def validate_instance(schema: dict[str, Any], value: Any, location: str) -> list
         allowed = schema["enum"]
         if isinstance(allowed, list) and value not in allowed:
             errors.append(f"{location}: value '{value}' is not in enum {allowed}")
+
+    if schema_type == "string" and isinstance(value, str):
+        min_length = schema.get("minLength")
+        if isinstance(min_length, int) and len(value) < min_length:
+            errors.append(f"{location}: expected string length >= {min_length}")
+        pattern = schema.get("pattern")
+        if isinstance(pattern, str) and not re.search(pattern, value):
+            errors.append(f"{location}: value '{value}' does not match pattern '{pattern}'")
+        if schema.get("format") == "date" and not is_iso_date(value):
+            errors.append(f"{location}: value '{value}' is not a YYYY-MM-DD date")
 
     if schema_type == "object":
         if not isinstance(value, dict):
@@ -308,10 +369,57 @@ def validate_instance(schema: dict[str, Any], value: Any, location: str) -> list
     if schema_type == "array":
         if not isinstance(value, list):
             return errors
+        min_items = schema.get("minItems")
+        if isinstance(min_items, int) and len(value) < min_items:
+            errors.append(f"{location}: expected at least {min_items} items")
         item_schema = schema.get("items")
         if isinstance(item_schema, dict):
             for item_index, item in enumerate(value):
                 errors.extend(validate_instance(item_schema, item, f"{location}[{item_index}]"))
+
+    return errors
+
+
+def load_examples() -> dict[str, Any]:
+    examples: dict[str, Any] = {}
+    for name in PAIR_NAMES:
+        example_path = KIT_DIR / f"{name}.example.yaml"
+        if example_path.is_file():
+            examples[name] = parse_yaml_example(example_path)
+    return examples
+
+
+def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    domain = examples.get("domain")
+    service = examples.get("service")
+    data_product = examples.get("data-product")
+    catalog_component = examples.get("catalog-component")
+
+    if isinstance(domain, dict) and isinstance(service, dict):
+        if service.get("domain") != domain.get("domain"):
+            errors.append("cross-file: service.domain must match domain.domain")
+        if service.get("owner") != domain.get("owner"):
+            errors.append("cross-file: service.owner must match domain.owner in starter kit examples")
+
+    if isinstance(domain, dict) and isinstance(data_product, dict):
+        if data_product.get("domain") != domain.get("domain"):
+            errors.append("cross-file: data-product.domain must match domain.domain")
+        if data_product.get("owner") != domain.get("owner"):
+            errors.append("cross-file: data-product.owner must match domain.owner in starter kit examples")
+
+    if isinstance(service, dict) and isinstance(catalog_component, dict):
+        if catalog_component.get("name") != service.get("service"):
+            errors.append("cross-file: catalog-component.name must match service.service")
+        if catalog_component.get("domain") != service.get("domain"):
+            errors.append("cross-file: catalog-component.domain must match service.domain")
+        if catalog_component.get("owner") != service.get("owner"):
+            errors.append("cross-file: catalog-component.owner must match service.owner")
+        runtime = catalog_component.get("runtime")
+        service_runtime = service.get("runtime")
+        if isinstance(runtime, dict) and isinstance(service_runtime, dict):
+            if runtime.get("imageRepository") != service_runtime.get("imageRepository"):
+                errors.append("cross-file: catalog runtime imageRepository must match service runtime imageRepository")
 
     return errors
 
@@ -353,6 +461,12 @@ def main() -> int:
 
     for name in PAIR_NAMES:
         errors.extend(validate_pair(name))
+
+    if not errors:
+        try:
+            errors.extend(validate_cross_file_consistency(load_examples()))
+        except KitValidationError as exc:
+            errors.append(str(exc))
 
     discovered_schemas = {path.stem.removesuffix(".schema") for path in KIT_DIR.glob("*.schema.json")}
     unexpected = sorted(discovered_schemas - set(PAIR_NAMES))

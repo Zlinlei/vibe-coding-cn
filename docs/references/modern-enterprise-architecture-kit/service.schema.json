@@ -16,15 +16,45 @@
     "rollback"
   ],
   "properties": {
-    "service": { "type": "string" },
-    "domain": { "type": "string" },
-    "owner": { "type": "string" },
+    "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
+    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
     "lifecycle": { "type": "string", "enum": ["draft", "beta", "production", "deprecated"] },
-    "runtime": { "type": "object" },
-    "resources": { "type": "object" },
+    "runtime": {
+      "type": "object",
+      "required": ["type", "imageRepository", "ports", "health"],
+      "properties": {
+        "type": { "type": "string", "enum": ["kubernetes"] },
+        "imageRepository": { "type": "string", "minLength": 1 },
+        "ports": { "type": "object", "required": ["http"], "properties": { "http": { "type": "integer" } } },
+        "health": {
+          "type": "object",
+          "required": ["liveness", "readiness"],
+          "properties": {
+            "liveness": { "type": "string", "pattern": "^/" },
+            "readiness": { "type": "string", "pattern": "^/" }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "required": ["requests", "limits"],
+      "properties": {
+        "requests": { "type": "object", "required": ["cpu", "memory"], "properties": { "cpu": { "type": "string" }, "memory": { "type": "string" } } },
+        "limits": { "type": "object", "required": ["cpu", "memory"], "properties": { "cpu": { "type": "string" }, "memory": { "type": "string" } } }
+      }
+    },
     "dependencies": { "type": "object" },
-    "slo": { "type": "object" },
-    "runbook": { "type": "string" },
-    "rollback": { "type": "string" }
+    "slo": {
+      "type": "object",
+      "required": ["availability", "latencyP95Ms"],
+      "properties": {
+        "availability": { "type": "number" },
+        "latencyP95Ms": { "type": "integer" }
+      }
+    },
+    "runbook": { "type": "string", "minLength": 1 },
+    "rollback": { "type": "string", "minLength": 1 }
   }
 }

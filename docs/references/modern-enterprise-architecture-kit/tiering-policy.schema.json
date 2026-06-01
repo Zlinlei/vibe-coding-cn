@@ -19,6 +19,14 @@
     "rpo": { "type": "string" },
     "onCall": { "type": "string" },
     "drillCadence": { "type": "string" },
-    "errorBudgetPolicy": { "type": "object" }
+    "errorBudgetPolicy": {
+      "type": "object",
+      "required": ["attentionAt", "restrictAt", "freezeAt"],
+      "properties": {
+        "attentionAt": { "type": "string", "pattern": "^\\d+%$" },
+        "restrictAt": { "type": "string", "pattern": "^\\d+%$" },
+        "freezeAt": { "type": "string", "pattern": "^\\d+%$" }
+      }
+    }
   }
 }

@@ -13,3 +13,5 @@ downstream:
   - fulfillment
 sloTier: tier-1
 dataClassification: internal
+architectureDecision:
+  - governance/decisions/adr-0001-order-boundary.md
