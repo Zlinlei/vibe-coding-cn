@@ -1,9 +1,9 @@
 {
-  "version": "V2.18",
+  "version": "V2.19",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁、导出完整性清单和 provenance statement",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁、导出完整性清单、provenance statement 和签名策略",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -14,6 +14,11 @@
       "source": "SLSA v1.2",
       "url": "https://slsa.dev/spec/v1.2/",
       "rationale": "供应链控制项覆盖 source、build、provenance 和 artifact evidence"
+    },
+    {
+      "source": "Sigstore Cosign",
+      "url": "https://docs.sigstore.dev/cosign/signing/signing_with_blobs/",
+      "rationale": "审计导出签名策略采用 Cosign blob signing 的 bundle 交接口径，要求签名、证书和透明日志证明可被后续验签"
     },
     {
       "source": "NIST SSDF SP 800-218",
@@ -1032,7 +1037,7 @@
           "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
           "nestedRequired": {
             "target": ["standard", "format", "machineReadable"],
-            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy"],
             "controls": ["count", "selectionSource"],
             "assessment": ["source", "result", "openFindings", "poamRequired"],
             "validation": ["command", "result", "output"],
@@ -1073,7 +1078,7 @@
           "nestedRequired": {
             "command": ["local", "preflight", "export"],
             "qualityGate": ["requiredInMakeTest", "zeroDependency", "blocksOnMismatch"],
-            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch"],
+            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches"],
             "ciIntegration": ["localGate", "makefileTarget", "script"],
             "retention": ["period", "reviewOn"]
           }
@@ -1089,11 +1094,13 @@
         "audit-export-gate.version must match currentVersion",
         "audit-export-gate.command.local must be make check-modern-architecture-audit-export",
         "audit-export-gate.expectations.controlCount must match control catalog length",
-        "audit-export-gate.outputs must include audit JSON, Markdown, OSCAL summary, integrity manifest and provenance statement",
+        "audit-export-gate.outputs must include audit JSON, Markdown, OSCAL summary, integrity manifest, provenance statement and signing policy",
         "audit-export-gate.expectations.integrityManifestRequired must be true",
         "audit-export-gate.expectations.generatedOutputDigestsMatch must be true",
         "audit-export-gate.expectations.provenanceStatementRequired must be true",
         "audit-export-gate.expectations.provenanceSubjectDigestsMatch must be true",
+        "audit-export-gate.expectations.signingPolicyRequired must be true",
+        "audit-export-gate.expectations.signingPayloadDigestMatches must be true",
         "audit-export-gate.qualityGate.requiredInMakeTest must be true",
         "audit-export-gate.ciIntegration.localGate must be make test",
         "audit export gate runtime invariant check failed"
@@ -1177,6 +1184,47 @@
         "audit-export-provenance.buildDefinition.exportCommand must be make export-modern-architecture-audit",
         "audit-export-provenance.buildDefinition.resolvedDependenciesRequired must be true",
         "audit-export-provenance.runDetails.sourceCommitRequired must be true",
+        "audit export gate runtime invariant check failed"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AUDIT-EXPORT-SIGNING-POLICY-001",
+      "category": "audit-export",
+      "title": "审计导出必须声明签名策略并校验 provenance payload 摘要",
+      "statement": "审计导出包必须生成独立签名策略，声明待签名 provenance payload、摘要算法、签名方式、验签命令、透明日志要求和本地门禁边界；本地门禁必须校验 payload 摘要，但不得伪造真实签名。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
+        "scripts/export-modern-architecture-audit.py",
+        "scripts/check-modern-architecture-audit-export.py"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.schema.json",
+          "required": ["policy", "version", "owner", "generatedOn", "scope", "payload", "signature", "commands", "localGate", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureVersion", "package", "controlCount", "starterKitPairs"],
+            "payload": ["path", "digestAlgorithm", "predicateType"],
+            "signature": ["required", "method", "identity", "issuer", "bundlePath", "transparencyLogRequired"],
+            "commands": ["sign", "verify"],
+            "localGate": ["command", "verifiesPayloadDigest", "doesNotForgeSignature"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
+          "fields": ["policy", "version", "payload.path", "signature.required", "signature.method", "commands.sign", "localGate.doesNotForgeSignature", "retention.reviewOn"]
+        }
+      ],
+      "checkerEvidence": [
+        "audit-export-signing-policy.version must match currentVersion",
+        "audit-export-signing-policy.scope.controlCount must match control catalog length",
+        "audit-export-signing-policy.payload.path must point to audit-export-provenance.json",
+        "audit-export-signing-policy.signature.method must be sigstore-cosign-or-enterprise-signing",
+        "audit-export-signing-policy.commands.sign must use cosign sign-blob --bundle",
+        "audit-export-signing-policy.localGate.doesNotForgeSignature must be true",
         "audit export gate runtime invariant check failed"
       ]
     }

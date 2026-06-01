@@ -1,0 +1,30 @@
+policy: modern-enterprise-architecture-audit-export-signing-policy
+version: V2.19
+owner: governance-team
+generatedOn: 2026-06-02
+scope:
+  architectureVersion: V2.19
+  package: modern-enterprise-architecture-audit-export
+  controlCount: 34
+  starterKitPairs: 50
+payload:
+  path: build/modern-enterprise-architecture-audit/audit-export-provenance.json
+  digestAlgorithm: sha256
+  predicateType: https://slsa.dev/provenance/v1
+signature:
+  required: true
+  method: sigstore-cosign-or-enterprise-signing
+  identity: governance-team
+  issuer: enterprise-oidc-or-sigstore
+  bundlePath: governance/evidence/audit-export/audit-export-provenance.sigstore.bundle
+  transparencyLogRequired: true
+commands:
+  sign: cosign sign-blob --bundle governance/evidence/audit-export/audit-export-provenance.sigstore.bundle build/modern-enterprise-architecture-audit/audit-export-provenance.json
+  verify: cosign verify-blob --bundle governance/evidence/audit-export/audit-export-provenance.sigstore.bundle --certificate-identity governance-team --certificate-oidc-issuer enterprise-oidc-or-sigstore build/modern-enterprise-architecture-audit/audit-export-provenance.json
+localGate:
+  command: make check-modern-architecture-audit-export
+  verifiesPayloadDigest: true
+  doesNotForgeSignature: true
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

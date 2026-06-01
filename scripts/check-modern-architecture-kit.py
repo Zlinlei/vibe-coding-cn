@@ -74,6 +74,7 @@ PAIR_NAMES = [
     "audit-export-gate",
     "audit-export-integrity",
     "audit-export-provenance",
+    "audit-export-signing-policy",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -699,11 +700,13 @@ def validate_audit_export_gate_runtime() -> list[str]:
             oscal_path = out_dir / "oscal-summary.json"
             integrity_path = out_dir / "audit-export-integrity.json"
             provenance_path = out_dir / "audit-export-provenance.json"
+            signing_policy_path = out_dir / "audit-export-signing-policy.json"
             exporter.write_json(packet, json_path)
             exporter.write_markdown(packet, markdown_path)
             exporter.write_oscal_summary(packet, oscal_path)
             exporter.write_integrity_manifest(packet, [json_path, markdown_path, oscal_path], integrity_path)
             exporter.write_provenance_statement(packet, [json_path, markdown_path, oscal_path, integrity_path], provenance_path)
+            exporter.write_signing_policy(packet, provenance_path, signing_policy_path)
             errors.extend(
                 gate.validate_packet(
                     load_json_object(json_path),
@@ -713,6 +716,8 @@ def validate_audit_export_gate_runtime() -> list[str]:
                     [json_path, markdown_path, oscal_path],
                     load_json_object(provenance_path),
                     [json_path, markdown_path, oscal_path, integrity_path],
+                    load_json_object(signing_policy_path),
+                    provenance_path,
                 )
             )
             if not markdown_path.is_file() or markdown_path.stat().st_size == 0:
@@ -944,6 +949,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     audit_export_gate = examples.get("audit-export-gate")
     audit_export_integrity = examples.get("audit-export-integrity")
     audit_export_provenance = examples.get("audit-export-provenance")
+    audit_export_signing_policy = examples.get("audit-export-signing-policy")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1694,6 +1700,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
                 "scripts/check-modern-architecture-audit-export.py",
@@ -1899,6 +1906,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "auditExportGate": "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
                 "auditExportIntegrity": "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
                 "auditExportProvenance": "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
+                "auditExportSigningPolicy": "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
             }
             for key, expected_path in expected_sources.items():
                 if source_artifacts.get(key) != expected_path:
@@ -1994,6 +2002,10 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: audit-export-gate.expectations.provenanceStatementRequired must be true")
             if expectations.get("provenanceSubjectDigestsMatch") is not True:
                 errors.append("cross-file: audit-export-gate.expectations.provenanceSubjectDigestsMatch must be true")
+            if expectations.get("signingPolicyRequired") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.signingPolicyRequired must be true")
+            if expectations.get("signingPayloadDigestMatches") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.signingPayloadDigestMatches must be true")
         outputs = audit_export_gate.get("outputs")
         if isinstance(outputs, list):
             output_paths = {item.get("path") for item in outputs if isinstance(item, dict) and isinstance(item.get("path"), str)}
@@ -2003,10 +2015,11 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "build/modern-enterprise-architecture-audit/oscal-summary.json",
                 "build/modern-enterprise-architecture-audit/audit-export-integrity.json",
                 "build/modern-enterprise-architecture-audit/audit-export-provenance.json",
+                "build/modern-enterprise-architecture-audit/audit-export-signing-policy.json",
             }
             if not required_outputs.issubset(output_paths):
                 errors.append(
-                    "cross-file: audit-export-gate.outputs must include audit JSON, Markdown, OSCAL summary, integrity manifest and provenance statement"
+                    "cross-file: audit-export-gate.outputs must include audit JSON, Markdown, OSCAL summary, integrity manifest, provenance statement and signing policy"
                 )
             for item in outputs:
                 if isinstance(item, dict) and item.get("required") is not True:
@@ -2159,6 +2172,54 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             review_on = parse_example_date(retention.get("reviewOn"))
             if generated_on is not None and review_on is not None and review_on <= generated_on:
                 errors.append("cross-file: audit-export-provenance.retention.reviewOn must be after generatedOn")
+
+    if isinstance(audit_export_signing_policy, dict):
+        if audit_export_signing_policy.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: audit-export-signing-policy.version must match currentVersion")
+        scope = audit_export_signing_policy.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: audit-export-signing-policy.scope.architectureVersion must match currentVersion")
+            if scope.get("controlCount") != len(catalog_control_ids):
+                errors.append("cross-file: audit-export-signing-policy.scope.controlCount must match control catalog length")
+            if scope.get("starterKitPairs") != len(PAIR_NAMES):
+                errors.append("cross-file: audit-export-signing-policy.scope.starterKitPairs must match starter kit pair count")
+        payload = audit_export_signing_policy.get("payload")
+        if isinstance(payload, dict):
+            if payload.get("path") != "build/modern-enterprise-architecture-audit/audit-export-provenance.json":
+                errors.append("cross-file: audit-export-signing-policy.payload.path must point to audit-export-provenance.json")
+            if payload.get("digestAlgorithm") != "sha256":
+                errors.append("cross-file: audit-export-signing-policy.payload.digestAlgorithm must be sha256")
+            if payload.get("predicateType") != "https://slsa.dev/provenance/v1":
+                errors.append("cross-file: audit-export-signing-policy.payload.predicateType must be SLSA provenance v1")
+        signature = audit_export_signing_policy.get("signature")
+        if isinstance(signature, dict):
+            if signature.get("required") is not True:
+                errors.append("cross-file: audit-export-signing-policy.signature.required must be true")
+            if signature.get("method") != "sigstore-cosign-or-enterprise-signing":
+                errors.append("cross-file: audit-export-signing-policy.signature.method must be sigstore-cosign-or-enterprise-signing")
+            if signature.get("transparencyLogRequired") is not True:
+                errors.append("cross-file: audit-export-signing-policy.signature.transparencyLogRequired must be true")
+        commands = audit_export_signing_policy.get("commands")
+        if isinstance(commands, dict):
+            sign_command = commands.get("sign")
+            verify_command = commands.get("verify")
+            if not isinstance(sign_command, str) or "cosign sign-blob --bundle" not in sign_command:
+                errors.append("cross-file: audit-export-signing-policy.commands.sign must use cosign sign-blob --bundle")
+            if not isinstance(verify_command, str) or "cosign verify-blob --bundle" not in verify_command:
+                errors.append("cross-file: audit-export-signing-policy.commands.verify must use cosign verify-blob --bundle")
+        local_gate = audit_export_signing_policy.get("localGate")
+        if isinstance(local_gate, dict):
+            if local_gate.get("verifiesPayloadDigest") is not True:
+                errors.append("cross-file: audit-export-signing-policy.localGate.verifiesPayloadDigest must be true")
+            if local_gate.get("doesNotForgeSignature") is not True:
+                errors.append("cross-file: audit-export-signing-policy.localGate.doesNotForgeSignature must be true")
+        generated_on = parse_example_date(audit_export_signing_policy.get("generatedOn"))
+        retention = audit_export_signing_policy.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if generated_on is not None and review_on is not None and review_on <= generated_on:
+                errors.append("cross-file: audit-export-signing-policy.retention.reviewOn must be after generatedOn")
 
     return errors
 

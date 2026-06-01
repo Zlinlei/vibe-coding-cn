@@ -71,7 +71,8 @@
         "baselineChangeRecord",
         "auditExportGate",
         "auditExportIntegrity",
-        "auditExportProvenance"
+        "auditExportProvenance",
+        "auditExportSigningPolicy"
       ],
       "properties": {
         "versionManifest": {
@@ -107,6 +108,10 @@
           "minLength": 1
         },
         "auditExportProvenance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "auditExportSigningPolicy": {
           "type": "string",
           "minLength": 1
         }

@@ -189,6 +189,69 @@ def validate_provenance_statement(
     return errors
 
 
+def validate_signing_policy(
+    signing_policy: dict[str, Any],
+    packet: dict[str, Any],
+    provenance_path: Path,
+) -> list[str]:
+    errors: list[str] = []
+    if signing_policy.get("signingPolicy") != "modern-enterprise-architecture-audit-export-signing-policy":
+        errors.append("audit-export-signing-policy.json signingPolicy must be modern-enterprise-architecture-audit-export-signing-policy")
+    if signing_policy.get("version") != packet.get("version"):
+        errors.append("audit-export-signing-policy.json version must match audit-export.json version")
+    if signing_policy.get("status") != "external-signature-required":
+        errors.append("audit-export-signing-policy.json status must be external-signature-required")
+
+    payload = signing_policy.get("payload")
+    if not isinstance(payload, dict):
+        errors.append("audit-export-signing-policy.json payload must be an object")
+    else:
+        if payload.get("path") != relative(provenance_path):
+            errors.append("audit-export-signing-policy.json payload.path must point to audit-export-provenance.json")
+        if payload.get("sha256") != sha256_file(provenance_path):
+            errors.append("audit-export-signing-policy.json payload.sha256 must match provenance statement")
+        if payload.get("bytes") != provenance_path.stat().st_size:
+            errors.append("audit-export-signing-policy.json payload.bytes must match provenance statement")
+        if payload.get("predicateType") != "https://slsa.dev/provenance/v1":
+            errors.append("audit-export-signing-policy.json payload.predicateType must be SLSA provenance v1")
+
+    signature = signing_policy.get("signature")
+    if not isinstance(signature, dict):
+        errors.append("audit-export-signing-policy.json signature must be an object")
+    else:
+        if signature.get("required") is not True:
+            errors.append("audit-export-signing-policy.json signature.required must be true")
+        if signature.get("method") != "sigstore-cosign-or-enterprise-signing":
+            errors.append("audit-export-signing-policy.json signature.method must be sigstore-cosign-or-enterprise-signing")
+        if signature.get("bundlePath") != "governance/evidence/audit-export/audit-export-provenance.sigstore.bundle":
+            errors.append("audit-export-signing-policy.json signature.bundlePath must point to audit export signing bundle")
+        if signature.get("transparencyLogRequired") is not True:
+            errors.append("audit-export-signing-policy.json signature.transparencyLogRequired must be true")
+
+    commands = signing_policy.get("commands")
+    if not isinstance(commands, dict):
+        errors.append("audit-export-signing-policy.json commands must be an object")
+    else:
+        sign_command = commands.get("sign")
+        verify_command = commands.get("verify")
+        if not isinstance(sign_command, str) or "cosign sign-blob --bundle" not in sign_command:
+            errors.append("audit-export-signing-policy.json commands.sign must use cosign sign-blob --bundle")
+        if not isinstance(verify_command, str) or "cosign verify-blob --bundle" not in verify_command:
+            errors.append("audit-export-signing-policy.json commands.verify must use cosign verify-blob --bundle")
+
+    local_gate = signing_policy.get("localGate")
+    if not isinstance(local_gate, dict):
+        errors.append("audit-export-signing-policy.json localGate must be an object")
+    else:
+        if local_gate.get("command") != "make check-modern-architecture-audit-export":
+            errors.append("audit-export-signing-policy.json localGate.command must be make check-modern-architecture-audit-export")
+        if local_gate.get("verifiesPayloadDigest") is not True:
+            errors.append("audit-export-signing-policy.json localGate.verifiesPayloadDigest must be true")
+        if local_gate.get("doesNotForgeSignature") is not True:
+            errors.append("audit-export-signing-policy.json localGate.doesNotForgeSignature must be true")
+    return errors
+
+
 def validate_packet(
     packet: dict[str, Any],
     oscal: dict[str, Any],
@@ -197,6 +260,8 @@ def validate_packet(
     generated_outputs: list[Path] | None = None,
     provenance: dict[str, Any] | None = None,
     provenance_outputs: list[Path] | None = None,
+    signing_policy: dict[str, Any] | None = None,
+    signing_payload: Path | None = None,
 ) -> list[str]:
     errors: list[str] = []
     version_manifest = checker.load_version_manifest()
@@ -234,6 +299,7 @@ def validate_packet(
         "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
         "scripts/check-modern-architecture-audit-export.py",
     }
     if not required_artifacts.issubset(artifact_paths):
@@ -265,6 +331,8 @@ def validate_packet(
                     errors.append("auditExportGate outputs must include audit-export-integrity.json")
                 if "build/modern-enterprise-architecture-audit/audit-export-provenance.json" not in output_paths:
                     errors.append("auditExportGate outputs must include audit-export-provenance.json")
+                if "build/modern-enterprise-architecture-audit/audit-export-signing-policy.json" not in output_paths:
+                    errors.append("auditExportGate outputs must include audit-export-signing-policy.json")
             expectations = audit_export_gate.get("expectations")
             if isinstance(expectations, dict):
                 if expectations.get("integrityManifestRequired") is not True:
@@ -275,9 +343,16 @@ def validate_packet(
                     errors.append("auditExportGate expectations.provenanceStatementRequired must be true")
                 if expectations.get("provenanceSubjectDigestsMatch") is not True:
                     errors.append("auditExportGate expectations.provenanceSubjectDigestsMatch must be true")
+                if expectations.get("signingPolicyRequired") is not True:
+                    errors.append("auditExportGate expectations.signingPolicyRequired must be true")
+                if expectations.get("signingPayloadDigestMatches") is not True:
+                    errors.append("auditExportGate expectations.signingPayloadDigestMatches must be true")
         audit_export_provenance = evidence.get("auditExportProvenance")
         if audit_export_provenance != examples.get("audit-export-provenance"):
             errors.append("audit-export.json evidence.auditExportProvenance must match starter kit example")
+        audit_export_signing_policy = evidence.get("auditExportSigningPolicy")
+        if audit_export_signing_policy != examples.get("audit-export-signing-policy"):
+            errors.append("audit-export.json evidence.auditExportSigningPolicy must match starter kit example")
 
     if oscal.get("version") != expected_version:
         errors.append("oscal-summary.json version must match currentVersion")
@@ -308,6 +383,10 @@ def validate_packet(
         errors.append("audit-export-provenance.json must be generated and validated")
     else:
         errors.extend(validate_provenance_statement(provenance, packet, provenance_outputs))
+    if signing_policy is None or signing_payload is None:
+        errors.append("audit-export-signing-policy.json must be generated and validated")
+    else:
+        errors.extend(validate_signing_policy(signing_policy, packet, signing_payload))
 
     return errors
 
@@ -317,7 +396,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--out-dir",
         default=str(DEFAULT_OUT_DIR),
-        help="Output directory for audit-export.json, audit-export.md, oscal-summary.json and provenance outputs",
+        help="Output directory for audit-export.json, audit-export.md, oscal-summary.json and signing outputs",
     )
     return parser.parse_args()
 
@@ -338,16 +417,19 @@ def main() -> int:
     oscal_path = out_dir / "oscal-summary.json"
     integrity_path = out_dir / "audit-export-integrity.json"
     provenance_path = out_dir / "audit-export-provenance.json"
+    signing_policy_path = out_dir / "audit-export-signing-policy.json"
     exporter.write_json(packet, json_path)
     exporter.write_markdown(packet, markdown_path)
     exporter.write_oscal_summary(packet, oscal_path)
     exporter.write_integrity_manifest(packet, [json_path, markdown_path, oscal_path], integrity_path)
     exporter.write_provenance_statement(packet, [json_path, markdown_path, oscal_path, integrity_path], provenance_path)
+    exporter.write_signing_policy(packet, provenance_path, signing_policy_path)
 
     loaded_packet = load_json(json_path)
     loaded_oscal = load_json(oscal_path)
     loaded_integrity = load_json(integrity_path)
     loaded_provenance = load_json(provenance_path)
+    loaded_signing_policy = load_json(signing_policy_path)
     errors = validate_packet(
         loaded_packet,
         loaded_oscal,
@@ -356,6 +438,8 @@ def main() -> int:
         [json_path, markdown_path, oscal_path],
         loaded_provenance,
         [json_path, markdown_path, oscal_path, integrity_path],
+        loaded_signing_policy,
+        provenance_path,
     )
     if errors:
         print("MODERN_ARCHITECTURE_AUDIT_EXPORT_ERRORS")
@@ -369,7 +453,7 @@ def main() -> int:
     control_count = loaded_packet.get("controlCount")
     print(
         "OK modern architecture audit export gate checked: "
-        f"{version}, {pair_count} schema/example pairs, {control_count} controls, integrity and provenance"
+        f"{version}, {pair_count} schema/example pairs, {control_count} controls, integrity, provenance and signing policy"
     )
     return 0
 

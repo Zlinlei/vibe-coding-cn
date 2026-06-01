@@ -120,7 +120,9 @@
         "integrityManifestRequired",
         "generatedOutputDigestsMatch",
         "provenanceStatementRequired",
-        "provenanceSubjectDigestsMatch"
+        "provenanceSubjectDigestsMatch",
+        "signingPolicyRequired",
+        "signingPayloadDigestMatches"
       ],
       "properties": {
         "architectureVersion": {
@@ -162,6 +164,12 @@
           "type": "boolean"
         },
         "provenanceSubjectDigestsMatch": {
+          "type": "boolean"
+        },
+        "signingPolicyRequired": {
+          "type": "boolean"
+        },
+        "signingPayloadDigestMatches": {
           "type": "boolean"
         }
       }

@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit Export Signing Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy",
+    "version",
+    "owner",
+    "generatedOn",
+    "scope",
+    "payload",
+    "signature",
+    "commands",
+    "localGate",
+    "retention"
+  ],
+  "properties": {
+    "policy": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^V\\d+\\.\\d+$"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generatedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architectureVersion",
+        "package",
+        "controlCount",
+        "starterKitPairs"
+      ],
+      "properties": {
+        "architectureVersion": {
+          "type": "string",
+          "pattern": "^V\\d+\\.\\d+$"
+        },
+        "package": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controlCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "starterKitPairs": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "digestAlgorithm",
+        "predicateType"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digestAlgorithm": {
+          "type": "string",
+          "enum": [
+            "sha256"
+          ]
+        },
+        "predicateType": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "method",
+        "identity",
+        "issuer",
+        "bundlePath",
+        "transparencyLogRequired"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bundlePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transparencyLogRequired": {
+          "type": "boolean"
+        }
+      }
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sign",
+        "verify"
+      ],
+      "properties": {
+        "sign": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verify": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "localGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "verifiesPayloadDigest",
+        "doesNotForgeSignature"
+      ],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verifiesPayloadDigest": {
+          "type": "boolean"
+        },
+        "doesNotForgeSignature": {
+          "type": "boolean"
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period",
+        "reviewOn"
+      ],
+      "properties": {
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

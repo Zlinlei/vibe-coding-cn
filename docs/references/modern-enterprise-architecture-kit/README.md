@@ -1,8 +1,8 @@
 # 现代企业数字化平台 Starter Kit
 
-本目录把《现代企业数字化平台架构说明文档》的 V2.18 起点转成可执行资产，当前包含 49 组 schema/example。
+本目录把《现代企业数字化平台架构说明文档》的 V2.19 起点转成可执行资产，当前包含 50 组 schema/example。
 
-V2.18 在严格 schema 模式之上补齐审计导出 provenance statement。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
+V2.19 在严格 schema 模式之上补齐审计导出签名策略和 provenance payload 签名交接。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
 
 ## 文件说明
 
@@ -57,6 +57,7 @@ V2.18 在严格 schema 模式之上补齐审计导出 provenance statement。所
 | `audit-export-gate.schema.json` / `audit-export-gate.example.yaml` | 审计导出命令、本地质量门禁、输出不变量和 OSCAL 摘要一致性模板。 |
 | `audit-export-integrity.schema.json` / `audit-export-integrity.example.yaml` | 审计导出生成物、SHA-256 摘要、源制品哈希和防篡改校验模板。 |
 | `audit-export-provenance.schema.json` / `audit-export-provenance.example.yaml` | 审计导出 subject、构建定义、源码提交和源证据依赖追溯模板。 |
+| `audit-export-signing-policy.schema.json` / `audit-export-signing-policy.example.yaml` | 审计导出 provenance payload 签名策略、Cosign 交接、验签命令和本地门禁边界模板。 |
 
 ## 使用方式
 
@@ -82,7 +83,7 @@ make check-modern-architecture-audit-export
 
 6. 目标项目落地时，应把这些 schema 接入 CI、Developer Portal、catalog 生成和发布准入。
 
-## V2.18 校验范围
+## V2.19 校验范围
 
 - 检查每组 `*.schema.json` 和 `*.example.yaml` 是否同时存在。
 - 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称、控制项数量和索引提及是否一致。
@@ -92,8 +93,8 @@ make check-modern-architecture-audit-export
 - 检查示例 YAML 的类型、必填字段、枚举、命名格式、数组最小长度和日期格式。
 - 检查 starter kit 示例中的领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告是否保持关键字段一致。
 - 检查服务可靠性等级、GitOps ServiceAccount、生产供应链策略、AI 工具风险映射、AI 预算 owner、供应链漏洞和 Scorecard 结果是否形成可阻断门禁。
-- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘、平台产品指标、隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测、成本分摊证据、访问复核、密钥轮换、漏洞修复、事故复盘、证据新鲜度、控制证据映射、审计导出清单、审计导出自动化命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁、审计导出完整性清单和审计导出 provenance statement 是否形成 schema、example、checker 和导出包证据链。
-- 检查审计导出 JSON、Markdown、OSCAL 摘要、完整性清单和 provenance statement 的版本、pair 数、控制数、评估状态和输出不变量是否一致。
+- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘、平台产品指标、隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测、成本分摊证据、访问复核、密钥轮换、漏洞修复、事故复盘、证据新鲜度、控制证据映射、审计导出清单、审计导出自动化命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁、审计导出完整性清单、审计导出 provenance statement 和审计导出签名策略是否形成 schema、example、checker 和导出包证据链。
+- 检查审计导出 JSON、Markdown、OSCAL 摘要、完整性清单、provenance statement 和签名策略的版本、pair 数、控制数、评估状态和输出不变量是否一致。
 
 ## 边界
 
