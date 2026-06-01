@@ -1,0 +1,269 @@
+map: modern-enterprise-architecture-control-evidence
+version: V2.11
+owner: governance-team
+generatedOn: 2026-06-02
+controlCount: 26
+freshness:
+  maxAgeDays: 90
+  expiryAction: block
+controls:
+  - id: CTRL-ARCH-VERSION-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-version.json
+        type: version-manifest
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-RELIABILITY-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/service.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-DATA-GOVERNANCE-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/data-product.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-AI-RUNTIME-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/ai-product.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-GITOPS-SECURITY-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/gitops-deployment.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-SUPPLY-CHAIN-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/supply-chain-attestation.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-PRODUCTION-READINESS-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/production-readiness.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-SCHEMA-STRICT-001
+    evidence:
+      - path: scripts/check-modern-architecture-kit.py
+        type: checker
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-EXTENSION-POLICY-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/extension-policy.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-FEATURE-FLAG-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/feature-flag-control.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-AI-THREAT-MODEL-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/ai-threat-model.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-LINEAGE-EVIDENCE-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/lineage-event.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-PLATFORM-METRICS-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/platform-product-metrics.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-PRIVACY-IMPACT-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/privacy-impact-assessment.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-TENANT-BOUNDARY-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/tenant-boundary.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-RECOVERY-DRILL-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/recovery-drill-evidence.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-POLICY-TEST-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/policy-test-report.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-GENAI-OBSERVABILITY-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/genai-observability-contract.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-COST-ALLOCATION-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/cost-allocation-evidence.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-ACCESS-REVIEW-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/identity-access-review.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-SECRETS-ROTATION-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/secrets-rotation-evidence.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-VULNERABILITY-REMEDIATION-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/vulnerability-remediation-evidence.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-INCIDENT-POSTMORTEM-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/incident-postmortem.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-EVIDENCE-FRESHNESS-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/evidence-freshness-policy.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-CONTROL-EVIDENCE-MAP-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/control-evidence-map.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-AUDIT-EXPORT-MANIFEST-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/audit-export-manifest.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true

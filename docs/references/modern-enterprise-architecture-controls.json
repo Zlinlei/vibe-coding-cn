@@ -1,14 +1,14 @@
 {
-  "version": "V2.10",
+  "version": "V2.11",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并补齐访问复核、密钥轮换、漏洞修复、事故复盘和证据新鲜度控制项",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射和审计导出清单",
   "alignment": [
     {
       "source": "NIST OSCAL",
       "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
-      "rationale": "采用机器可读控制目录思想，记录控制项、证据和验证入口"
+      "rationale": "采用机器可读控制目录和评估证据思想，记录控制项、证据、验证入口和审计导出清单"
     },
     {
       "source": "SLSA v1.2",
@@ -79,6 +79,11 @@
       "source": "CISA Known Exploited Vulnerabilities",
       "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
       "rationale": "漏洞修复控制项覆盖高风险漏洞处置、SLA、残余风险和发布阻断"
+    },
+    {
+      "source": "NIST OSCAL Assessment Results",
+      "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/assessment/",
+      "rationale": "审计导出控制项参考机器可读评估结果和证据包的组织方式"
     }
   ],
   "controls": [
@@ -842,6 +847,75 @@
         "evidence-freshness-policy.defaults.maxAgeDays must be <= 90",
         "evidence-freshness-policy.evidenceTypes.required must be true",
         "evidence-freshness-policy.automation.ciEnforced must be true"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-CONTROL-EVIDENCE-MAP-001",
+      "category": "audit-evidence-lifecycle",
+      "title": "每个控制项必须进入控制证据映射总账",
+      "statement": "控制目录中的每个控制项必须在控制证据映射中有且仅有一条记录，并声明证据路径、状态、新鲜度、必需性和阻断属性。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/control-evidence-map.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/control-evidence-map.schema.json",
+          "required": ["map", "version", "owner", "generatedOn", "controlCount", "freshness", "controls"],
+          "nestedRequired": {
+            "freshness": ["maxAgeDays", "expiryAction"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
+          "fields": ["map", "version", "controlCount", "freshness.expiryAction", "controls"]
+        }
+      ],
+      "checkerEvidence": [
+        "control-evidence-map.version must match currentVersion",
+        "control-evidence-map.controlCount must match control catalog length",
+        "control-evidence-map.controls must cover every control catalog id",
+        "control-evidence-map.controls.status must be pass",
+        "control-evidence-map.controls.fresh must be true",
+        "control-evidence-map.evidence.path must exist"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AUDIT-EXPORT-MANIFEST-001",
+      "category": "audit-export",
+      "title": "审计导出包必须声明范围、内容、验证、签名和留存",
+      "statement": "审计导出包必须声明架构版本、控制项数量、starter kit 数量、必需内容、验证命令、验证结果、签名要求和留存复审日期。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.schema.json",
+          "required": ["package", "version", "generatedOn", "owner", "scope", "contents", "verification", "signing", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureVersion", "controlCount", "starterKitPairs"],
+            "verification": ["command", "result", "runId", "report"],
+            "signing": ["required", "method", "identity"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml",
+          "fields": ["package", "scope.architectureVersion", "scope.controlCount", "scope.starterKitPairs", "contents", "verification.result", "signing.required", "retention.reviewOn"]
+        }
+      ],
+      "checkerEvidence": [
+        "audit-export-manifest.scope.architectureVersion must match currentVersion",
+        "audit-export-manifest.scope.controlCount must match control catalog length",
+        "audit-export-manifest.scope.starterKitPairs must match starter kit pair count",
+        "audit-export-manifest.contents must include required audit artifacts",
+        "audit-export-manifest.verification.result must be pass",
+        "audit-export-manifest.signing.required must be true"
       ]
     }
   ]

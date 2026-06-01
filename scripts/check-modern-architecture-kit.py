@@ -62,6 +62,8 @@ PAIR_NAMES = [
     "vulnerability-remediation-evidence",
     "incident-postmortem",
     "evidence-freshness-policy",
+    "control-evidence-map",
+    "audit-export-manifest",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -838,6 +840,22 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     vulnerability_remediation_evidence = examples.get("vulnerability-remediation-evidence")
     incident_postmortem = examples.get("incident-postmortem")
     evidence_freshness_policy = examples.get("evidence-freshness-policy")
+    control_evidence_map = examples.get("control-evidence-map")
+    audit_export_manifest = examples.get("audit-export-manifest")
+    try:
+        version_manifest = load_version_manifest()
+    except (json.JSONDecodeError, ValueError):
+        version_manifest = {}
+    try:
+        control_catalog = load_control_catalog()
+    except (json.JSONDecodeError, ValueError):
+        control_catalog = {}
+    catalog_controls = control_catalog.get("controls") if isinstance(control_catalog, dict) else None
+    if not isinstance(catalog_controls, list):
+        catalog_controls = []
+    catalog_control_ids = [
+        control.get("id") for control in catalog_controls if isinstance(control, dict) and isinstance(control.get("id"), str)
+    ]
 
     if isinstance(domain, dict) and isinstance(service, dict):
         if service.get("domain") != domain.get("domain"):
@@ -1502,6 +1520,92 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
         automation = evidence_freshness_policy.get("automation")
         if isinstance(automation, dict) and automation.get("ciEnforced") is not True:
             errors.append("cross-file: evidence-freshness-policy.automation.ciEnforced must be true")
+
+    if isinstance(control_evidence_map, dict):
+        if control_evidence_map.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: control-evidence-map.version must match currentVersion")
+        if control_evidence_map.get("controlCount") != len(catalog_control_ids):
+            errors.append("cross-file: control-evidence-map.controlCount must match control catalog length")
+        mapped_controls = control_evidence_map.get("controls")
+        if isinstance(mapped_controls, list):
+            mapped_ids: list[str] = []
+            for item in mapped_controls:
+                if not isinstance(item, dict):
+                    continue
+                control_id = item.get("id")
+                if isinstance(control_id, str):
+                    mapped_ids.append(control_id)
+                if item.get("status") != "pass":
+                    errors.append("cross-file: control-evidence-map.controls.status must be pass")
+                if item.get("required") is not True:
+                    errors.append("cross-file: control-evidence-map.controls.required must be true")
+                if item.get("fresh") is not True:
+                    errors.append("cross-file: control-evidence-map.controls.fresh must be true")
+                if item.get("blocking") is not True:
+                    errors.append("cross-file: control-evidence-map.controls.blocking must be true")
+                evidence_items = item.get("evidence")
+                if isinstance(evidence_items, list):
+                    for evidence_item in evidence_items:
+                        if not isinstance(evidence_item, dict):
+                            continue
+                        evidence_path = evidence_item.get("path")
+                        if isinstance(evidence_path, str) and not (ROOT / evidence_path).is_file():
+                            errors.append("cross-file: control-evidence-map.evidence.path must exist")
+            if sorted(mapped_ids) != sorted(catalog_control_ids):
+                errors.append("cross-file: control-evidence-map.controls must cover every control catalog id")
+            if len(mapped_ids) != len(set(mapped_ids)):
+                errors.append("cross-file: control-evidence-map.controls must not contain duplicate control ids")
+        freshness = control_evidence_map.get("freshness")
+        if isinstance(freshness, dict):
+            if freshness.get("expiryAction") != "block":
+                errors.append("cross-file: control-evidence-map.freshness.expiryAction must be block")
+            if freshness.get("maxAgeDays", 0) > 90:
+                errors.append("cross-file: control-evidence-map.freshness.maxAgeDays must be <= 90")
+
+    if isinstance(audit_export_manifest, dict):
+        scope = audit_export_manifest.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: audit-export-manifest.scope.architectureVersion must match currentVersion")
+            if scope.get("controlCount") != len(catalog_control_ids):
+                errors.append("cross-file: audit-export-manifest.scope.controlCount must match control catalog length")
+            if scope.get("starterKitPairs") != len(PAIR_NAMES):
+                errors.append("cross-file: audit-export-manifest.scope.starterKitPairs must match starter kit pair count")
+        contents = audit_export_manifest.get("contents")
+        if isinstance(contents, list):
+            content_paths: set[str] = set()
+            for item in contents:
+                if not isinstance(item, dict):
+                    continue
+                path_value = item.get("path")
+                if isinstance(path_value, str):
+                    content_paths.add(path_value)
+                    if item.get("required") is True and not (ROOT / path_value).is_file():
+                        errors.append("cross-file: audit-export-manifest.contents.path must exist")
+            required_content_paths = {
+                "docs/references/modern-enterprise-architecture-template.md",
+                "docs/references/modern-enterprise-architecture-version.json",
+                "docs/references/modern-enterprise-architecture-controls.json",
+                "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
+                "scripts/check-modern-architecture-kit.py",
+            }
+            if not required_content_paths.issubset(content_paths):
+                errors.append("cross-file: audit-export-manifest.contents must include required audit artifacts")
+        verification = audit_export_manifest.get("verification")
+        if isinstance(verification, dict):
+            if verification.get("command") != "make check-modern-architecture-kit":
+                errors.append("cross-file: audit-export-manifest.verification.command must be make check-modern-architecture-kit")
+            if verification.get("result") != "pass":
+                errors.append("cross-file: audit-export-manifest.verification.result must be pass")
+        signing = audit_export_manifest.get("signing")
+        if isinstance(signing, dict) and signing.get("required") is not True:
+            errors.append("cross-file: audit-export-manifest.signing.required must be true")
+        generated_on = parse_example_date(audit_export_manifest.get("generatedOn"))
+        retention = audit_export_manifest.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if generated_on is not None and review_on is not None and review_on <= generated_on:
+                errors.append("cross-file: audit-export-manifest.retention.reviewOn must be after generatedOn")
 
     return errors
 
