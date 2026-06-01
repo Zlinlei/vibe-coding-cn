@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import re
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -51,9 +51,16 @@ PAIR_NAMES = [
     "ai-threat-model",
     "lineage-event",
     "platform-product-metrics",
+    "privacy-impact-assessment",
+    "tenant-boundary",
+    "recovery-drill-evidence",
+    "policy-test-report",
+    "genai-observability-contract",
+    "cost-allocation-evidence",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DATETIME_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$")
 JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
 
@@ -347,7 +354,7 @@ def validate_schema_fragment(schema: dict[str, Any], location: str) -> list[str]
                 errors.append(f"{location}: invalid pattern: {exc}")
 
     schema_format = schema.get("format")
-    if schema_format is not None and schema_format != "date":
+    if schema_format is not None and schema_format not in {"date", "date-time"}:
         errors.append(f"{location}: unsupported format '{schema_format}'")
 
     for numeric_key in ("minLength", "minItems"):
@@ -355,6 +362,12 @@ def validate_schema_fragment(schema: dict[str, Any], location: str) -> list[str]
             not isinstance(schema[numeric_key], int) or isinstance(schema[numeric_key], bool) or schema[numeric_key] < 0
         ):
             errors.append(f"{location}: {numeric_key} must be a non-negative integer")
+
+    for numeric_key in ("minimum", "maximum"):
+        if numeric_key in schema and (
+            not isinstance(schema[numeric_key], (int, float)) or isinstance(schema[numeric_key], bool)
+        ):
+            errors.append(f"{location}: {numeric_key} must be a number")
 
     return errors
 
@@ -364,6 +377,16 @@ def is_iso_date(value: str) -> bool:
         return False
     try:
         date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
+
+
+def is_iso_datetime(value: str) -> bool:
+    if not DATETIME_PATTERN.match(value):
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
         return False
     return True
@@ -700,6 +723,16 @@ def validate_instance(schema: dict[str, Any], value: Any, location: str) -> list
             errors.append(f"{location}: value '{value}' does not match pattern '{pattern}'")
         if schema.get("format") == "date" and not is_iso_date(value):
             errors.append(f"{location}: value '{value}' is not a YYYY-MM-DD date")
+        if schema.get("format") == "date-time" and not is_iso_datetime(value):
+            errors.append(f"{location}: value '{value}' is not an RFC 3339 date-time")
+
+    if schema_type in {"number", "integer"} and isinstance(value, (int, float)) and not isinstance(value, bool):
+        minimum = schema.get("minimum")
+        maximum = schema.get("maximum")
+        if isinstance(minimum, (int, float)) and value < minimum:
+            errors.append(f"{location}: value {value} is below minimum {minimum}")
+        if isinstance(maximum, (int, float)) and value > maximum:
+            errors.append(f"{location}: value {value} is above maximum {maximum}")
 
     if schema_type == "object":
         if not isinstance(value, dict):
@@ -784,6 +817,12 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     ai_threat_model = examples.get("ai-threat-model")
     lineage_event = examples.get("lineage-event")
     platform_product_metrics = examples.get("platform-product-metrics")
+    privacy_impact_assessment = examples.get("privacy-impact-assessment")
+    tenant_boundary = examples.get("tenant-boundary")
+    recovery_drill_evidence = examples.get("recovery-drill-evidence")
+    policy_test_report = examples.get("policy-test-report")
+    genai_observability_contract = examples.get("genai-observability-contract")
+    cost_allocation_evidence = examples.get("cost-allocation-evidence")
 
     if isinstance(domain, dict) and isinstance(service, dict):
         if service.get("domain") != domain.get("domain"):
@@ -1195,6 +1234,150 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: platform-product-metrics.metrics.cognitiveLoadScore must be present")
             if metrics.get("selfServiceCompletionRate") is None:
                 errors.append("cross-file: platform-product-metrics.metrics.selfServiceCompletionRate must be present")
+
+    if isinstance(data_product, dict) and isinstance(privacy_impact_assessment, dict):
+        if privacy_impact_assessment.get("dataProduct") != data_product.get("dataProduct"):
+            errors.append("cross-file: privacy-impact-assessment.dataProduct must match data-product.dataProduct")
+        if privacy_impact_assessment.get("domain") != data_product.get("domain"):
+            errors.append("cross-file: privacy-impact-assessment.domain must match data-product.domain")
+        if privacy_impact_assessment.get("owner") != data_product.get("owner"):
+            errors.append("cross-file: privacy-impact-assessment.owner must match data-product.owner")
+        data_classification = data_product.get("classification")
+        assessment_classification = privacy_impact_assessment.get("classification")
+        if isinstance(data_classification, dict) and isinstance(assessment_classification, dict):
+            if assessment_classification.get("level") != data_classification.get("level"):
+                errors.append("cross-file: privacy-impact-assessment.classification.level must match data-product.classification.level")
+            pii_fields = data_classification.get("pii")
+            if isinstance(pii_fields, list) and pii_fields:
+                review = privacy_impact_assessment.get("review")
+                if isinstance(review, dict) and review.get("dpiaRequired") is not True:
+                    errors.append("cross-file: privacy-impact-assessment.review.dpiaRequired must be true when data-product has pii")
+        deletion = privacy_impact_assessment.get("deletion")
+        if isinstance(deletion, dict) and isinstance(rag_index_contract, dict):
+            if deletion.get("vectorIndex") != rag_index_contract.get("indexId"):
+                errors.append("cross-file: privacy-impact-assessment.deletion.vectorIndex must match rag-index-contract.indexId")
+        controls = privacy_impact_assessment.get("controls")
+        if isinstance(controls, dict):
+            if controls.get("subjectDeletePropagation") is not True:
+                errors.append("cross-file: privacy-impact-assessment.controls.subjectDeletePropagation must be true")
+        review = privacy_impact_assessment.get("review")
+        if isinstance(review, dict) and review.get("approved") is not True:
+            errors.append("cross-file: privacy-impact-assessment.review.approved must be true")
+
+    if isinstance(service, dict) and isinstance(tenant_boundary, dict):
+        if tenant_boundary.get("domain") != service.get("domain"):
+            errors.append("cross-file: tenant-boundary.domain must match service.domain")
+        if tenant_boundary.get("service") != service.get("service"):
+            errors.append("cross-file: tenant-boundary.service must match service.service")
+        if tenant_boundary.get("owner") != service.get("owner"):
+            errors.append("cross-file: tenant-boundary.owner must match service.owner")
+        if isinstance(gitops_deployment, dict):
+            if tenant_boundary.get("namespace") != gitops_deployment.get("namespace"):
+                errors.append("cross-file: tenant-boundary.namespace must match gitops-deployment.namespace")
+        network_policy = tenant_boundary.get("networkPolicy")
+        if isinstance(network_policy, dict) and network_policy.get("defaultDeny") is not True:
+            errors.append("cross-file: tenant-boundary.networkPolicy.defaultDeny must be true")
+        resource_quota = tenant_boundary.get("resourceQuota")
+        if isinstance(resource_quota, dict) and resource_quota.get("podLimit", 0) < 1:
+            errors.append("cross-file: tenant-boundary.resourceQuota.podLimit must be >= 1")
+
+    if isinstance(service, dict) and isinstance(recovery_drill_evidence, dict):
+        if recovery_drill_evidence.get("service") != service.get("service"):
+            errors.append("cross-file: recovery-drill-evidence.service must match service.service")
+        if recovery_drill_evidence.get("domain") != service.get("domain"):
+            errors.append("cross-file: recovery-drill-evidence.domain must match service.domain")
+        if recovery_drill_evidence.get("owner") != service.get("owner"):
+            errors.append("cross-file: recovery-drill-evidence.owner must match service.owner")
+        if recovery_drill_evidence.get("tier") != service.get("tier"):
+            errors.append("cross-file: recovery-drill-evidence.tier must match service.tier")
+        recovery = recovery_drill_evidence.get("recovery")
+        target = recovery_drill_evidence.get("target")
+        if isinstance(recovery, dict):
+            if recovery.get("status") != "pass":
+                errors.append("cross-file: recovery-drill-evidence.recovery.status must be pass")
+            if recovery.get("dataLossValidated") is not True:
+                errors.append("cross-file: recovery-drill-evidence.recovery.dataLossValidated must be true")
+            if isinstance(target, dict):
+                achieved_rto = recovery.get("achievedRtoMinutes")
+                target_rto = target.get("rtoMinutes")
+                achieved_rpo = recovery.get("achievedRpoMinutes")
+                target_rpo = target.get("rpoMinutes")
+                if isinstance(achieved_rto, int) and isinstance(target_rto, int) and achieved_rto > target_rto:
+                    errors.append("cross-file: recovery-drill-evidence.recovery.achievedRtoMinutes must be <= target.rtoMinutes")
+                if isinstance(achieved_rpo, int) and isinstance(target_rpo, int) and achieved_rpo > target_rpo:
+                    errors.append("cross-file: recovery-drill-evidence.recovery.achievedRpoMinutes must be <= target.rpoMinutes")
+
+    if isinstance(service, dict) and isinstance(policy_test_report, dict):
+        if policy_test_report.get("subject") != service.get("service"):
+            errors.append("cross-file: policy-test-report.subject must match service.service")
+        if policy_test_report.get("owner") != service.get("owner"):
+            errors.append("cross-file: policy-test-report.owner must match service.owner")
+        if isinstance(supply_chain_attestation, dict):
+            if policy_test_report.get("policy") != supply_chain_attestation.get("verification", {}).get("policy"):
+                errors.append("cross-file: policy-test-report.policy must match supply-chain-attestation.verification.policy")
+        tests = policy_test_report.get("tests")
+        result = policy_test_report.get("result")
+        if isinstance(tests, dict):
+            if tests.get("failed") != 0:
+                errors.append("cross-file: policy-test-report.tests.failed must be 0")
+            total = tests.get("total")
+            passed = tests.get("passed")
+            failed = tests.get("failed")
+            if isinstance(total, int) and isinstance(passed, int) and isinstance(failed, int) and total != passed + failed:
+                errors.append("cross-file: policy-test-report.tests.total must equal passed + failed")
+        if isinstance(result, dict) and result.get("decision") != "pass":
+            errors.append("cross-file: policy-test-report.result.decision must be pass")
+
+    if isinstance(ai_product, dict) and isinstance(genai_observability_contract, dict):
+        if genai_observability_contract.get("aiProduct") != ai_product.get("aiProduct"):
+            errors.append("cross-file: genai-observability-contract.aiProduct must match ai-product.aiProduct")
+        if genai_observability_contract.get("owner") != ai_product.get("owner"):
+            errors.append("cross-file: genai-observability-contract.owner must match ai-product.owner")
+        contract_model = genai_observability_contract.get("model")
+        ai_model = ai_product.get("model")
+        if isinstance(contract_model, dict) and isinstance(ai_model, dict):
+            if contract_model.get("gatewayRoute") != ai_model.get("gatewayRoute"):
+                errors.append("cross-file: genai-observability-contract.model.gatewayRoute must match ai-product.model.gatewayRoute")
+        telemetry = genai_observability_contract.get("telemetry")
+        if isinstance(telemetry, dict):
+            if telemetry.get("traceEnabled") is not True:
+                errors.append("cross-file: genai-observability-contract.telemetry.traceEnabled must be true")
+            if telemetry.get("tokenMetrics") is not True:
+                errors.append("cross-file: genai-observability-contract.telemetry.tokenMetrics must be true")
+            if telemetry.get("costMetrics") is not True:
+                errors.append("cross-file: genai-observability-contract.telemetry.costMetrics must be true")
+            if telemetry.get("toolCallSpans") is not True:
+                errors.append("cross-file: genai-observability-contract.telemetry.toolCallSpans must be true")
+            if telemetry.get("ragSpans") is not True:
+                errors.append("cross-file: genai-observability-contract.telemetry.ragSpans must be true")
+        privacy = genai_observability_contract.get("privacy")
+        if isinstance(privacy, dict) and privacy.get("piiRedaction") is not True:
+            errors.append("cross-file: genai-observability-contract.privacy.piiRedaction must be true")
+
+    if isinstance(data_product, dict) and isinstance(cost_allocation_evidence, dict):
+        if cost_allocation_evidence.get("domain") != data_product.get("domain"):
+            errors.append("cross-file: cost-allocation-evidence.domain must match data-product.domain")
+        data_cost = data_product.get("cost")
+        if isinstance(data_cost, dict):
+            if cost_allocation_evidence.get("owner") != data_cost.get("owner"):
+                errors.append("cross-file: cost-allocation-evidence.owner must match data-product.cost.owner")
+            if cost_allocation_evidence.get("allocationTag") != data_cost.get("allocationTag"):
+                errors.append("cross-file: cost-allocation-evidence.allocationTag must match data-product.cost.allocationTag")
+        coverage = cost_allocation_evidence.get("coverage")
+        if isinstance(coverage, dict):
+            if coverage.get("taggedResourceRate") != 100:
+                errors.append("cross-file: cost-allocation-evidence.coverage.taggedResourceRate must be 100")
+            if coverage.get("unallocatedCostUsd") != 0:
+                errors.append("cross-file: cost-allocation-evidence.coverage.unallocatedCostUsd must be 0")
+        costs = cost_allocation_evidence.get("costs")
+        if isinstance(costs, dict):
+            subtotal = 0
+            for field in ("cloudUsd", "aiUsd", "dataUsd"):
+                value = costs.get(field)
+                if isinstance(value, (int, float)) and not isinstance(value, bool):
+                    subtotal += value
+            if isinstance(costs.get("totalUsd"), (int, float)) and costs.get("totalUsd") != subtotal:
+                errors.append("cross-file: cost-allocation-evidence.costs.totalUsd must equal cloudUsd + aiUsd + dataUsd")
 
     return errors
 

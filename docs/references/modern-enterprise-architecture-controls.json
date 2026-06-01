@@ -1,9 +1,9 @@
 {
-  "version": "V2.8",
+  "version": "V2.9",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并补齐扩展策略、发布开关、AI 威胁模型、运行血缘和平台产品指标",
+  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并补齐隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测和成本分摊证据",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -39,6 +39,26 @@
       "source": "CNCF Platforms White Paper",
       "url": "https://tag-app-delivery.cncf.io/whitepapers/platforms/",
       "rationale": "平台产品指标控制项覆盖平台即产品、Golden Path、开发者体验和认知负载"
+    },
+    {
+      "source": "NIST Privacy Framework",
+      "url": "https://www.nist.gov/privacy-framework",
+      "rationale": "隐私控制项覆盖数据处理目的、主体权利、删除传播、授权基础和隐私影响评估"
+    },
+    {
+      "source": "Kubernetes Multi-tenancy / Resource Quotas",
+      "url": "https://kubernetes.io/docs/concepts/security/multi-tenancy/",
+      "rationale": "租户边界控制项覆盖 namespace、ServiceAccount、NetworkPolicy、ResourceQuota 和准入策略"
+    },
+    {
+      "source": "OpenTelemetry GenAI Semantic Conventions",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "rationale": "GenAI 观测控制项覆盖模型、Token、工具调用、RAG、成本和 trace 属性"
+    },
+    {
+      "source": "OpenCost",
+      "url": "https://opencost.io/docs/",
+      "rationale": "成本分摊控制项覆盖 Kubernetes 成本归集、标签覆盖、未分摊成本和优化证据"
     }
   ],
   "controls": [
@@ -430,6 +450,211 @@
         "platform-product-metrics.metrics.developerSatisfaction must be present",
         "platform-product-metrics.metrics.cognitiveLoadScore must be present",
         "platform-product-metrics.metrics.selfServiceCompletionRate must be present"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-PRIVACY-IMPACT-001",
+      "category": "privacy-engineering",
+      "title": "含个人信息的数据产品必须有隐私影响评估证据",
+      "statement": "含 PII 的数据产品必须声明处理目的、授权基础、主体权利、删除传播、AI 使用边界、隐私控制和 DPIA 审批证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/privacy-impact-assessment.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/privacy-impact-assessment.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/privacy-impact-assessment.schema.json",
+          "required": ["dataProduct", "domain", "owner", "classification", "lawfulBasis", "dataSubjectRights", "deletion", "controls", "review"],
+          "nestedRequired": {
+            "classification": ["level", "piiFields"],
+            "lawfulBasis": ["basis", "consentRequired", "purpose"],
+            "deletion": ["subjectDeleteSlaDays", "vectorIndex", "propagationEvidence"],
+            "controls": ["minimization", "encryption", "accessReview", "auditLogging", "subjectDeletePropagation"],
+            "review": ["dpiaRequired", "approved", "approver", "reviewedOn", "nextReviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/privacy-impact-assessment.example.yaml",
+          "fields": ["dataProduct", "classification.piiFields", "lawfulBasis.basis", "deletion.vectorIndex", "controls.subjectDeletePropagation", "review.approved"]
+        }
+      ],
+      "checkerEvidence": [
+        "privacy-impact-assessment.dataProduct must match data-product.dataProduct",
+        "privacy-impact-assessment.review.dpiaRequired must be true when data-product has pii",
+        "privacy-impact-assessment.deletion.vectorIndex must match rag-index-contract.indexId",
+        "privacy-impact-assessment.controls.subjectDeletePropagation must be true"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-TENANT-BOUNDARY-001",
+      "category": "multi-tenancy",
+      "title": "生产租户边界必须声明隔离、配额和准入策略",
+      "statement": "生产运行单元必须声明 tenant、namespace、ServiceAccount、Secret 范围、ResourceQuota、NetworkPolicy 默认拒绝、Pod 安全和准入策略。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/tenant-boundary.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/tenant-boundary.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/tenant-boundary.schema.json",
+          "required": ["tenant", "domain", "service", "owner", "environment", "namespace", "isolation", "resourceQuota", "networkPolicy", "admission"],
+          "nestedRequired": {
+            "isolation": ["mode", "serviceAccount", "secretScope"],
+            "resourceQuota": ["cpuLimitCores", "memoryLimitGi", "podLimit", "costAllocationTag"],
+            "networkPolicy": ["defaultDeny", "allowedIngress", "allowedEgress"],
+            "admission": ["podSecurity", "imagePolicy", "policyEngine"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/tenant-boundary.example.yaml",
+          "fields": ["tenant", "namespace", "isolation.serviceAccount", "resourceQuota.podLimit", "networkPolicy.defaultDeny", "admission.policyEngine"]
+        }
+      ],
+      "checkerEvidence": [
+        "tenant-boundary.service must match service.service",
+        "tenant-boundary.namespace must match gitops-deployment.namespace",
+        "tenant-boundary.networkPolicy.defaultDeny must be true",
+        "tenant-boundary.resourceQuota.podLimit must be >= 1"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-RECOVERY-DRILL-001",
+      "category": "resilience",
+      "title": "可靠性目标必须有恢复演练证据",
+      "statement": "Tier-1 / Tier-2 资产必须用恢复演练证明 RTO/RPO，而不是只在 service.yaml 或 tiering policy 中声明。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/recovery-drill-evidence.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/recovery-drill-evidence.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/recovery-drill-evidence.schema.json",
+          "required": ["drill", "service", "domain", "owner", "tier", "target", "execution", "recovery", "evidence", "decision"],
+          "nestedRequired": {
+            "target": ["rtoMinutes", "rpoMinutes"],
+            "execution": ["date", "scenario", "initiatedBy"],
+            "recovery": ["status", "achievedRtoMinutes", "achievedRpoMinutes", "dataLossValidated", "failoverValidated"],
+            "evidence": ["backup", "restoreLog", "postmortem"],
+            "decision": ["productionReady", "remediationRequired", "nextDrillOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/recovery-drill-evidence.example.yaml",
+          "fields": ["service", "target.rtoMinutes", "target.rpoMinutes", "recovery.status", "recovery.dataLossValidated", "evidence.restoreLog"]
+        }
+      ],
+      "checkerEvidence": [
+        "recovery-drill-evidence.service must match service.service",
+        "recovery-drill-evidence.recovery.status must be pass",
+        "recovery-drill-evidence.recovery.dataLossValidated must be true",
+        "recovery-drill-evidence.recovery.achievedRtoMinutes must be <= target.rtoMinutes"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-POLICY-TEST-001",
+      "category": "policy-as-code",
+      "title": "策略准入必须有策略测试报告",
+      "statement": "准入策略、供应链策略和治理策略必须有 Policy as Code 测试报告，证明策略引擎、测试数、失败数、阻断决策和执行命令。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/policy-test-report.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/policy-test-report.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/policy-test-report.schema.json",
+          "required": ["report", "policy", "subject", "owner", "engine", "version", "tests", "result", "evidence"],
+          "nestedRequired": {
+            "tests": ["total", "passed", "failed"],
+            "result": ["decision", "blocking"],
+            "evidence": ["command", "reportPath"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/policy-test-report.example.yaml",
+          "fields": ["policy", "subject", "engine", "tests.failed", "result.decision", "evidence.command"]
+        }
+      ],
+      "checkerEvidence": [
+        "policy-test-report.policy must match supply-chain-attestation.verification.policy",
+        "policy-test-report.tests.failed must be 0",
+        "policy-test-report.tests.total must equal passed + failed",
+        "policy-test-report.result.decision must be pass"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-GENAI-OBSERVABILITY-001",
+      "category": "ai-observability",
+      "title": "GenAI 产品必须声明标准化观测契约",
+      "statement": "AI 产品必须声明 OpenTelemetry GenAI 对齐、模型路由、Token、成本、工具调用、RAG span、日志脱敏、留存和隐私证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/genai-observability-contract.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/genai-observability-contract.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/genai-observability-contract.schema.json",
+          "required": ["contract", "aiProduct", "owner", "provider", "model", "telemetry", "trace", "metrics", "logs", "retention", "privacy"],
+          "nestedRequired": {
+            "model": ["gatewayRoute", "approvedModel", "modelVersion"],
+            "telemetry": ["semanticConvention", "traceEnabled", "tokenMetrics", "costMetrics", "toolCallSpans", "ragSpans"],
+            "trace": ["sampleRate", "requiredAttributes"],
+            "privacy": ["piiRedaction", "trainingOptOut", "auditEvidence"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/genai-observability-contract.example.yaml",
+          "fields": ["aiProduct", "model.gatewayRoute", "telemetry.tokenMetrics", "telemetry.costMetrics", "trace.requiredAttributes", "privacy.piiRedaction"]
+        }
+      ],
+      "checkerEvidence": [
+        "genai-observability-contract.aiProduct must match ai-product.aiProduct",
+        "genai-observability-contract.model.gatewayRoute must match ai-product.model.gatewayRoute",
+        "genai-observability-contract.telemetry.tokenMetrics must be true",
+        "genai-observability-contract.privacy.piiRedaction must be true"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-COST-ALLOCATION-001",
+      "category": "finops",
+      "title": "成本治理必须有成本分摊和未分摊成本证据",
+      "statement": "领域、数据产品和平台能力必须提供按 owner、domain、allocation tag、周期、成本来源、标签覆盖率和优化行动组织的成本分摊证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/cost-allocation-evidence.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/cost-allocation-evidence.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/cost-allocation-evidence.schema.json",
+          "required": ["evidence", "period", "owner", "domain", "allocationTag", "coverage", "costs", "optimization", "source"],
+          "nestedRequired": {
+            "coverage": ["taggedResourceRate", "unallocatedCostUsd", "services"],
+            "costs": ["cloudUsd", "aiUsd", "dataUsd", "totalUsd"],
+            "optimization": ["anomalies", "idleResourceUsd", "actions"],
+            "source": ["provider", "report"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/cost-allocation-evidence.example.yaml",
+          "fields": ["period", "owner", "allocationTag", "coverage.taggedResourceRate", "coverage.unallocatedCostUsd", "costs.totalUsd", "source.provider"]
+        }
+      ],
+      "checkerEvidence": [
+        "cost-allocation-evidence.allocationTag must match data-product.cost.allocationTag",
+        "cost-allocation-evidence.coverage.taggedResourceRate must be 100",
+        "cost-allocation-evidence.coverage.unallocatedCostUsd must be 0",
+        "cost-allocation-evidence.costs.totalUsd must equal cloudUsd + aiUsd + dataUsd"
       ]
     }
   ]

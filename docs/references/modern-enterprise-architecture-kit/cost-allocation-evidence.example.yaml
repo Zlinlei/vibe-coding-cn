@@ -1,0 +1,25 @@
+evidence: order-domain-cost-allocation-2026-06
+period: 2026-06
+owner: team-order
+domain: order
+allocationTag: cost.domain.order
+coverage:
+  taggedResourceRate: 100
+  unallocatedCostUsd: 0
+  services:
+    - order-command-service
+costs:
+  cloudUsd: 4200
+  aiUsd: 0
+  dataUsd: 800
+  totalUsd: 5000
+optimization:
+  anomalies: 0
+  idleResourceUsd: 120
+  actions:
+    - action: rightsize-order-command-service-staging
+      owner: team-order
+      dueDate: 2026-07-15
+source:
+  provider: opencost
+  report: governance/evidence/cost/order-domain-2026-06.json

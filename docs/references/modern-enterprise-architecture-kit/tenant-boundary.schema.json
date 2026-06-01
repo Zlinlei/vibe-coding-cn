@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenant",
+    "domain",
+    "service",
+    "owner",
+    "environment",
+    "namespace",
+    "isolation",
+    "resourceQuota",
+    "networkPolicy",
+    "admission",
+    "observability"
+  ],
+  "properties": {
+    "tenant": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "service": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "staging", "prod"]
+    },
+    "namespace": {
+      "type": "string",
+      "minLength": 1
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "serviceAccount", "secretScope"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["namespace", "cluster", "account", "cell"]
+        },
+        "serviceAccount": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secretScope": {
+          "type": "string",
+          "enum": ["namespace", "tenant", "external-secrets"]
+        }
+      }
+    },
+    "resourceQuota": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpuLimitCores", "memoryLimitGi", "podLimit", "costAllocationTag"],
+      "properties": {
+        "cpuLimitCores": {
+          "type": "number",
+          "minimum": 1
+        },
+        "memoryLimitGi": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "podLimit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "costAllocationTag": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "networkPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["defaultDeny", "allowedIngress", "allowedEgress"],
+      "properties": {
+        "defaultDeny": {
+          "type": "boolean"
+        },
+        "allowedIngress": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "allowedEgress": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["podSecurity", "imagePolicy", "policyEngine"],
+      "properties": {
+        "podSecurity": {
+          "type": "string",
+          "enum": ["baseline", "restricted"]
+        },
+        "imagePolicy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policyEngine": {
+          "type": "string",
+          "enum": ["opa", "kyverno", "cedar", "internal"]
+        }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quotaDashboard", "violationAlert"],
+      "properties": {
+        "quotaDashboard": {
+          "type": "string",
+          "minLength": 1
+        },
+        "violationAlert": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

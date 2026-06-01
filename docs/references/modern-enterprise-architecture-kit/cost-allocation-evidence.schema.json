@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence",
+    "period",
+    "owner",
+    "domain",
+    "allocationTag",
+    "coverage",
+    "costs",
+    "optimization",
+    "source"
+  ],
+  "properties": {
+    "evidence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^20[0-9]{2}-[0-9]{2}$"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allocationTag": {
+      "type": "string",
+      "minLength": 1
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taggedResourceRate", "unallocatedCostUsd", "services"],
+      "properties": {
+        "taggedResourceRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "unallocatedCostUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "services": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cloudUsd", "aiUsd", "dataUsd", "totalUsd"],
+      "properties": {
+        "cloudUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "aiUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dataUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "totalUsd": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "optimization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anomalies", "idleResourceUsd", "actions"],
+      "properties": {
+        "anomalies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "idleResourceUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "owner", "dueDate"],
+            "properties": {
+              "action": {
+                "type": "string",
+                "minLength": 1
+              },
+              "owner": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dueDate": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "report"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["opencost", "focus", "cloud-billing", "internal"]
+        },
+        "report": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

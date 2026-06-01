@@ -1,0 +1,16 @@
+report: prod-admission-policy-test-2026-06-02
+policy: governance/supply-chain/prod-admission.rego
+subject: order-command-service
+owner: team-order
+engine: opa
+version: 2026.06.02
+tests:
+  total: 24
+  passed: 24
+  failed: 0
+result:
+  decision: pass
+  blocking: false
+evidence:
+  command: opa test governance/supply-chain/prod-admission.rego governance/supply-chain/prod-admission_test.rego
+  reportPath: governance/evidence/policy-tests/prod-admission-2026-06-02.json

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "drill",
+    "service",
+    "domain",
+    "owner",
+    "tier",
+    "target",
+    "execution",
+    "recovery",
+    "evidence",
+    "decision"
+  ],
+  "properties": {
+    "drill": {
+      "type": "string",
+      "minLength": 1
+    },
+    "service": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["tier-1", "tier-2", "tier-3"]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rtoMinutes", "rpoMinutes"],
+      "properties": {
+        "rtoMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rpoMinutes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "scenario", "initiatedBy"],
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "scenario": {
+          "type": "string",
+          "minLength": 1
+        },
+        "initiatedBy": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "achievedRtoMinutes",
+        "achievedRpoMinutes",
+        "dataLossValidated",
+        "failoverValidated"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pass", "warn", "fail"]
+        },
+        "achievedRtoMinutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "achievedRpoMinutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dataLossValidated": {
+          "type": "boolean"
+        },
+        "failoverValidated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["backup", "restoreLog", "postmortem"],
+      "properties": {
+        "backup": {
+          "type": "string",
+          "minLength": 1
+        },
+        "restoreLog": {
+          "type": "string",
+          "minLength": 1
+        },
+        "postmortem": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["productionReady", "remediationRequired", "nextDrillOn"],
+      "properties": {
+        "productionReady": {
+          "type": "boolean"
+        },
+        "remediationRequired": {
+          "type": "boolean"
+        },
+        "nextDrillOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+assessment: order-facts-privacy-2026-q2
+dataProduct: order-facts
+domain: order
+owner: team-order
+classification:
+  level: confidential
+  piiFields:
+    - customer_id
+lawfulBasis:
+  basis: contract-service-operations
+  consentRequired: false
+  purpose: order analytics and customer support grounding
+processing:
+  locations:
+    - us-east-1
+  retention: 2y
+  processors:
+    - lakehouse-prod
+    - vector-platform-prod
+aiUse:
+  allowed:
+    - rag
+    - evaluation
+  disallowed:
+    - foundation-model-training
+  trainingOptOutRequired: true
+dataSubjectRights:
+  access: true
+  deletion: true
+  correction: true
+  portability: false
+deletion:
+  subjectDeleteSlaDays: 30
+  vectorIndex: vector:customer-support-policy:v12
+  propagationEvidence: governance/evidence/privacy/order-facts-delete-propagation-2026-q2.md
+controls:
+  minimization: true
+  encryption: true
+  accessReview: true
+  auditLogging: true
+  subjectDeletePropagation: true
+review:
+  dpiaRequired: true
+  approved: true
+  approver: privacy-office
+  reviewedOn: 2026-06-02
+  nextReviewOn: 2026-09-30

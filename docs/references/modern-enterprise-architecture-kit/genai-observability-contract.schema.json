@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "aiProduct",
+    "owner",
+    "provider",
+    "model",
+    "telemetry",
+    "trace",
+    "metrics",
+    "logs",
+    "retention",
+    "privacy"
+  ],
+  "properties": {
+    "contract": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aiProduct": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gatewayRoute", "approvedModel", "modelVersion"],
+      "properties": {
+        "gatewayRoute": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvedModel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "modelVersion": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semanticConvention",
+        "traceEnabled",
+        "tokenMetrics",
+        "costMetrics",
+        "toolCallSpans",
+        "ragSpans"
+      ],
+      "properties": {
+        "semanticConvention": {
+          "type": "string",
+          "minLength": 1
+        },
+        "traceEnabled": {
+          "type": "boolean"
+        },
+        "tokenMetrics": {
+          "type": "boolean"
+        },
+        "costMetrics": {
+          "type": "boolean"
+        },
+        "toolCallSpans": {
+          "type": "boolean"
+        },
+        "ragSpans": {
+          "type": "boolean"
+        }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sampleRate", "requiredAttributes"],
+      "properties": {
+        "sampleRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "requiredAttributes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latency", "tokenUsage", "toolErrors", "groundedAnswerRate", "cost"],
+      "properties": {
+        "latency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tokenUsage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "toolErrors": {
+          "type": "string",
+          "minLength": 1
+        },
+        "groundedAnswerRate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cost": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "logs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["promptLogging", "responseLogging", "toolPayloadLogging"],
+      "properties": {
+        "promptLogging": {
+          "type": "string",
+          "enum": ["none", "redacted", "full"]
+        },
+        "responseLogging": {
+          "type": "string",
+          "enum": ["none", "redacted", "full"]
+        },
+        "toolPayloadLogging": {
+          "type": "string",
+          "enum": ["none", "redacted", "full"]
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["traceDays", "logDays"],
+      "properties": {
+        "traceDays": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "logDays": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["piiRedaction", "trainingOptOut", "auditEvidence"],
+      "properties": {
+        "piiRedaction": {
+          "type": "boolean"
+        },
+        "trainingOptOut": {
+          "type": "boolean"
+        },
+        "auditEvidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

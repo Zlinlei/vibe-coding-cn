@@ -1,8 +1,8 @@
 # 现代企业数字化平台 Starter Kit
 
-本目录把《现代企业数字化平台架构说明文档》的 V2.8 起点转成可执行资产，当前包含 30 组 schema/example。
+本目录把《现代企业数字化平台架构说明文档》的 V2.9 起点转成可执行资产，当前包含 36 组 schema/example。
 
-V2.8 在严格 schema 模式之上补齐扩展字段策略、Feature Flag / Kill Switch、AI 威胁模型、运行血缘和平台产品指标。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
+V2.9 在严格 schema 模式之上补齐隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测和成本分摊证据。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
 
 ## 文件说明
 
@@ -38,6 +38,12 @@ V2.8 在严格 schema 模式之上补齐扩展字段策略、Feature Flag / Kill
 | `ai-threat-model.schema.json` / `ai-threat-model.example.yaml` | OWASP LLM / Agentic AI、MCP 工具同意、红队和残余风险模板。 |
 | `lineage-event.schema.json` / `lineage-event.example.yaml` | 数据产品运行血缘事件、job、run、inputs、outputs、schema 和质量证据模板。 |
 | `platform-product-metrics.schema.json` / `platform-product-metrics.example.yaml` | Platform PM、Golden Path、采用率、满意度、认知负载和平台 SLO 模板。 |
+| `privacy-impact-assessment.schema.json` / `privacy-impact-assessment.example.yaml` | DPIA、处理目的、合法基础、主体权利、删除传播和 AI 使用限制模板。 |
+| `tenant-boundary.schema.json` / `tenant-boundary.example.yaml` | 租户、namespace、ServiceAccount、Secret 范围、ResourceQuota、NetworkPolicy 和准入策略模板。 |
+| `recovery-drill-evidence.schema.json` / `recovery-drill-evidence.example.yaml` | 恢复演练、RTO/RPO 目标、实际恢复结果、备份、恢复日志和复盘证据模板。 |
+| `policy-test-report.schema.json` / `policy-test-report.example.yaml` | 策略引擎、测试数、失败数、阻断决策和执行命令证据模板。 |
+| `genai-observability-contract.schema.json` / `genai-observability-contract.example.yaml` | OpenTelemetry GenAI、Token、成本、工具调用、RAG span、日志脱敏和留存模板。 |
+| `cost-allocation-evidence.schema.json` / `cost-allocation-evidence.example.yaml` | 成本周期、owner、allocation tag、标签覆盖率、未分摊成本、成本来源和优化行动模板。 |
 
 ## 使用方式
 
@@ -51,17 +57,17 @@ make check-modern-architecture-kit
 
 4. 目标项目落地时，应把这些 schema 接入 CI、Developer Portal、catalog 生成和发布准入。
 
-## V2.8 校验范围
+## V2.9 校验范围
 
 - 检查每组 `*.schema.json` 和 `*.example.yaml` 是否同时存在。
 - 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称、控制项数量和索引提及是否一致。
 - 检查 `modern-enterprise-architecture-controls.json` 中的控制项是否能追溯到 schema 字段、example 字段和 checker 规则。
-- 检查 schema 的 draft 版本、根类型、`required`、`properties`、`items`、`enum`、`pattern`、`minLength`、`minItems` 和 `format: date`。
+- 检查 schema 的 draft 版本、根类型、`required`、`properties`、`items`、`enum`、`pattern`、`minLength`、`minItems`、`minimum`、`maximum`、`format: date` 和 `format: date-time`。
 - 检查所有对象 schema 是否声明 `additionalProperties=false`，并阻断 YAML 示例中的未知字段。
 - 检查示例 YAML 的类型、必填字段、枚举、命名格式、数组最小长度和日期格式。
 - 检查 starter kit 示例中的领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告是否保持关键字段一致。
 - 检查服务可靠性等级、GitOps ServiceAccount、生产供应链策略、AI 工具风险映射、AI 预算 owner、供应链漏洞和 Scorecard 结果是否形成可阻断门禁。
-- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘和平台产品指标是否形成 schema、example 和 checker 证据链。
+- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘、平台产品指标、隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测和成本分摊证据是否形成 schema、example 和 checker 证据链。
 
 ## 边界
 

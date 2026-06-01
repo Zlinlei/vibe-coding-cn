@@ -1,0 +1,29 @@
+tenant: order-prod
+domain: order
+service: order-command-service
+owner: team-order
+environment: prod
+namespace: order-prod
+isolation:
+  mode: namespace
+  serviceAccount: order-command-service
+  secretScope: namespace
+resourceQuota:
+  cpuLimitCores: 24
+  memoryLimitGi: 64
+  podLimit: 80
+  costAllocationTag: cost.domain.order
+networkPolicy:
+  defaultDeny: true
+  allowedIngress:
+    - api-gateway-prod
+  allowedEgress:
+    - payment-prod
+    - kafka-prod-order
+admission:
+  podSecurity: restricted
+  imagePolicy: governance/supply-chain/prod-admission.rego
+  policyEngine: opa
+observability:
+  quotaDashboard: observability/dashboards/order-prod-quota.json
+  violationAlert: alerts/order-prod-quota-violation

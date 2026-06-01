@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["report", "policy", "subject", "owner", "engine", "version", "tests", "result", "evidence"],
+  "properties": {
+    "report": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "engine": {
+      "type": "string",
+      "enum": ["opa", "cedar", "kyverno", "internal"]
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "passed", "failed"],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "blocking"],
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": ["pass", "warn", "fail"]
+        },
+        "blocking": {
+          "type": "boolean"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "reportPath"],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reportPath": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

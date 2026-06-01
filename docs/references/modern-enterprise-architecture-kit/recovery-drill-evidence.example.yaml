@@ -1,0 +1,26 @@
+drill: order-command-service-restore-2026-q2
+service: order-command-service
+domain: order
+owner: team-order
+tier: tier-1
+target:
+  rtoMinutes: 60
+  rpoMinutes: 15
+execution:
+  date: 2026-06-02
+  scenario: primary-zone-loss-and-database-restore
+  initiatedBy: sre-order
+recovery:
+  status: pass
+  achievedRtoMinutes: 42
+  achievedRpoMinutes: 10
+  dataLossValidated: true
+  failoverValidated: true
+evidence:
+  backup: backups/order-command-service/2026-06-02
+  restoreLog: governance/evidence/drills/order-command-service-restore-2026-q2.log
+  postmortem: governance/postmortems/order-command-service-restore-2026-q2.md
+decision:
+  productionReady: true
+  remediationRequired: false
+  nextDrillOn: 2026-09-30
