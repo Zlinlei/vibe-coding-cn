@@ -1,0 +1,24 @@
+platformProduct: internal-developer-platform
+owner: platform-team
+platformPm: platform-product-manager
+period: 2026-Q2
+goldenPath: service-to-production
+metrics:
+  adoptionRate: ">= 80%"
+  developerSatisfaction: ">= 4.2/5"
+  cognitiveLoadScore: "<= 3/5"
+  leadTimeP50: "<= 2d"
+  changeFailureRate: "<= 10%"
+  selfServiceCompletionRate: ">= 90%"
+  supportTicketDeflection: ">= 50%"
+slo:
+  portalAvailability: 99.9
+  scaffoldSuccessRate: ">= 95%"
+feedback:
+  survey: governance/evidence/platform-surveys/2026-q2.md
+  topFriction: environment-permission-onboarding
+actions:
+  - action: simplify-production-readiness-form
+    owner: platform-team
+    dueDate: 2026-07-15
+scorecard: catalog/scorecards/platform-product.yaml

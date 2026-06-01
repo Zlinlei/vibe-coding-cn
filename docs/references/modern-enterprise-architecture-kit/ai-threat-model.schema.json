@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "threatModel",
+    "aiProduct",
+    "owner",
+    "riskTier",
+    "standard",
+    "scope",
+    "risks",
+    "controls",
+    "redTeam",
+    "residualRisk"
+  ],
+  "properties": {
+    "threatModel": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aiProduct": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "riskTier": {
+      "type": "string",
+      "enum": ["R1", "R2", "R3", "R4", "R5"]
+    },
+    "standard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["llmTop10", "agenticTop10", "mcpSpec"],
+      "properties": {
+        "llmTop10": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agenticTop10": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mcpSpec": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tools", "dataSources"],
+      "properties": {
+        "tools": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "dataSources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk", "mitigation"],
+        "properties": {
+          "risk": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mitigation": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "toolConsentRequired",
+        "humanApprovalRequired",
+        "egressRestricted",
+        "promptInjectionTests"
+      ],
+      "properties": {
+        "toolConsentRequired": {
+          "type": "boolean"
+        },
+        "humanApprovalRequired": {
+          "type": "boolean"
+        },
+        "egressRestricted": {
+          "type": "boolean"
+        },
+        "promptInjectionTests": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "redTeam": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "lastRun", "result"],
+      "properties": {
+        "dataset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lastRun": {
+          "type": "string",
+          "format": "date"
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "warn", "fail"]
+        }
+      }
+    },
+    "residualRisk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "acceptedBy", "expiresOn"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "acceptedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expiresOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

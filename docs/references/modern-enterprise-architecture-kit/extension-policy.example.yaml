@@ -1,0 +1,19 @@
+policy: enterprise-extension-policy
+owner: architecture-governance
+scope: starter-kit
+allowedPrefixes:
+  - x-company-
+  - x-regulatory-
+appliesTo:
+  - service
+  - data-product
+  - ai-product
+approval:
+  required: true
+  approver: architecture-review-board
+  changeRecord: governance/decisions/adr-architecture-extension-policy.md
+validation:
+  defaultDecision: reject
+  unknownFieldBehavior: fail
+  checker: make check-modern-architecture-kit
+expiryReview: 2026-09-30

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "flag",
+    "domain",
+    "service",
+    "owner",
+    "provider",
+    "lifecycle",
+    "purpose",
+    "evaluation",
+    "rollout",
+    "successMetrics",
+    "guardrails",
+    "approval",
+    "observability",
+    "expiresOn"
+  ],
+  "properties": {
+    "flag": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "service": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "type": "string",
+      "enum": ["openfeature", "launchdarkly", "unleash", "internal"]
+    },
+    "lifecycle": {
+      "type": "string",
+      "enum": ["planned", "active", "deprecated", "removed"]
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sdk", "defaultVariant", "targetingKey", "context"],
+      "properties": {
+        "sdk": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defaultVariant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetingKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "rollout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "initialPercent", "maxPercent"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["canary", "blue-green", "percentage", "tenant-allowlist"]
+        },
+        "initialPercent": {
+          "type": "integer"
+        },
+        "maxPercent": {
+          "type": "integer"
+        }
+      }
+    },
+    "successMetrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["killSwitch", "rollbackOnSloBurn", "freezeOnIncident"],
+      "properties": {
+        "killSwitch": {
+          "type": "boolean"
+        },
+        "rollbackOnSloBurn": {
+          "type": "boolean"
+        },
+        "freezeOnIncident": {
+          "type": "boolean"
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approver", "changeTicket"],
+      "properties": {
+        "approver": {
+          "type": "string",
+          "minLength": 1
+        },
+        "changeTicket": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exposureEvent", "dashboard"],
+      "properties": {
+        "exposureEvent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dashboard": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "expiresOn": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

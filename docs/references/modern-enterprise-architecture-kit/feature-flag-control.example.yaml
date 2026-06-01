@@ -1,0 +1,32 @@
+flag: order-command-write-path-v2
+domain: order
+service: order-command-service
+owner: team-order
+provider: openfeature
+lifecycle: active
+purpose: control progressive rollout and emergency kill switch for order write path
+evaluation:
+  sdk: openfeature
+  defaultVariant: off
+  targetingKey: tenantId
+  context:
+    - tenantId
+    - region
+rollout:
+  strategy: canary
+  initialPercent: 5
+  maxPercent: 100
+successMetrics:
+  - order_create_success_rate
+  - p95_latency_ms
+guardrails:
+  killSwitch: true
+  rollbackOnSloBurn: true
+  freezeOnIncident: true
+approval:
+  approver: team-order
+  changeTicket: CHG-2026-0602-flag-order
+observability:
+  exposureEvent: feature.flag.order-command-write-path-v2.evaluated
+  dashboard: observability/dashboards/order-command-flags.json
+expiresOn: 2026-09-30

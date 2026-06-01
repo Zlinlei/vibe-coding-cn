@@ -46,6 +46,11 @@ PAIR_NAMES = [
     "deprecation-policy",
     "audit-evidence-index",
     "scorecard",
+    "extension-policy",
+    "feature-flag-control",
+    "ai-threat-model",
+    "lineage-event",
+    "platform-product-metrics",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -774,6 +779,11 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     gitops_drift_report = examples.get("gitops-drift-report")
     audit_evidence_index = examples.get("audit-evidence-index")
     scorecard = examples.get("scorecard")
+    extension_policy = examples.get("extension-policy")
+    feature_flag_control = examples.get("feature-flag-control")
+    ai_threat_model = examples.get("ai-threat-model")
+    lineage_event = examples.get("lineage-event")
+    platform_product_metrics = examples.get("platform-product-metrics")
 
     if isinstance(domain, dict) and isinstance(service, dict):
         if service.get("domain") != domain.get("domain"):
@@ -1113,6 +1123,78 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             errors.append("cross-file: scorecard.owner must match service.owner")
         if scorecard.get("lifecycle") != service.get("lifecycle"):
             errors.append("cross-file: scorecard.lifecycle must match service.lifecycle")
+
+    if isinstance(extension_policy, dict):
+        validation = extension_policy.get("validation")
+        if isinstance(validation, dict):
+            if validation.get("defaultDecision") != "reject":
+                errors.append("cross-file: extension-policy.validation.defaultDecision must be reject")
+            if validation.get("unknownFieldBehavior") != "fail":
+                errors.append("cross-file: extension-policy.validation.unknownFieldBehavior must be fail")
+        allowed_prefixes = extension_policy.get("allowedPrefixes")
+        if isinstance(allowed_prefixes, list) and "x-company-" not in allowed_prefixes:
+            errors.append("cross-file: extension-policy.allowedPrefixes must include x-company-")
+
+    if isinstance(service, dict) and isinstance(feature_flag_control, dict):
+        if feature_flag_control.get("domain") != service.get("domain"):
+            errors.append("cross-file: feature-flag-control.domain must match service.domain")
+        if feature_flag_control.get("service") != service.get("service"):
+            errors.append("cross-file: feature-flag-control.service must match service.service")
+        if feature_flag_control.get("owner") != service.get("owner"):
+            errors.append("cross-file: feature-flag-control.owner must match service.owner")
+        flag_guardrails = feature_flag_control.get("guardrails")
+        if isinstance(flag_guardrails, dict):
+            if flag_guardrails.get("killSwitch") is not True:
+                errors.append("cross-file: feature-flag-control.guardrails.killSwitch must be true")
+            if flag_guardrails.get("rollbackOnSloBurn") is not True:
+                errors.append("cross-file: feature-flag-control.guardrails.rollbackOnSloBurn must be true")
+
+    if isinstance(ai_product, dict) and isinstance(ai_threat_model, dict):
+        if ai_threat_model.get("aiProduct") != ai_product.get("aiProduct"):
+            errors.append("cross-file: ai-threat-model.aiProduct must match ai-product.aiProduct")
+        if ai_threat_model.get("owner") != ai_product.get("owner"):
+            errors.append("cross-file: ai-threat-model.owner must match ai-product.owner")
+        if ai_threat_model.get("riskTier") != ai_product.get("riskTier"):
+            errors.append("cross-file: ai-threat-model.riskTier must match ai-product.riskTier")
+        scope = ai_threat_model.get("scope")
+        if isinstance(scope, dict) and isinstance(ai_tool_contract, dict):
+            scoped_tools = scope.get("tools")
+            if isinstance(scoped_tools, list) and ai_tool_contract.get("tool") not in scoped_tools:
+                errors.append("cross-file: ai-threat-model.scope.tools must include ai-tool-contract.tool")
+        threat_controls = ai_threat_model.get("controls")
+        if isinstance(threat_controls, dict):
+            if threat_controls.get("toolConsentRequired") is not True:
+                errors.append("cross-file: ai-threat-model.controls.toolConsentRequired must be true")
+            if isinstance(ai_tool_contract, dict):
+                runtime_controls = ai_tool_contract.get("runtimeControls")
+                if isinstance(runtime_controls, dict):
+                    if threat_controls.get("humanApprovalRequired") != runtime_controls.get("requiresHumanApproval"):
+                        errors.append(
+                            "cross-file: ai-threat-model.controls.humanApprovalRequired must match ai-tool-contract.runtimeControls.requiresHumanApproval"
+                        )
+
+    if isinstance(data_product, dict) and isinstance(lineage_event, dict):
+        if lineage_event.get("dataProduct") != data_product.get("dataProduct"):
+            errors.append("cross-file: lineage-event.dataProduct must match data-product.dataProduct")
+        if lineage_event.get("domain") != data_product.get("domain"):
+            errors.append("cross-file: lineage-event.domain must match data-product.domain")
+        if lineage_event.get("owner") != data_product.get("owner"):
+            errors.append("cross-file: lineage-event.owner must match data-product.owner")
+        if lineage_event.get("outputDataProduct") != data_product.get("dataProduct"):
+            errors.append("cross-file: lineage-event.outputDataProduct must match data-product.dataProduct")
+        run = lineage_event.get("run")
+        if isinstance(run, dict) and run.get("state") != "COMPLETE":
+            errors.append("cross-file: lineage-event.run.state must be COMPLETE in starter kit examples")
+
+    if isinstance(platform_product_metrics, dict):
+        metrics = platform_product_metrics.get("metrics")
+        if isinstance(metrics, dict):
+            if metrics.get("developerSatisfaction") is None:
+                errors.append("cross-file: platform-product-metrics.metrics.developerSatisfaction must be present")
+            if metrics.get("cognitiveLoadScore") is None:
+                errors.append("cross-file: platform-product-metrics.metrics.cognitiveLoadScore must be present")
+            if metrics.get("selfServiceCompletionRate") is None:
+                errors.append("cross-file: platform-product-metrics.metrics.selfServiceCompletionRate must be present")
 
     return errors
 

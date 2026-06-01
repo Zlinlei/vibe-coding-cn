@@ -1,0 +1,33 @@
+threatModel: support-agent-r3-2026-q2
+aiProduct: customer-service-agent
+owner: team-support-ai
+riskTier: R3
+standard:
+  llmTop10: OWASP-LLM-2025
+  agenticTop10: OWASP-Agentic-2026
+  mcpSpec: "2025-06-18"
+scope:
+  tools:
+    - refund-preview
+  dataSources:
+    - vector-customer-support-policy-v12
+risks:
+  - risk: prompt-injection
+    mitigation: input-output-guardrails-and-rag-source-filtering
+  - risk: excessive-agency
+    mitigation: human-approval-for-refund-preview
+  - risk: sensitive-information-disclosure
+    mitigation: pii-filter-and-audit
+controls:
+  toolConsentRequired: true
+  humanApprovalRequired: true
+  egressRestricted: true
+  promptInjectionTests: evals/red-team.yaml
+redTeam:
+  dataset: evals/red-team.yaml
+  lastRun: 2026-06-01
+  result: pass
+residualRisk:
+  level: medium
+  acceptedBy: security-ai-governance
+  expiresOn: 2026-09-30

@@ -1,8 +1,8 @@
 # 现代企业数字化平台 Starter Kit
 
-本目录把《现代企业数字化平台架构说明文档》的 V2.7 起点转成可执行资产，当前包含 25 组 schema/example。
+本目录把《现代企业数字化平台架构说明文档》的 V2.8 起点转成可执行资产，当前包含 30 组 schema/example。
 
-V2.7 启用严格 schema 模式：所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
+V2.8 在严格 schema 模式之上补齐扩展字段策略、Feature Flag / Kill Switch、AI 威胁模型、运行血缘和平台产品指标。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
 
 ## 文件说明
 
@@ -33,6 +33,11 @@ V2.7 启用严格 schema 模式：所有对象节点必须声明 `additionalProp
 | `deprecation-policy.schema.json` / `deprecation-policy.example.yaml` | 迁移、兼容和弃用策略模板。 |
 | `audit-evidence-index.schema.json` / `audit-evidence-index.example.yaml` | 审计证据索引模板。 |
 | `scorecard.schema.json` / `scorecard.example.yaml` | 架构和生产就绪评分模板。 |
+| `extension-policy.schema.json` / `extension-policy.example.yaml` | 严格 schema 下的受控扩展前缀、审批记录和未知字段处理模板。 |
+| `feature-flag-control.schema.json` / `feature-flag-control.example.yaml` | Feature Flag、Kill Switch、灰度策略、SLO 燃尽回滚和曝光事件模板。 |
+| `ai-threat-model.schema.json` / `ai-threat-model.example.yaml` | OWASP LLM / Agentic AI、MCP 工具同意、红队和残余风险模板。 |
+| `lineage-event.schema.json` / `lineage-event.example.yaml` | 数据产品运行血缘事件、job、run、inputs、outputs、schema 和质量证据模板。 |
+| `platform-product-metrics.schema.json` / `platform-product-metrics.example.yaml` | Platform PM、Golden Path、采用率、满意度、认知负载和平台 SLO 模板。 |
 
 ## 使用方式
 
@@ -46,7 +51,7 @@ make check-modern-architecture-kit
 
 4. 目标项目落地时，应把这些 schema 接入 CI、Developer Portal、catalog 生成和发布准入。
 
-## V2.7 校验范围
+## V2.8 校验范围
 
 - 检查每组 `*.schema.json` 和 `*.example.yaml` 是否同时存在。
 - 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称、控制项数量和索引提及是否一致。
@@ -56,6 +61,7 @@ make check-modern-architecture-kit
 - 检查示例 YAML 的类型、必填字段、枚举、命名格式、数组最小长度和日期格式。
 - 检查 starter kit 示例中的领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告是否保持关键字段一致。
 - 检查服务可靠性等级、GitOps ServiceAccount、生产供应链策略、AI 工具风险映射、AI 预算 owner、供应链漏洞和 Scorecard 结果是否形成可阻断门禁。
+- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘和平台产品指标是否形成 schema、example 和 checker 证据链。
 
 ## 边界
 

@@ -1,9 +1,9 @@
 {
-  "version": "V2.7",
+  "version": "V2.8",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并要求 starter kit 严格拒绝未知字段",
+  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并补齐扩展策略、发布开关、AI 威胁模型、运行血缘和平台产品指标",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -19,6 +19,26 @@
       "source": "NIST SSDF SP 800-218",
       "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
       "rationale": "安全开发控制项覆盖设计、构建、测试、发布和漏洞响应"
+    },
+    {
+      "source": "OpenFeature Specification",
+      "url": "https://openfeature.dev/specification/",
+      "rationale": "发布开关控制项覆盖 flag evaluation、context、tracking、kill switch 和渐进式交付"
+    },
+    {
+      "source": "OpenLineage",
+      "url": "https://openlineage.io/docs/",
+      "rationale": "运行血缘控制项覆盖 job、run、dataset、inputs、outputs 和事件证据"
+    },
+    {
+      "source": "OWASP LLM / Agentic AI",
+      "url": "https://genai.owasp.org/",
+      "rationale": "AI 威胁模型控制项覆盖 prompt injection、敏感信息泄露、过度代理和工具风险"
+    },
+    {
+      "source": "CNCF Platforms White Paper",
+      "url": "https://tag-app-delivery.cncf.io/whitepapers/platforms/",
+      "rationale": "平台产品指标控制项覆盖平台即产品、Golden Path、开发者体验和认知负载"
     }
   ],
   "controls": [
@@ -246,6 +266,170 @@
       "checkerEvidence": [
         "additionalProperties must be false for strict starter kit schemas",
         "unexpected field"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-EXTENSION-POLICY-001",
+      "category": "schema-extension-governance",
+      "title": "严格 schema 必须配套受控扩展策略",
+      "statement": "企业自定义字段必须通过受控前缀、审批记录和默认拒绝策略进入 schema，不允许用未知字段绕过治理。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/extension-policy.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/extension-policy.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/extension-policy.schema.json",
+          "required": ["allowedPrefixes", "approval", "validation", "expiryReview"],
+          "nestedRequired": {
+            "approval": ["required", "approver", "changeRecord"],
+            "validation": ["defaultDecision", "unknownFieldBehavior", "checker"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/extension-policy.example.yaml",
+          "fields": ["allowedPrefixes", "approval.required", "approval.changeRecord", "validation.defaultDecision", "validation.unknownFieldBehavior"]
+        }
+      ],
+      "checkerEvidence": [
+        "extension-policy.validation.defaultDecision must be reject",
+        "extension-policy.validation.unknownFieldBehavior must be fail",
+        "extension-policy.allowedPrefixes must include x-company-"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-FEATURE-FLAG-001",
+      "category": "progressive-delivery",
+      "title": "生产变更必须声明发布开关和 Kill Switch",
+      "statement": "高风险生产变更必须声明 Feature Flag、评估上下文、灰度策略、成功指标、Kill Switch、SLO 燃尽回滚和曝光事件。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/feature-flag-control.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/feature-flag-control.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/feature-flag-control.schema.json",
+          "required": ["flag", "service", "provider", "evaluation", "rollout", "guardrails", "observability", "expiresOn"],
+          "nestedRequired": {
+            "evaluation": ["sdk", "defaultVariant", "targetingKey", "context"],
+            "rollout": ["strategy", "initialPercent", "maxPercent"],
+            "guardrails": ["killSwitch", "rollbackOnSloBurn", "freezeOnIncident"],
+            "observability": ["exposureEvent", "dashboard"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/feature-flag-control.example.yaml",
+          "fields": ["flag", "provider", "evaluation.targetingKey", "rollout.strategy", "guardrails.killSwitch", "observability.exposureEvent"]
+        }
+      ],
+      "checkerEvidence": [
+        "feature-flag-control.service must match service.service",
+        "feature-flag-control.guardrails.killSwitch must be true",
+        "feature-flag-control.guardrails.rollbackOnSloBurn must be true"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AI-THREAT-MODEL-001",
+      "category": "ai-security",
+      "title": "AI 产品必须声明威胁模型和红队证据",
+      "statement": "AI 产品必须声明 OWASP LLM / Agentic AI 对齐、MCP 工具边界、Prompt Injection 测试、工具同意、人工确认、出站限制、红队结果和残余风险接受。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/ai-threat-model.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/ai-threat-model.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/ai-threat-model.schema.json",
+          "required": ["standard", "scope", "risks", "controls", "redTeam", "residualRisk"],
+          "nestedRequired": {
+            "standard": ["llmTop10", "agenticTop10", "mcpSpec"],
+            "scope": ["tools", "dataSources"],
+            "controls": ["toolConsentRequired", "humanApprovalRequired", "egressRestricted", "promptInjectionTests"],
+            "redTeam": ["dataset", "lastRun", "result"],
+            "residualRisk": ["level", "acceptedBy", "expiresOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/ai-threat-model.example.yaml",
+          "fields": ["standard.llmTop10", "standard.agenticTop10", "scope.tools", "controls.toolConsentRequired", "redTeam.result", "residualRisk.acceptedBy"]
+        }
+      ],
+      "checkerEvidence": [
+        "ai-threat-model.aiProduct must match ai-product.aiProduct",
+        "ai-threat-model.scope.tools must include ai-tool-contract.tool",
+        "ai-threat-model.controls.toolConsentRequired must be true",
+        "ai-threat-model.controls.humanApprovalRequired must match ai-tool-contract.runtimeControls.requiresHumanApproval"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-LINEAGE-EVIDENCE-001",
+      "category": "data-lineage",
+      "title": "数据产品必须有运行血缘事件证据",
+      "statement": "数据产品必须提供可审计的运行血缘事件，覆盖 producer job、run state、输入数据集、输出数据集、schema、质量证据和血缘后端。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/lineage-event.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/lineage-event.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/lineage-event.schema.json",
+          "required": ["dataProduct", "outputDataProduct", "producerJob", "run", "inputs", "outputs", "facets", "backend"],
+          "nestedRequired": {
+            "producerJob": ["namespace", "name"],
+            "run": ["runId", "state", "eventTime"],
+            "facets": ["schema", "quality", "producer"],
+            "backend": ["type", "url"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/lineage-event.example.yaml",
+          "fields": ["dataProduct", "producerJob.name", "run.state", "inputs", "outputs", "facets.schema", "backend.type"]
+        }
+      ],
+      "checkerEvidence": [
+        "lineage-event.dataProduct must match data-product.dataProduct",
+        "lineage-event.outputDataProduct must match data-product.dataProduct",
+        "lineage-event.run.state must be COMPLETE in starter kit examples"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-PLATFORM-METRICS-001",
+      "category": "platform-product-management",
+      "title": "内部平台必须作为产品度量",
+      "statement": "内部平台必须声明 Platform PM、Golden Path、采用率、开发者满意度、认知负载、自助完成率、平台 SLO、反馈证据和改进行动。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/platform-product-metrics.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/platform-product-metrics.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/platform-product-metrics.schema.json",
+          "required": ["platformProduct", "owner", "platformPm", "goldenPath", "metrics", "slo", "feedback", "actions", "scorecard"],
+          "nestedRequired": {
+            "metrics": ["adoptionRate", "developerSatisfaction", "cognitiveLoadScore", "selfServiceCompletionRate"],
+            "slo": ["portalAvailability", "scaffoldSuccessRate"],
+            "feedback": ["survey", "topFriction"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/platform-product-metrics.example.yaml",
+          "fields": ["platformProduct", "platformPm", "metrics.developerSatisfaction", "metrics.cognitiveLoadScore", "slo.portalAvailability", "feedback.survey"]
+        }
+      ],
+      "checkerEvidence": [
+        "platform-product-metrics.metrics.developerSatisfaction must be present",
+        "platform-product-metrics.metrics.cognitiveLoadScore must be present",
+        "platform-product-metrics.metrics.selfServiceCompletionRate must be present"
       ]
     }
   ]

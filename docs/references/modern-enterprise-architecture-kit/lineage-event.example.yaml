@@ -1,0 +1,27 @@
+lineageEvent: order-facts-daily-materialization-2026-06-01
+dataProduct: order-facts
+domain: order
+owner: team-order
+outputDataProduct: order-facts
+producerJob:
+  namespace: airflow-prod
+  name: order_facts_materialize
+run:
+  runId: 0176a8c2-fe01-7439-87e6-56a1a1b4029f
+  state: COMPLETE
+  eventTime: 2026-06-01
+inputs:
+  - namespace: kafka-prod-order
+    name: order-created
+  - namespace: kafka-prod-payment
+    name: payment-authorized
+outputs:
+  - namespace: lakehouse-gold-order
+    name: order_facts
+facets:
+  schema: contracts/datasets/order-facts.schema.yaml
+  quality: governance/evidence/data-quality/order-facts-2026-06-01.md
+  producer: order-command-service
+backend:
+  type: openlineage
+  url: https://lineage.company.com
