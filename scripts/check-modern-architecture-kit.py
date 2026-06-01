@@ -57,6 +57,11 @@ PAIR_NAMES = [
     "policy-test-report",
     "genai-observability-contract",
     "cost-allocation-evidence",
+    "identity-access-review",
+    "secrets-rotation-evidence",
+    "vulnerability-remediation-evidence",
+    "incident-postmortem",
+    "evidence-freshness-policy",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -786,6 +791,11 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             return None
         return date.fromisoformat(value)
 
+    def parse_example_datetime(value: Any) -> datetime | None:
+        if not isinstance(value, str) or not is_iso_datetime(value):
+            return None
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
     def mapping_values(items: Any, key: str) -> list[Any]:
         if not isinstance(items, list):
             return []
@@ -823,6 +833,11 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     policy_test_report = examples.get("policy-test-report")
     genai_observability_contract = examples.get("genai-observability-contract")
     cost_allocation_evidence = examples.get("cost-allocation-evidence")
+    identity_access_review = examples.get("identity-access-review")
+    secrets_rotation_evidence = examples.get("secrets-rotation-evidence")
+    vulnerability_remediation_evidence = examples.get("vulnerability-remediation-evidence")
+    incident_postmortem = examples.get("incident-postmortem")
+    evidence_freshness_policy = examples.get("evidence-freshness-policy")
 
     if isinstance(domain, dict) and isinstance(service, dict):
         if service.get("domain") != domain.get("domain"):
@@ -1378,6 +1393,115 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                     subtotal += value
             if isinstance(costs.get("totalUsd"), (int, float)) and costs.get("totalUsd") != subtotal:
                 errors.append("cross-file: cost-allocation-evidence.costs.totalUsd must equal cloudUsd + aiUsd + dataUsd")
+
+    if isinstance(service, dict) and isinstance(identity_access_review, dict):
+        if identity_access_review.get("service") != service.get("service"):
+            errors.append("cross-file: identity-access-review.service must match service.service")
+        if identity_access_review.get("domain") != service.get("domain"):
+            errors.append("cross-file: identity-access-review.domain must match service.domain")
+        if identity_access_review.get("owner") != service.get("owner"):
+            errors.append("cross-file: identity-access-review.owner must match service.owner")
+        if isinstance(gitops_deployment, dict) and identity_access_review.get("namespace") != gitops_deployment.get("namespace"):
+            errors.append("cross-file: identity-access-review.namespace must match gitops-deployment.namespace")
+        break_glass = identity_access_review.get("breakGlass")
+        if isinstance(break_glass, dict):
+            if break_glass.get("mfaRequired") is not True:
+                errors.append("cross-file: identity-access-review.breakGlass.mfaRequired must be true")
+            if break_glass.get("maxDurationHours", 0) > 8:
+                errors.append("cross-file: identity-access-review.breakGlass.maxDurationHours must be <= 8")
+        review = identity_access_review.get("review")
+        if isinstance(review, dict) and review.get("decision") != "pass":
+            errors.append("cross-file: identity-access-review.review.decision must be pass")
+
+    if isinstance(service, dict) and isinstance(secrets_rotation_evidence, dict):
+        if secrets_rotation_evidence.get("service") != service.get("service"):
+            errors.append("cross-file: secrets-rotation-evidence.service must match service.service")
+        if secrets_rotation_evidence.get("domain") != service.get("domain"):
+            errors.append("cross-file: secrets-rotation-evidence.domain must match service.domain")
+        if secrets_rotation_evidence.get("owner") != service.get("owner"):
+            errors.append("cross-file: secrets-rotation-evidence.owner must match service.owner")
+        if isinstance(gitops_deployment, dict):
+            if secrets_rotation_evidence.get("namespace") != gitops_deployment.get("namespace"):
+                errors.append("cross-file: secrets-rotation-evidence.namespace must match gitops-deployment.namespace")
+        crypto = secrets_rotation_evidence.get("crypto")
+        if isinstance(crypto, dict) and crypto.get("encryptionAtRest") is not True:
+            errors.append("cross-file: secrets-rotation-evidence.crypto.encryptionAtRest must be true")
+        rotation = secrets_rotation_evidence.get("rotation")
+        if isinstance(rotation, dict):
+            if rotation.get("status") != "pass":
+                errors.append("cross-file: secrets-rotation-evidence.rotation.status must be pass")
+            last_rotated = parse_example_date(rotation.get("lastRotatedOn"))
+            next_rotation = parse_example_date(rotation.get("nextRotationOn"))
+            if last_rotated is not None and next_rotation is not None and next_rotation <= last_rotated:
+                errors.append("cross-file: secrets-rotation-evidence.rotation.nextRotationOn must be after lastRotatedOn")
+        exposure = secrets_rotation_evidence.get("exposure")
+        if isinstance(exposure, dict) and exposure.get("detected") is not False:
+            errors.append("cross-file: secrets-rotation-evidence.exposure.detected must be false")
+
+    if isinstance(service, dict) and isinstance(vulnerability_remediation_evidence, dict):
+        if vulnerability_remediation_evidence.get("subjectService") != service.get("service"):
+            errors.append("cross-file: vulnerability-remediation-evidence.subjectService must match service.service")
+        if vulnerability_remediation_evidence.get("domain") != service.get("domain"):
+            errors.append("cross-file: vulnerability-remediation-evidence.domain must match service.domain")
+        if vulnerability_remediation_evidence.get("owner") != service.get("owner"):
+            errors.append("cross-file: vulnerability-remediation-evidence.owner must match service.owner")
+        remediation = vulnerability_remediation_evidence.get("remediation")
+        if isinstance(remediation, dict):
+            if remediation.get("status") not in {"fixed", "mitigated"}:
+                errors.append("cross-file: vulnerability-remediation-evidence.remediation.status must be fixed or mitigated")
+            due_date = parse_example_date(remediation.get("dueDate"))
+            remediated_on = parse_example_date(remediation.get("remediatedOn"))
+            if due_date is not None and remediated_on is not None and remediated_on > due_date:
+                errors.append("cross-file: vulnerability-remediation-evidence.remediation.remediatedOn must be on or before dueDate")
+        residual = vulnerability_remediation_evidence.get("residual")
+        if isinstance(residual, dict):
+            if residual.get("criticalOpen") != 0:
+                errors.append("cross-file: vulnerability-remediation-evidence.residual.criticalOpen must be 0")
+            if residual.get("highOpen") != 0:
+                errors.append("cross-file: vulnerability-remediation-evidence.residual.highOpen must be 0")
+        decision = vulnerability_remediation_evidence.get("decision")
+        if isinstance(decision, dict) and decision.get("releaseAllowed") is not True:
+            errors.append("cross-file: vulnerability-remediation-evidence.decision.releaseAllowed must be true")
+
+    if isinstance(service, dict) and isinstance(incident_postmortem, dict):
+        if incident_postmortem.get("service") != service.get("service"):
+            errors.append("cross-file: incident-postmortem.service must match service.service")
+        if incident_postmortem.get("domain") != service.get("domain"):
+            errors.append("cross-file: incident-postmortem.domain must match service.domain")
+        if incident_postmortem.get("owner") != service.get("owner"):
+            errors.append("cross-file: incident-postmortem.owner must match service.owner")
+        incident = incident_postmortem.get("incident")
+        if isinstance(incident, dict):
+            detected_at = parse_example_datetime(incident.get("detectedAt"))
+            resolved_at = parse_example_datetime(incident.get("resolvedAt"))
+            if detected_at is not None and resolved_at is not None and resolved_at <= detected_at:
+                errors.append("cross-file: incident-postmortem.incident.resolvedAt must be after detectedAt")
+        prevention = incident_postmortem.get("prevention")
+        if isinstance(prevention, dict):
+            if prevention.get("runbookUpdated") is not True:
+                errors.append("cross-file: incident-postmortem.prevention.runbookUpdated must be true")
+            if prevention.get("gateUpdated") is not True:
+                errors.append("cross-file: incident-postmortem.prevention.gateUpdated must be true")
+        closure = incident_postmortem.get("closure")
+        if isinstance(closure, dict) and closure.get("status") != "closed":
+            errors.append("cross-file: incident-postmortem.closure.status must be closed")
+
+    if isinstance(evidence_freshness_policy, dict):
+        defaults = evidence_freshness_policy.get("defaults")
+        if isinstance(defaults, dict):
+            if defaults.get("expiryAction") != "block":
+                errors.append("cross-file: evidence-freshness-policy.defaults.expiryAction must be block")
+            if defaults.get("maxAgeDays", 0) > 90:
+                errors.append("cross-file: evidence-freshness-policy.defaults.maxAgeDays must be <= 90")
+        evidence_types = evidence_freshness_policy.get("evidenceTypes")
+        if isinstance(evidence_types, list):
+            for item in evidence_types:
+                if isinstance(item, dict) and item.get("required") is not True:
+                    errors.append("cross-file: evidence-freshness-policy.evidenceTypes.required must be true")
+                    break
+        automation = evidence_freshness_policy.get("automation")
+        if isinstance(automation, dict) and automation.get("ciEnforced") is not True:
+            errors.append("cross-file: evidence-freshness-policy.automation.ciEnforced must be true")
 
     return errors
 

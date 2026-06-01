@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["postmortem", "service", "domain", "owner", "incident", "impact", "rootCause", "actions", "prevention", "closure"],
+  "properties": {
+    "postmortem": {"type": "string", "minLength": 1},
+    "service": {"type": "string", "minLength": 1},
+    "domain": {"type": "string", "minLength": 1},
+    "owner": {"type": "string", "minLength": 1},
+    "incident": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "severity", "detectedAt", "resolvedAt"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "severity": {"type": "string", "enum": ["sev1", "sev2", "sev3", "sev4"]},
+        "detectedAt": {"type": "string", "format": "date-time"},
+        "resolvedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["customerImpact", "sloBurn"],
+      "properties": {
+        "customerImpact": {"type": "string", "minLength": 1},
+        "sloBurn": {"type": "string", "minLength": 1}
+      }
+    },
+    "rootCause": {"type": "string", "minLength": 1},
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "owner", "dueDate", "status"],
+        "properties": {
+          "action": {"type": "string", "minLength": 1},
+          "owner": {"type": "string", "minLength": 1},
+          "dueDate": {"type": "string", "format": "date"},
+          "status": {"type": "string", "enum": ["open", "closed"]}
+        }
+      }
+    },
+    "prevention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runbookUpdated", "gateUpdated", "monitoringUpdated"],
+      "properties": {
+        "runbookUpdated": {"type": "boolean"},
+        "gateUpdated": {"type": "boolean"},
+        "monitoringUpdated": {"type": "boolean"}
+      }
+    },
+    "closure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "approvedBy", "closedOn"],
+      "properties": {
+        "status": {"type": "string", "enum": ["open", "closed"]},
+        "approvedBy": {"type": "string", "minLength": 1},
+        "closedOn": {"type": "string", "format": "date"}
+      }
+    }
+  }
+}

@@ -1,9 +1,9 @@
 {
-  "version": "V2.9",
+  "version": "V2.10",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并补齐隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测和成本分摊证据",
+  "summary": "把关键企业架构控制项映射到 schema、example 和 checker 证据，并补齐访问复核、密钥轮换、漏洞修复、事故复盘和证据新鲜度控制项",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -59,6 +59,26 @@
       "source": "OpenCost",
       "url": "https://opencost.io/docs/",
       "rationale": "成本分摊控制项覆盖 Kubernetes 成本归集、标签覆盖、未分摊成本和优化证据"
+    },
+    {
+      "source": "NIST Cybersecurity Framework 2.0",
+      "url": "https://www.nist.gov/cyberframework",
+      "rationale": "安全运营控制项覆盖识别、保护、检测、响应和恢复的闭环证据"
+    },
+    {
+      "source": "NIST SP 800-61",
+      "url": "https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+      "rationale": "事故复盘控制项覆盖事件处理、根因、修复行动和持续改进"
+    },
+    {
+      "source": "Kubernetes Secrets",
+      "url": "https://kubernetes.io/docs/concepts/configuration/secret/",
+      "rationale": "密钥控制项覆盖 Secret 使用、加密、轮换和泄露扫描证据"
+    },
+    {
+      "source": "CISA Known Exploited Vulnerabilities",
+      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "rationale": "漏洞修复控制项覆盖高风险漏洞处置、SLA、残余风险和发布阻断"
     }
   ],
   "controls": [
@@ -655,6 +675,173 @@
         "cost-allocation-evidence.coverage.taggedResourceRate must be 100",
         "cost-allocation-evidence.coverage.unallocatedCostUsd must be 0",
         "cost-allocation-evidence.costs.totalUsd must equal cloudUsd + aiUsd + dataUsd"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-ACCESS-REVIEW-001",
+      "category": "identity-access-governance",
+      "title": "生产访问权限必须有周期性复核和 break-glass 审计",
+      "statement": "生产服务必须声明身份源、角色、权限范围、特权身份、break-glass、MFA、最长授权时长和访问复核证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/identity-access-review.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/identity-access-review.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/identity-access-review.schema.json",
+          "required": ["review", "service", "domain", "owner", "environment", "namespace", "identityProvider", "roles", "breakGlass", "evidence"],
+          "nestedRequired": {
+            "review": ["reviewId", "reviewedOn", "nextReviewOn", "reviewer", "decision"],
+            "breakGlass": ["enabled", "account", "mfaRequired", "maxDurationHours", "auditLog"],
+            "evidence": ["report", "ticket"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/identity-access-review.example.yaml",
+          "fields": ["review.decision", "service", "namespace", "identityProvider", "roles", "breakGlass.mfaRequired", "evidence.report"]
+        }
+      ],
+      "checkerEvidence": [
+        "identity-access-review.service must match service.service",
+        "identity-access-review.namespace must match gitops-deployment.namespace",
+        "identity-access-review.breakGlass.mfaRequired must be true",
+        "identity-access-review.review.decision must be pass"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-SECRETS-ROTATION-001",
+      "category": "secrets-management",
+      "title": "生产密钥必须有加密、轮换和泄露扫描证据",
+      "statement": "生产服务必须声明 Secret provider、KMS、静态加密、轮换周期、轮换结果、密钥清单和泄露扫描证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/secrets-rotation-evidence.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/secrets-rotation-evidence.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/secrets-rotation-evidence.schema.json",
+          "required": ["evidence", "service", "domain", "owner", "environment", "namespace", "provider", "crypto", "rotation", "secrets", "exposure"],
+          "nestedRequired": {
+            "crypto": ["encryptionAtRest", "kmsKey", "keyRotationDays"],
+            "rotation": ["lastRotatedOn", "nextRotationOn", "maxAgeDays", "status"],
+            "exposure": ["detected", "scanner", "lastScanOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/secrets-rotation-evidence.example.yaml",
+          "fields": ["service", "namespace", "provider", "crypto.encryptionAtRest", "rotation.status", "exposure.detected"]
+        }
+      ],
+      "checkerEvidence": [
+        "secrets-rotation-evidence.service must match service.service",
+        "secrets-rotation-evidence.crypto.encryptionAtRest must be true",
+        "secrets-rotation-evidence.rotation.status must be pass",
+        "secrets-rotation-evidence.exposure.detected must be false"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-VULNERABILITY-REMEDIATION-001",
+      "category": "vulnerability-management",
+      "title": "高风险漏洞必须有 SLA 内修复和残余风险证据",
+      "statement": "供应链和运行时高风险漏洞必须声明漏洞 ID、严重度、KEV 状态、扫描器、发现日期、到期日期、修复日期、残余漏洞和发布准入决策。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/vulnerability-remediation-evidence.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/vulnerability-remediation-evidence.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/vulnerability-remediation-evidence.schema.json",
+          "required": ["evidence", "subjectService", "domain", "owner", "finding", "remediation", "residual", "decision"],
+          "nestedRequired": {
+            "finding": ["id", "severity", "kevListed", "scanner", "discoveredOn"],
+            "remediation": ["status", "dueDate", "remediatedOn", "fixVersion", "evidence"],
+            "residual": ["criticalOpen", "highOpen"],
+            "decision": ["releaseAllowed", "approvedBy"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/vulnerability-remediation-evidence.example.yaml",
+          "fields": ["subjectService", "finding.severity", "remediation.status", "remediation.dueDate", "residual.criticalOpen", "decision.releaseAllowed"]
+        }
+      ],
+      "checkerEvidence": [
+        "vulnerability-remediation-evidence.subjectService must match service.service",
+        "vulnerability-remediation-evidence.remediation.status must be fixed or mitigated",
+        "vulnerability-remediation-evidence.remediation.remediatedOn must be on or before dueDate",
+        "vulnerability-remediation-evidence.residual.highOpen must be 0"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-INCIDENT-POSTMORTEM-001",
+      "category": "incident-management",
+      "title": "生产事故必须有复盘、纠正行动和门禁反哺证据",
+      "statement": "生产事故必须声明影响、根因、检测/恢复时间、纠正行动、runbook 更新、门禁更新、监控更新和关闭审批。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/incident-postmortem.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/incident-postmortem.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/incident-postmortem.schema.json",
+          "required": ["postmortem", "service", "domain", "owner", "incident", "impact", "rootCause", "actions", "prevention", "closure"],
+          "nestedRequired": {
+            "incident": ["id", "severity", "detectedAt", "resolvedAt"],
+            "impact": ["customerImpact", "sloBurn"],
+            "prevention": ["runbookUpdated", "gateUpdated", "monitoringUpdated"],
+            "closure": ["status", "approvedBy", "closedOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/incident-postmortem.example.yaml",
+          "fields": ["service", "incident.severity", "incident.detectedAt", "incident.resolvedAt", "prevention.gateUpdated", "closure.status"]
+        }
+      ],
+      "checkerEvidence": [
+        "incident-postmortem.service must match service.service",
+        "incident-postmortem.incident.resolvedAt must be after detectedAt",
+        "incident-postmortem.prevention.runbookUpdated must be true",
+        "incident-postmortem.closure.status must be closed"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-EVIDENCE-FRESHNESS-001",
+      "category": "audit-evidence-lifecycle",
+      "title": "审计证据必须有新鲜度、过期阻断和 CI 执行策略",
+      "statement": "关键证据必须声明默认最大年龄、按类型最大年龄、是否必需、过期动作、CI 执行状态和复审日期，防止过期证据继续证明生产准入。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/evidence-freshness-policy.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/evidence-freshness-policy.example.yaml"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/evidence-freshness-policy.schema.json",
+          "required": ["policy", "owner", "defaults", "evidenceTypes", "automation", "review"],
+          "nestedRequired": {
+            "defaults": ["maxAgeDays", "expiryAction"],
+            "automation": ["ciEnforced", "reportPath"],
+            "review": ["reviewedOn", "nextReviewOn", "approver"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/evidence-freshness-policy.example.yaml",
+          "fields": ["policy", "defaults.maxAgeDays", "defaults.expiryAction", "evidenceTypes", "automation.ciEnforced", "review.nextReviewOn"]
+        }
+      ],
+      "checkerEvidence": [
+        "evidence-freshness-policy.defaults.expiryAction must be block",
+        "evidence-freshness-policy.defaults.maxAgeDays must be <= 90",
+        "evidence-freshness-policy.evidenceTypes.required must be true",
+        "evidence-freshness-policy.automation.ciEnforced must be true"
       ]
     }
   ]

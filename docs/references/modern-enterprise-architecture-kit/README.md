@@ -1,8 +1,8 @@
 # 现代企业数字化平台 Starter Kit
 
-本目录把《现代企业数字化平台架构说明文档》的 V2.9 起点转成可执行资产，当前包含 36 组 schema/example。
+本目录把《现代企业数字化平台架构说明文档》的 V2.10 起点转成可执行资产，当前包含 41 组 schema/example。
 
-V2.9 在严格 schema 模式之上补齐隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测和成本分摊证据。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
+V2.10 在严格 schema 模式之上补齐访问复核、密钥轮换、漏洞修复、事故复盘和证据新鲜度控制项。所有对象节点必须声明 `additionalProperties=false`，示例和落地契约中出现未声明字段会被门禁阻断。
 
 ## 文件说明
 
@@ -44,6 +44,11 @@ V2.9 在严格 schema 模式之上补齐隐私影响评估、租户隔离、恢�
 | `policy-test-report.schema.json` / `policy-test-report.example.yaml` | 策略引擎、测试数、失败数、阻断决策和执行命令证据模板。 |
 | `genai-observability-contract.schema.json` / `genai-observability-contract.example.yaml` | OpenTelemetry GenAI、Token、成本、工具调用、RAG span、日志脱敏和留存模板。 |
 | `cost-allocation-evidence.schema.json` / `cost-allocation-evidence.example.yaml` | 成本周期、owner、allocation tag、标签覆盖率、未分摊成本、成本来源和优化行动模板。 |
+| `identity-access-review.schema.json` / `identity-access-review.example.yaml` | 身份源、角色、特权访问、break-glass、MFA 和访问复核证据模板。 |
+| `secrets-rotation-evidence.schema.json` / `secrets-rotation-evidence.example.yaml` | Secret provider、KMS、静态加密、轮换结果和泄露扫描证据模板。 |
+| `vulnerability-remediation-evidence.schema.json` / `vulnerability-remediation-evidence.example.yaml` | 漏洞 ID、严重度、KEV 状态、修复 SLA、残余风险和发布准入模板。 |
+| `incident-postmortem.schema.json` / `incident-postmortem.example.yaml` | 事故影响、检测/恢复时间、根因、行动项、runbook 更新、门禁反哺和关闭审批模板。 |
+| `evidence-freshness-policy.schema.json` / `evidence-freshness-policy.example.yaml` | 证据最大年龄、按类型过期策略、CI 执行和过期阻断模板。 |
 
 ## 使用方式
 
@@ -57,7 +62,7 @@ make check-modern-architecture-kit
 
 4. 目标项目落地时，应把这些 schema 接入 CI、Developer Portal、catalog 生成和发布准入。
 
-## V2.9 校验范围
+## V2.10 校验范围
 
 - 检查每组 `*.schema.json` 和 `*.example.yaml` 是否同时存在。
 - 检查 `modern-enterprise-architecture-version.json` 中的当前版本、发布状态、pair 数量、pair 名称、控制项数量和索引提及是否一致。
@@ -67,7 +72,7 @@ make check-modern-architecture-kit
 - 检查示例 YAML 的类型、必填字段、枚举、命名格式、数组最小长度和日期格式。
 - 检查 starter kit 示例中的领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告是否保持关键字段一致。
 - 检查服务可靠性等级、GitOps ServiceAccount、生产供应链策略、AI 工具风险映射、AI 预算 owner、供应链漏洞和 Scorecard 结果是否形成可阻断门禁。
-- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘、平台产品指标、隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测和成本分摊证据是否形成 schema、example 和 checker 证据链。
+- 检查扩展字段策略、Feature Flag、AI 威胁模型、数据运行血缘、平台产品指标、隐私影响评估、租户隔离、恢复演练、策略测试、GenAI 观测、成本分摊证据、访问复核、密钥轮换、漏洞修复、事故复盘和证据新鲜度是否形成 schema、example 和 checker 证据链。
 
 ## 边界
 

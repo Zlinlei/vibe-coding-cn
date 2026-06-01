@@ -1,0 +1,34 @@
+review:
+  reviewId: order-command-service-access-2026-q2
+  reviewedOn: 2026-06-02
+  nextReviewOn: 2026-09-30
+  reviewer: security-iam
+  decision: pass
+service: order-command-service
+domain: order
+owner: team-order
+environment: prod
+namespace: order-prod
+identityProvider: company-idp
+roles:
+  - role: order-command-service-deployer
+    scope: namespace:order-prod
+    subjects:
+      - team-order
+    privileged: false
+    lastReviewedOn: 2026-06-02
+  - role: order-command-service-admin
+    scope: namespace:order-prod
+    subjects:
+      - sre-order
+    privileged: true
+    lastReviewedOn: 2026-06-02
+breakGlass:
+  enabled: true
+  account: break-glass-order-prod
+  mfaRequired: true
+  maxDurationHours: 4
+  auditLog: governance/evidence/access/order-prod-break-glass-2026-q2.log
+evidence:
+  report: governance/evidence/access/order-command-service-access-2026-q2.md
+  ticket: IAM-2026-0602-order

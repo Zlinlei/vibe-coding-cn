@@ -1,0 +1,25 @@
+policy: architecture-evidence-freshness
+owner: governance-team
+defaults:
+  maxAgeDays: 90
+  expiryAction: block
+evidenceTypes:
+  - type: release-evidence
+    maxAgeDays: 30
+    required: true
+  - type: supply-chain-attestation
+    maxAgeDays: 7
+    required: true
+  - type: access-review
+    maxAgeDays: 90
+    required: true
+  - type: recovery-drill
+    maxAgeDays: 120
+    required: true
+automation:
+  ciEnforced: true
+  reportPath: governance/evidence/freshness/architecture-evidence-freshness.json
+review:
+  reviewedOn: 2026-06-02
+  nextReviewOn: 2026-09-30
+  approver: governance-team

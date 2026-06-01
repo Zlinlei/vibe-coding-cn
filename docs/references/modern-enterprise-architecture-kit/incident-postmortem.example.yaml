@@ -1,0 +1,26 @@
+postmortem: order-command-service-sev2-2026-06-02
+service: order-command-service
+domain: order
+owner: team-order
+incident:
+  id: INC-2026-0602-order
+  severity: sev2
+  detectedAt: 2026-06-02T04:10:00Z
+  resolvedAt: 2026-06-02T04:42:00Z
+impact:
+  customerImpact: delayed order creation in one region
+  sloBurn: 4 percent monthly error budget
+rootCause: canary configuration missed one required downstream timeout
+actions:
+  - action: add downstream timeout policy test
+    owner: team-order
+    dueDate: 2026-06-10
+    status: closed
+prevention:
+  runbookUpdated: true
+  gateUpdated: true
+  monitoringUpdated: true
+closure:
+  status: closed
+  approvedBy: sre-lead
+  closedOn: 2026-06-02
