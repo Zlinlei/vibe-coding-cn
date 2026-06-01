@@ -1,0 +1,34 @@
+manifest: modern-enterprise-architecture-audit-export-integrity
+version: V2.17
+owner: governance-team
+generatedOn: 2026-06-02
+algorithm: sha256
+scope:
+  architectureVersion: V2.17
+  package: modern-enterprise-architecture-audit-export
+  controlCount: 32
+  starterKitPairs: 48
+outputs:
+  - path: build/modern-enterprise-architecture-audit/audit-export.json
+    type: json
+    required: true
+    digestRequired: true
+  - path: build/modern-enterprise-architecture-audit/audit-export.md
+    type: markdown
+    required: true
+    digestRequired: true
+  - path: build/modern-enterprise-architecture-audit/oscal-summary.json
+    type: json
+    required: true
+    digestRequired: true
+verification:
+  command: make check-modern-architecture-audit-export
+  result: pass
+  checker: scripts/check-modern-architecture-audit-export.py
+tamperEvidence:
+  includesGeneratedOutputs: true
+  includesSourceArtifacts: true
+  blocksOnMismatch: true
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

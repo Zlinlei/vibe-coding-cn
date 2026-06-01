@@ -116,7 +116,9 @@
         "verificationCommand",
         "verificationResult",
         "oscalControlCountMatchesCatalog",
-        "poamRequiredFollowsOpenFindings"
+        "poamRequiredFollowsOpenFindings",
+        "integrityManifestRequired",
+        "generatedOutputDigestsMatch"
       ],
       "properties": {
         "architectureVersion": {
@@ -146,6 +148,12 @@
           "type": "boolean"
         },
         "poamRequiredFollowsOpenFindings": {
+          "type": "boolean"
+        },
+        "integrityManifestRequired": {
+          "type": "boolean"
+        },
+        "generatedOutputDigestsMatch": {
           "type": "boolean"
         }
       }

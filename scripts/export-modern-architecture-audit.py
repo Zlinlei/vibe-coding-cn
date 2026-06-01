@@ -27,6 +27,7 @@ REQUIRED_EXPORT_ARTIFACTS = [
     "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
+    "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
     "scripts/check-modern-architecture-kit.py",
     "scripts/export-modern-architecture-audit.py",
     "scripts/check-modern-architecture-audit-export.py",
@@ -123,6 +124,7 @@ def build_packet(checker: Any) -> dict[str, Any]:
             "baselineChangeRecord": examples.get("baseline-change-record"),
             "oscalExportProfile": examples.get("oscal-export-profile"),
             "auditExportGate": examples.get("audit-export-gate"),
+            "auditExportIntegrity": examples.get("audit-export-integrity"),
         },
         "artifacts": artifacts,
         "verification": {
@@ -202,12 +204,42 @@ def write_oscal_summary(packet: dict[str, Any], path: Path) -> None:
     path.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def build_integrity_manifest(packet: dict[str, Any], generated_outputs: list[Path]) -> dict[str, Any]:
+    return {
+        "integrityManifest": "modern-enterprise-architecture-audit-export-integrity",
+        "generatedAt": packet["generatedAt"],
+        "version": packet["version"],
+        "algorithm": "sha256",
+        "generatedOutputs": [
+            {
+                "path": relative(path),
+                "sha256": sha256_file(path),
+                "bytes": path.stat().st_size,
+            }
+            for path in generated_outputs
+        ],
+        "sourceArtifacts": packet["artifacts"],
+        "verification": {
+            "command": "make check-modern-architecture-audit-export",
+            "result": "pass",
+            "checker": "scripts/check-modern-architecture-audit-export.py",
+        },
+    }
+
+
+def write_integrity_manifest(packet: dict[str, Any], generated_outputs: list[Path], path: Path) -> None:
+    path.write_text(
+        json.dumps(build_integrity_manifest(packet, generated_outputs), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Export modern enterprise architecture audit packet")
     parser.add_argument(
         "--out-dir",
         default=str(DEFAULT_OUT_DIR),
-        help="Output directory for audit-export.json and audit-export.md",
+        help="Output directory for audit-export.json, audit-export.md, oscal-summary.json and integrity manifest",
     )
     return parser.parse_args()
 
@@ -224,13 +256,16 @@ def main() -> int:
     json_path = out_dir / "audit-export.json"
     markdown_path = out_dir / "audit-export.md"
     oscal_path = out_dir / "oscal-summary.json"
+    integrity_path = out_dir / "audit-export-integrity.json"
     write_json(packet, json_path)
     write_markdown(packet, markdown_path)
     write_oscal_summary(packet, oscal_path)
+    write_integrity_manifest(packet, [json_path, markdown_path, oscal_path], integrity_path)
 
     print(f"OK modern architecture audit export written: {relative(json_path)}")
     print(f"OK modern architecture audit report written: {relative(markdown_path)}")
     print(f"OK modern architecture OSCAL summary written: {relative(oscal_path)}")
+    print(f"OK modern architecture audit integrity manifest written: {relative(integrity_path)}")
     return 0
 
 

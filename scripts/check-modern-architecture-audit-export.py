@@ -10,6 +10,7 @@ the version manifest, control catalog, and audit-export-gate contract.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import sys
@@ -40,7 +41,76 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
-def validate_packet(packet: dict[str, Any], oscal: dict[str, Any], checker: Any) -> list[str]:
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def relative(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def validate_integrity_manifest(
+    integrity: dict[str, Any],
+    packet: dict[str, Any],
+    generated_outputs: list[Path],
+) -> list[str]:
+    errors: list[str] = []
+    if integrity.get("integrityManifest") != "modern-enterprise-architecture-audit-export-integrity":
+        errors.append("audit-export-integrity.json integrityManifest must be modern-enterprise-architecture-audit-export-integrity")
+    if integrity.get("version") != packet.get("version"):
+        errors.append("audit-export-integrity.json version must match audit-export.json version")
+    if integrity.get("algorithm") != "sha256":
+        errors.append("audit-export-integrity.json algorithm must be sha256")
+
+    generated_entries = integrity.get("generatedOutputs")
+    if not isinstance(generated_entries, list):
+        errors.append("audit-export-integrity.json generatedOutputs must be an array")
+        generated_entries = []
+    entries_by_path = {entry.get("path"): entry for entry in generated_entries if isinstance(entry, dict)}
+    for path in generated_outputs:
+        path_value = relative(path)
+        entry = entries_by_path.get(path_value)
+        if not isinstance(entry, dict):
+            errors.append(f"audit-export-integrity.json generatedOutputs must include {path_value}")
+            continue
+        if entry.get("sha256") != sha256_file(path):
+            errors.append(f"audit-export-integrity.json generatedOutputs sha256 mismatch for {path_value}")
+        if entry.get("bytes") != path.stat().st_size:
+            errors.append(f"audit-export-integrity.json generatedOutputs bytes mismatch for {path_value}")
+
+    source_artifacts = integrity.get("sourceArtifacts")
+    if source_artifacts != packet.get("artifacts"):
+        errors.append("audit-export-integrity.json sourceArtifacts must match audit-export.json artifacts")
+
+    verification = integrity.get("verification")
+    if not isinstance(verification, dict):
+        errors.append("audit-export-integrity.json verification must be an object")
+    else:
+        if verification.get("command") != "make check-modern-architecture-audit-export":
+            errors.append(
+                "audit-export-integrity.json verification.command must be make check-modern-architecture-audit-export"
+            )
+        if verification.get("result") != "pass":
+            errors.append("audit-export-integrity.json verification.result must be pass")
+        if verification.get("checker") != "scripts/check-modern-architecture-audit-export.py":
+            errors.append("audit-export-integrity.json verification.checker must point to audit export checker")
+    return errors
+
+
+def validate_packet(
+    packet: dict[str, Any],
+    oscal: dict[str, Any],
+    checker: Any,
+    integrity: dict[str, Any] | None = None,
+    generated_outputs: list[Path] | None = None,
+) -> list[str]:
     errors: list[str] = []
     version_manifest = checker.load_version_manifest()
     control_catalog = checker.load_control_catalog()
@@ -75,6 +145,7 @@ def validate_packet(packet: dict[str, Any], oscal: dict[str, Any], checker: Any)
     artifact_paths = {item.get("path") for item in artifacts if isinstance(item, dict)} if isinstance(artifacts, list) else set()
     required_artifacts = {
         "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
         "scripts/check-modern-architecture-audit-export.py",
     }
     if not required_artifacts.issubset(artifact_paths):
@@ -99,6 +170,17 @@ def validate_packet(packet: dict[str, Any], oscal: dict[str, Any], checker: Any)
             quality_gate = audit_export_gate.get("qualityGate")
             if isinstance(quality_gate, dict) and quality_gate.get("requiredInMakeTest") is not True:
                 errors.append("auditExportGate qualityGate.requiredInMakeTest must be true")
+            outputs = audit_export_gate.get("outputs")
+            if isinstance(outputs, list):
+                output_paths = {item.get("path") for item in outputs if isinstance(item, dict)}
+                if "build/modern-enterprise-architecture-audit/audit-export-integrity.json" not in output_paths:
+                    errors.append("auditExportGate outputs must include audit-export-integrity.json")
+            expectations = audit_export_gate.get("expectations")
+            if isinstance(expectations, dict):
+                if expectations.get("integrityManifestRequired") is not True:
+                    errors.append("auditExportGate expectations.integrityManifestRequired must be true")
+                if expectations.get("generatedOutputDigestsMatch") is not True:
+                    errors.append("auditExportGate expectations.generatedOutputDigestsMatch must be true")
 
     if oscal.get("version") != expected_version:
         errors.append("oscal-summary.json version must match currentVersion")
@@ -120,6 +202,11 @@ def validate_packet(packet: dict[str, Any], oscal: dict[str, Any], checker: Any)
         expected_poam_required = assessment_summary.get("openFindings") != 0
         if poam.get("required") != expected_poam_required:
             errors.append("oscal-summary.json poam.required must follow openFindings")
+
+    if integrity is None or generated_outputs is None:
+        errors.append("audit-export-integrity.json must be generated and validated")
+    else:
+        errors.extend(validate_integrity_manifest(integrity, packet, generated_outputs))
 
     return errors
 
@@ -148,13 +235,16 @@ def main() -> int:
     json_path = out_dir / "audit-export.json"
     markdown_path = out_dir / "audit-export.md"
     oscal_path = out_dir / "oscal-summary.json"
+    integrity_path = out_dir / "audit-export-integrity.json"
     exporter.write_json(packet, json_path)
     exporter.write_markdown(packet, markdown_path)
     exporter.write_oscal_summary(packet, oscal_path)
+    exporter.write_integrity_manifest(packet, [json_path, markdown_path, oscal_path], integrity_path)
 
     loaded_packet = load_json(json_path)
     loaded_oscal = load_json(oscal_path)
-    errors = validate_packet(loaded_packet, loaded_oscal, checker)
+    loaded_integrity = load_json(integrity_path)
+    errors = validate_packet(loaded_packet, loaded_oscal, checker, loaded_integrity, [json_path, markdown_path, oscal_path])
     if errors:
         print("MODERN_ARCHITECTURE_AUDIT_EXPORT_ERRORS")
         for error in errors:
@@ -167,7 +257,7 @@ def main() -> int:
     control_count = loaded_packet.get("controlCount")
     print(
         "OK modern architecture audit export gate checked: "
-        f"{version}, {pair_count} schema/example pairs, {control_count} controls"
+        f"{version}, {pair_count} schema/example pairs, {control_count} controls, integrity manifest"
     )
     return 0
 

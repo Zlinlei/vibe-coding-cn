@@ -1,5 +1,5 @@
 gate: modern-enterprise-architecture-audit-export-gate
-version: V2.16
+version: V2.17
 owner: governance-team
 generatedOn: 2026-06-02
 command:
@@ -23,14 +23,20 @@ outputs:
     type: json
     required: true
     invariant: OSCAL summary control count, profile version and POA&M state match assessment evidence
+  - path: build/modern-enterprise-architecture-audit/audit-export-integrity.json
+    type: json
+    required: true
+    invariant: generated output digests match the exported audit files
 expectations:
-  architectureVersion: V2.16
-  starterKitPairs: 47
-  controlCount: 31
+  architectureVersion: V2.17
+  starterKitPairs: 48
+  controlCount: 32
   verificationCommand: make check-modern-architecture-kit
   verificationResult: pass
   oscalControlCountMatchesCatalog: true
   poamRequiredFollowsOpenFindings: true
+  integrityManifestRequired: true
+  generatedOutputDigestsMatch: true
 ciIntegration:
   localGate: make test
   makefileTarget: check-modern-architecture-audit-export

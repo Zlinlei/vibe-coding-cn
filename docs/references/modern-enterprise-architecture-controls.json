@@ -1,14 +1,14 @@
 {
-  "version": "V2.16",
+  "version": "V2.17",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射和审计导出门禁",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁和导出完整性清单",
   "alignment": [
     {
       "source": "NIST OSCAL",
       "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
-      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告、基线变更记录、OSCAL 交换映射和导出门禁"
+      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告、基线变更记录、OSCAL 交换映射、导出门禁和完整性清单"
     },
     {
       "source": "SLSA v1.2",
@@ -1032,7 +1032,7 @@
           "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
           "nestedRequired": {
             "target": ["standard", "format", "machineReadable"],
-            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity"],
             "controls": ["count", "selectionSource"],
             "assessment": ["source", "result", "openFindings", "poamRequired"],
             "validation": ["command", "result", "output"],
@@ -1073,7 +1073,7 @@
           "nestedRequired": {
             "command": ["local", "preflight", "export"],
             "qualityGate": ["requiredInMakeTest", "zeroDependency", "blocksOnMismatch"],
-            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult"],
+            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch"],
             "ciIntegration": ["localGate", "makefileTarget", "script"],
             "retention": ["period", "reviewOn"]
           }
@@ -1089,9 +1089,51 @@
         "audit-export-gate.version must match currentVersion",
         "audit-export-gate.command.local must be make check-modern-architecture-audit-export",
         "audit-export-gate.expectations.controlCount must match control catalog length",
-        "audit-export-gate.outputs must include audit JSON, Markdown and OSCAL summary",
+        "audit-export-gate.outputs must include audit JSON, Markdown, OSCAL summary and integrity manifest",
+        "audit-export-gate.expectations.integrityManifestRequired must be true",
+        "audit-export-gate.expectations.generatedOutputDigestsMatch must be true",
         "audit-export-gate.qualityGate.requiredInMakeTest must be true",
         "audit-export-gate.ciIntegration.localGate must be make test",
+        "audit export gate runtime invariant check failed"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AUDIT-EXPORT-INTEGRITY-001",
+      "category": "audit-export",
+      "title": "审计导出生成物必须有完整性清单和哈希校验",
+      "statement": "审计导出包必须生成独立完整性清单，记录 JSON、Markdown、OSCAL 摘要和源证据制品的 SHA-256 摘要，并由门禁阻断摘要不一致的导出结果。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
+        "scripts/export-modern-architecture-audit.py",
+        "scripts/check-modern-architecture-audit-export.py"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.schema.json",
+          "required": ["manifest", "version", "owner", "generatedOn", "algorithm", "scope", "outputs", "verification", "tamperEvidence", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureVersion", "package", "controlCount", "starterKitPairs"],
+            "verification": ["command", "result", "checker"],
+            "tamperEvidence": ["includesGeneratedOutputs", "includesSourceArtifacts", "blocksOnMismatch"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-integrity.example.yaml",
+          "fields": ["manifest", "version", "algorithm", "scope.controlCount", "outputs", "verification.command", "tamperEvidence.blocksOnMismatch", "retention.reviewOn"]
+        }
+      ],
+      "checkerEvidence": [
+        "audit-export-integrity.version must match currentVersion",
+        "audit-export-integrity.scope.controlCount must match control catalog length",
+        "audit-export-integrity.outputs must include audit JSON, Markdown and OSCAL summary",
+        "audit-export-integrity.outputs.required must be true",
+        "audit-export-integrity.outputs.digestRequired must be true",
+        "audit-export-integrity.verification.command must be make check-modern-architecture-audit-export",
+        "audit-export-integrity.tamperEvidence.includesGeneratedOutputs must be true",
         "audit export gate runtime invariant check failed"
       ]
     }

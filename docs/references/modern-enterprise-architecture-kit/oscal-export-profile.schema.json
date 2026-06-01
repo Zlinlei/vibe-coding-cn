@@ -69,7 +69,8 @@
         "auditExportManifest",
         "controlAssessmentReport",
         "baselineChangeRecord",
-        "auditExportGate"
+        "auditExportGate",
+        "auditExportIntegrity"
       ],
       "properties": {
         "versionManifest": {
@@ -97,6 +98,10 @@
           "minLength": 1
         },
         "auditExportGate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "auditExportIntegrity": {
           "type": "string",
           "minLength": 1
         }
