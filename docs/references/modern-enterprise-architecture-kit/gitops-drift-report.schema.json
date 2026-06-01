@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GitOps Drift Report",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "report",
+    "environment",
+    "service",
+    "domain",
+    "owner",
+    "expected",
+    "observed",
+    "drift",
+    "decision",
+    "generatedAt"
+  ],
+  "properties": {
+    "report": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "environment": { "type": "string", "enum": ["dev", "staging", "prod"] },
+    "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
+    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "expected": {
+      "type": "object",
+      "required": ["namespace", "imageDigest", "replicas", "configHash", "serviceAccount", "policyHash"],
+      "properties": {
+        "namespace": { "type": "string", "minLength": 1 },
+        "imageDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "replicas": { "type": "integer" },
+        "configHash": { "type": "string", "minLength": 1 },
+        "serviceAccount": { "type": "string", "minLength": 1 },
+        "policyHash": { "type": "string", "minLength": 1 }
+      }
+    },
+    "observed": {
+      "type": "object",
+      "required": ["namespace", "imageDigest", "replicas", "configHash", "serviceAccount", "policyHash"],
+      "properties": {
+        "namespace": { "type": "string", "minLength": 1 },
+        "imageDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "replicas": { "type": "integer" },
+        "configHash": { "type": "string", "minLength": 1 },
+        "serviceAccount": { "type": "string", "minLength": 1 },
+        "policyHash": { "type": "string", "minLength": 1 }
+      }
+    },
+    "drift": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "severity", "description"],
+        "properties": {
+          "field": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["none", "low", "medium", "high", "critical"] },
+          "description": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "decision": { "type": "string", "enum": ["no-drift", "investigate", "block-release"] },
+    "generatedAt": { "type": "string", "format": "date" }
+  }
+}

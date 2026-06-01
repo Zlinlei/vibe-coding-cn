@@ -1,0 +1,25 @@
+report: order-command-service-prod-drift
+environment: prod
+service: order-command-service
+domain: order
+owner: team-order
+expected:
+  namespace: order-prod
+  imageDigest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+  replicas: 3
+  configHash: config:8f14e45fceea167a5a36dedd4bea2543
+  serviceAccount: order-command-service
+  policyHash: policy:c9f0f895fb98ab9159f51fd0297e236d
+observed:
+  namespace: order-prod
+  imageDigest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+  replicas: 3
+  configHash: config:8f14e45fceea167a5a36dedd4bea2543
+  serviceAccount: order-command-service
+  policyHash: policy:c9f0f895fb98ab9159f51fd0297e236d
+drift:
+  - field: none
+    severity: none
+    description: no drift detected
+decision: no-drift
+generatedAt: 2026-06-01

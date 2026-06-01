@@ -1,0 +1,22 @@
+exception: order-command-service-temporary-policy-exception
+policy: governance/supply-chain/prod-admission.rego
+subject: order-command-service
+owner: team-order
+reason: temporary vendor scanner outage during approved emergency release
+risk: medium
+compensatingControls:
+  - manual SBOM review completed
+  - runtime deployment restricted to canary window
+requestedAt: 2026-06-01
+approvedAt: 2026-06-01
+status: approved
+approver: security-team
+expiresOn: 2026-06-15
+remediation:
+  owner: team-order
+  plan: restore automated scanner evidence and rerun supply-chain gate
+  dueDate: 2026-06-10
+closure:
+  required: true
+  autoBlockAfterExpiry: true
+  evidence: governance/evidence/exceptions/order-command-service-temporary-policy-exception.md

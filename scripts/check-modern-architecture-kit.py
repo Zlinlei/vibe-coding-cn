@@ -32,6 +32,12 @@ PAIR_NAMES = [
     "catalog-data-product",
     "catalog-ai-product",
     "gitops-deployment",
+    "release-evidence",
+    "supply-chain-attestation",
+    "policy-exception",
+    "api-compatibility-report",
+    "event-compatibility-report",
+    "gitops-drift-report",
     "production-readiness",
     "raci",
     "tiering-policy",
@@ -400,6 +406,17 @@ def load_examples() -> dict[str, Any]:
 
 def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+
+    def parse_example_date(value: Any) -> date | None:
+        if not isinstance(value, str) or not is_iso_date(value):
+            return None
+        return date.fromisoformat(value)
+
+    def mapping_values(items: Any, key: str) -> list[Any]:
+        if not isinstance(items, list):
+            return []
+        return [item.get(key) for item in items if isinstance(item, dict)]
+
     domain = examples.get("domain")
     service = examples.get("service")
     api_contract = examples.get("api-contract")
@@ -413,6 +430,13 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     fine_tuning_contract = examples.get("fine-tuning-contract")
     catalog_ai_product = examples.get("catalog-ai-product")
     gitops_deployment = examples.get("gitops-deployment")
+    release_evidence = examples.get("release-evidence")
+    supply_chain_attestation = examples.get("supply-chain-attestation")
+    policy_exception = examples.get("policy-exception")
+    api_compatibility_report = examples.get("api-compatibility-report")
+    event_compatibility_report = examples.get("event-compatibility-report")
+    gitops_drift_report = examples.get("gitops-drift-report")
+    audit_evidence_index = examples.get("audit-evidence-index")
     scorecard = examples.get("scorecard")
 
     if isinstance(domain, dict) and isinstance(service, dict):
@@ -464,6 +488,14 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             if runtime.get("imageRepository") != service_runtime.get("imageRepository"):
                 errors.append("cross-file: catalog runtime imageRepository must match service runtime imageRepository")
 
+    if isinstance(catalog_component, dict) and isinstance(gitops_deployment, dict):
+        runtime = catalog_component.get("runtime")
+        if isinstance(runtime, dict):
+            if runtime.get("namespace") != gitops_deployment.get("namespace"):
+                errors.append("cross-file: catalog runtime namespace must match gitops-deployment.namespace")
+            if runtime.get("deployment") != gitops_deployment.get("deployment"):
+                errors.append("cross-file: catalog runtime deployment must match gitops-deployment.deployment")
+
     if isinstance(service, dict) and isinstance(gitops_deployment, dict):
         if gitops_deployment.get("domain") != service.get("domain"):
             errors.append("cross-file: gitops-deployment.domain must match service.domain")
@@ -477,9 +509,158 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             if deployment_image.get("repository") != service_runtime.get("imageRepository"):
                 errors.append("cross-file: gitops-deployment.image.repository must match service.runtime.imageRepository")
 
+    if isinstance(service, dict) and isinstance(release_evidence, dict):
+        if release_evidence.get("subjectService") != service.get("service"):
+            errors.append("cross-file: release-evidence.subjectService must match service.service")
+        if release_evidence.get("domain") != service.get("domain"):
+            errors.append("cross-file: release-evidence.domain must match service.domain")
+        if release_evidence.get("owner") != service.get("owner"):
+            errors.append("cross-file: release-evidence.owner must match service.owner")
+        artifact = release_evidence.get("artifact")
+        service_runtime = service.get("runtime")
+        if isinstance(artifact, dict) and isinstance(service_runtime, dict):
+            if artifact.get("repository") != service_runtime.get("imageRepository"):
+                errors.append("cross-file: release-evidence.artifact.repository must match service.runtime.imageRepository")
+
+    if isinstance(gitops_deployment, dict) and isinstance(release_evidence, dict):
+        if release_evidence.get("environment") != gitops_deployment.get("environment"):
+            errors.append("cross-file: release-evidence.environment must match gitops-deployment.environment")
+        artifact = release_evidence.get("artifact")
+        deployment_image = gitops_deployment.get("image")
+        if isinstance(artifact, dict) and isinstance(deployment_image, dict):
+            if artifact.get("digest") != deployment_image.get("digest"):
+                errors.append("cross-file: release-evidence.artifact.digest must match gitops-deployment.image.digest")
+
+    if isinstance(catalog_component, dict) and isinstance(release_evidence, dict):
+        expected_component = f"catalog/components/{catalog_component.get('name')}.yaml"
+        if release_evidence.get("catalogComponent") != expected_component:
+            errors.append("cross-file: release-evidence.catalogComponent must point to catalog component example path")
+        runtime = catalog_component.get("runtime")
+        if isinstance(runtime, dict) and release_evidence.get("gitopsPath") != runtime.get("gitopsPath"):
+            errors.append("cross-file: release-evidence.gitopsPath must match catalog-component.runtime.gitopsPath")
+
+    if isinstance(release_evidence, dict) and isinstance(audit_evidence_index, dict):
+        if release_evidence.get("release") != audit_evidence_index.get("evidence"):
+            errors.append("cross-file: release-evidence.release must match audit-evidence-index.evidence")
+        if release_evidence.get("owner") != audit_evidence_index.get("owner"):
+            errors.append("cross-file: release-evidence.owner must match audit-evidence-index.owner")
+        if release_evidence.get("subjectService") != audit_evidence_index.get("subject"):
+            errors.append("cross-file: release-evidence.subjectService must match audit-evidence-index.subject")
+
+    if isinstance(service, dict) and isinstance(supply_chain_attestation, dict):
+        if supply_chain_attestation.get("subjectService") != service.get("service"):
+            errors.append("cross-file: supply-chain-attestation.subjectService must match service.service")
+        if supply_chain_attestation.get("owner") != service.get("owner"):
+            errors.append("cross-file: supply-chain-attestation.owner must match service.owner")
+        artifact = supply_chain_attestation.get("artifact")
+        service_runtime = service.get("runtime")
+        if isinstance(artifact, dict) and isinstance(service_runtime, dict):
+            if artifact.get("repository") != service_runtime.get("imageRepository"):
+                errors.append("cross-file: supply-chain-attestation.artifact.repository must match service.runtime.imageRepository")
+
+    if isinstance(gitops_deployment, dict) and isinstance(supply_chain_attestation, dict):
+        artifact = supply_chain_attestation.get("artifact")
+        deployment_image = gitops_deployment.get("image")
+        if isinstance(artifact, dict) and isinstance(deployment_image, dict):
+            if artifact.get("digest") != deployment_image.get("digest"):
+                errors.append("cross-file: supply-chain-attestation.artifact.digest must match gitops-deployment.image.digest")
+
+    if isinstance(release_evidence, dict) and isinstance(supply_chain_attestation, dict):
+        if supply_chain_attestation.get("source", {}).get("commit") != release_evidence.get("commit"):
+            errors.append("cross-file: supply-chain-attestation.source.commit must match release-evidence.commit")
+        release_supply_chain = release_evidence.get("supplyChain")
+        if isinstance(release_supply_chain, dict):
+            if release_supply_chain.get("attestation") != supply_chain_attestation.get("attestation"):
+                errors.append("cross-file: release-evidence.supplyChain.attestation must match supply-chain-attestation.attestation")
+            if release_supply_chain.get("sbom") != supply_chain_attestation.get("sbom", {}).get("location"):
+                errors.append("cross-file: release-evidence.supplyChain.sbom must match supply-chain-attestation.sbom.location")
+            if release_supply_chain.get("provenance") != supply_chain_attestation.get("provenance", {}).get("location"):
+                errors.append(
+                    "cross-file: release-evidence.supplyChain.provenance must match supply-chain-attestation.provenance.location"
+                )
+            if release_supply_chain.get("signature") != supply_chain_attestation.get("signature", {}).get("location"):
+                errors.append(
+                    "cross-file: release-evidence.supplyChain.signature must match supply-chain-attestation.signature.location"
+                )
+        release_verification = release_evidence.get("verification")
+        attestation_verification = supply_chain_attestation.get("verification")
+        if isinstance(release_verification, dict) and isinstance(attestation_verification, dict):
+            if release_verification.get("policy") != attestation_verification.get("policy"):
+                errors.append("cross-file: release-evidence.verification.policy must match supply-chain-attestation.verification.policy")
+
+    if isinstance(service, dict) and isinstance(policy_exception, dict):
+        if policy_exception.get("subject") != service.get("service"):
+            errors.append("cross-file: policy-exception.subject must match service.service")
+        if policy_exception.get("owner") != service.get("owner"):
+            errors.append("cross-file: policy-exception.owner must match service.owner")
+
+    if isinstance(policy_exception, dict) and isinstance(supply_chain_attestation, dict):
+        if policy_exception.get("policy") != supply_chain_attestation.get("verification", {}).get("policy"):
+            errors.append("cross-file: policy-exception.policy must match supply-chain-attestation.verification.policy")
+        approved_at = parse_example_date(policy_exception.get("approvedAt"))
+        expires_on = parse_example_date(policy_exception.get("expiresOn"))
+        remediation = policy_exception.get("remediation")
+        due_date = parse_example_date(remediation.get("dueDate")) if isinstance(remediation, dict) else None
+        if approved_at is not None and expires_on is not None and expires_on <= approved_at:
+            errors.append("cross-file: policy-exception.expiresOn must be after approvedAt")
+        if due_date is not None and expires_on is not None and due_date > expires_on:
+            errors.append("cross-file: policy-exception.remediation.dueDate must be on or before expiresOn")
+
     if isinstance(api_contract, dict) and isinstance(ai_tool_contract, dict):
         if ai_tool_contract.get("backingApi") != api_contract.get("api"):
             errors.append("cross-file: ai-tool-contract.backingApi must match api-contract.api")
+
+    if isinstance(api_contract, dict) and isinstance(api_compatibility_report, dict):
+        if api_compatibility_report.get("api") != api_contract.get("api"):
+            errors.append("cross-file: api-compatibility-report.api must match api-contract.api")
+        if api_compatibility_report.get("owner") != api_contract.get("owner"):
+            errors.append("cross-file: api-compatibility-report.owner must match api-contract.owner")
+        if api_compatibility_report.get("candidateVersion") != api_contract.get("version"):
+            errors.append("cross-file: api-compatibility-report.candidateVersion must match api-contract.version")
+        if api_compatibility_report.get("spec") != api_contract.get("spec"):
+            errors.append("cross-file: api-compatibility-report.spec must match api-contract.spec")
+        api_consumers = sorted(api_contract.get("consumers", [])) if isinstance(api_contract.get("consumers"), list) else []
+        impact_consumers = sorted(mapping_values(api_compatibility_report.get("consumerImpact"), "consumer"))
+        if api_consumers != impact_consumers:
+            errors.append("cross-file: api-compatibility-report.consumerImpact consumers must match api-contract.consumers")
+
+    if isinstance(event_contract, dict) and isinstance(event_compatibility_report, dict):
+        if event_compatibility_report.get("event") != event_contract.get("event"):
+            errors.append("cross-file: event-compatibility-report.event must match event-contract.event")
+        if event_compatibility_report.get("owner") != event_contract.get("owner"):
+            errors.append("cross-file: event-compatibility-report.owner must match event-contract.owner")
+        if event_compatibility_report.get("candidateVersion") != event_contract.get("version"):
+            errors.append("cross-file: event-compatibility-report.candidateVersion must match event-contract.version")
+        if event_compatibility_report.get("schema") != event_contract.get("schema"):
+            errors.append("cross-file: event-compatibility-report.schema must match event-contract.schema")
+        event_consumers = sorted(event_contract.get("consumers", [])) if isinstance(event_contract.get("consumers"), list) else []
+        impact_consumers = sorted(mapping_values(event_compatibility_report.get("consumerImpact"), "consumer"))
+        if event_consumers != impact_consumers:
+            errors.append("cross-file: event-compatibility-report.consumerImpact consumers must match event-contract.consumers")
+
+    if isinstance(gitops_deployment, dict) and isinstance(gitops_drift_report, dict):
+        if gitops_drift_report.get("environment") != gitops_deployment.get("environment"):
+            errors.append("cross-file: gitops-drift-report.environment must match gitops-deployment.environment")
+        if gitops_drift_report.get("service") != gitops_deployment.get("service"):
+            errors.append("cross-file: gitops-drift-report.service must match gitops-deployment.service")
+        if gitops_drift_report.get("domain") != gitops_deployment.get("domain"):
+            errors.append("cross-file: gitops-drift-report.domain must match gitops-deployment.domain")
+        if isinstance(service, dict) and gitops_drift_report.get("owner") != service.get("owner"):
+            errors.append("cross-file: gitops-drift-report.owner must match service.owner")
+        expected = gitops_drift_report.get("expected")
+        deployment_image = gitops_deployment.get("image")
+        if isinstance(expected, dict) and isinstance(deployment_image, dict):
+            if expected.get("imageDigest") != deployment_image.get("digest"):
+                errors.append("cross-file: gitops-drift-report.expected.imageDigest must match gitops-deployment.image.digest")
+            if expected.get("namespace") != gitops_deployment.get("namespace"):
+                errors.append("cross-file: gitops-drift-report.expected.namespace must match gitops-deployment.namespace")
+            if expected.get("replicas") != gitops_deployment.get("replicas"):
+                errors.append("cross-file: gitops-drift-report.expected.replicas must match gitops-deployment.replicas")
+        observed = gitops_drift_report.get("observed")
+        if gitops_drift_report.get("decision") == "no-drift" and isinstance(expected, dict) and isinstance(observed, dict):
+            for field in ("namespace", "imageDigest", "replicas", "configHash", "serviceAccount", "policyHash"):
+                if expected.get(field) != observed.get(field):
+                    errors.append(f"cross-file: gitops-drift-report.observed.{field} must match expected.{field} when decision is no-drift")
 
     if isinstance(ai_product, dict) and isinstance(ai_tool_contract, dict):
         tools = ai_product.get("tools")

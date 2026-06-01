@@ -1,0 +1,37 @@
+attestation: order-command-service-supply-chain
+subjectService: order-command-service
+owner: team-order
+source:
+  repository: domains/order/services/order-command-service
+  commit: 0123456789abcdef0123456789abcdef01234567
+artifact:
+  repository: registry.company.com/order/order-command-service
+  digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+slsa:
+  level: 3
+  buildType: https://slsa.dev/container-based-build/v1
+builder:
+  id: github-actions-hardened-builder
+  workflow: .github/workflows/release.yml
+  isolated: true
+sbom:
+  format: cyclonedx
+  location: artifacts/order-command-service/sbom.cyclonedx.json
+provenance:
+  format: in-toto
+  location: artifacts/order-command-service/provenance.intoto.jsonl
+signature:
+  provider: sigstore
+  location: artifacts/order-command-service/signature.sigstore
+certificate:
+  identity: https://github.com/company/platform/.github/workflows/release.yml@refs/heads/main
+  issuer: https://token.actions.githubusercontent.com
+transparencyLog:
+  provider: rekor
+  entry: rekor://order-command-service/1234567890
+verification:
+  policy: governance/supply-chain/prod-admission.rego
+  command: cosign verify --certificate-identity-regexp github.com/company/platform --certificate-oidc-issuer https://token.actions.githubusercontent.com registry.company.com/order/order-command-service@sha256:1111111111111111111111111111111111111111111111111111111111111111
+  evidence: governance/evidence/releases/order-command-service-2026-06-01.md
+  verifiedAt: 2026-06-01
+  result: pass

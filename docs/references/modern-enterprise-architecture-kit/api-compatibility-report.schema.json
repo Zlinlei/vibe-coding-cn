@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API Compatibility Report",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "report",
+    "api",
+    "owner",
+    "previousVersion",
+    "candidateVersion",
+    "spec",
+    "checks",
+    "breakingChanges",
+    "consumerImpact",
+    "waiver",
+    "decision",
+    "generatedAt"
+  ],
+  "properties": {
+    "report": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "api": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-api$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "previousVersion": { "type": "string", "pattern": "^v[0-9]+$" },
+    "candidateVersion": { "type": "string", "pattern": "^v[0-9]+$" },
+    "spec": { "type": "string", "minLength": 1 },
+    "checks": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "breakingChanges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule", "severity", "description"],
+        "properties": {
+          "rule": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["none", "low", "medium", "high", "critical"] },
+          "description": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "consumerImpact": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["consumer", "impact", "migrationRequired"],
+        "properties": {
+          "consumer": { "type": "string", "minLength": 1 },
+          "impact": { "type": "string", "minLength": 1 },
+          "migrationRequired": { "type": "boolean" }
+        }
+      }
+    },
+    "waiver": {
+      "type": "object",
+      "required": ["required", "exception"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "exception": { "type": "string", "minLength": 1 }
+      }
+    },
+    "decision": { "type": "string", "enum": ["pass", "fail", "waived"] },
+    "generatedAt": { "type": "string", "format": "date" }
+  }
+}

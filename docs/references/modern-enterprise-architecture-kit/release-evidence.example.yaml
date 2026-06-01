@@ -1,0 +1,34 @@
+release: order-command-service-release-2026-06-01
+subjectService: order-command-service
+domain: order
+environment: prod
+owner: team-order
+commit: 0123456789abcdef0123456789abcdef01234567
+gitopsRevision: abcdef0123456789abcdef0123456789abcdef01
+gitopsPath: infra/gitops/environments/prod/order/order-command-service
+artifact:
+  repository: registry.company.com/order/order-command-service
+  digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+pipelineRun:
+  system: github-actions
+  runId: "1234567890"
+  url: https://github.com/company/platform/actions/runs/1234567890
+catalogComponent: catalog/components/order-command-service.yaml
+supplyChain:
+  attestation: order-command-service-supply-chain
+  sbom: artifacts/order-command-service/sbom.cyclonedx.json
+  provenance: artifacts/order-command-service/provenance.intoto.jsonl
+  signature: artifacts/order-command-service/signature.sigstore
+tests:
+  - make test
+  - contract compatibility checks
+approvals:
+  - role: service-owner
+    approver: team-order
+    date: 2026-06-01
+    status: approved
+verification:
+  policy: governance/supply-chain/prod-admission.rego
+  result: pass
+  evidence: governance/evidence/releases/order-command-service-2026-06-01.md
+generatedAt: 2026-06-01

@@ -1,0 +1,26 @@
+report: order-command-api-compatibility
+api: order-command-api
+owner: team-order
+previousVersion: v1
+candidateVersion: v2
+spec: contracts/apis/order-command.openapi.yaml
+checks:
+  - no removed required response fields
+  - no narrowed request schema
+  - deprecated v1 route remains available
+breakingChanges:
+  - rule: no-breaking-change
+    severity: none
+    description: no incompatible API change detected
+consumerImpact:
+  - consumer: checkout-web
+    impact: no migration required
+    migrationRequired: false
+  - consumer: partner-api
+    impact: no migration required
+    migrationRequired: false
+waiver:
+  required: false
+  exception: none
+decision: pass
+generatedAt: 2026-06-01

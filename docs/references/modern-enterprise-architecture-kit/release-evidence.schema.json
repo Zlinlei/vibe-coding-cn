@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Evidence",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "release",
+    "subjectService",
+    "domain",
+    "environment",
+    "owner",
+    "commit",
+    "gitopsRevision",
+    "gitopsPath",
+    "artifact",
+    "pipelineRun",
+    "catalogComponent",
+    "supplyChain",
+    "tests",
+    "approvals",
+    "verification",
+    "generatedAt"
+  ],
+  "properties": {
+    "release": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-release-[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "subjectService": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
+    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "environment": { "type": "string", "enum": ["dev", "staging", "prod"] },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "commit": { "type": "string", "pattern": "^[a-f0-9]{12,40}$" },
+    "gitopsRevision": { "type": "string", "pattern": "^[a-f0-9]{12,40}$" },
+    "gitopsPath": { "type": "string", "minLength": 1 },
+    "artifact": {
+      "type": "object",
+      "required": ["repository", "digest"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      }
+    },
+    "pipelineRun": {
+      "type": "object",
+      "required": ["system", "runId", "url"],
+      "properties": {
+        "system": { "type": "string", "minLength": 1 },
+        "runId": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "minLength": 1 }
+      }
+    },
+    "catalogComponent": { "type": "string", "minLength": 1 },
+    "supplyChain": {
+      "type": "object",
+      "required": ["attestation", "sbom", "provenance", "signature"],
+      "properties": {
+        "attestation": { "type": "string", "minLength": 1 },
+        "sbom": { "type": "string", "minLength": 1 },
+        "provenance": { "type": "string", "minLength": 1 },
+        "signature": { "type": "string", "minLength": 1 }
+      }
+    },
+    "tests": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "approvals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role", "approver", "date", "status"],
+        "properties": {
+          "role": { "type": "string", "minLength": 1 },
+          "approver": { "type": "string", "minLength": 1 },
+          "date": { "type": "string", "format": "date" },
+          "status": { "type": "string", "enum": ["approved", "rejected", "pending"] }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["policy", "result", "evidence"],
+      "properties": {
+        "policy": { "type": "string", "minLength": 1 },
+        "result": { "type": "string", "enum": ["pass", "fail", "waived"] },
+        "evidence": { "type": "string", "minLength": 1 }
+      }
+    },
+    "generatedAt": { "type": "string", "format": "date" }
+  }
+}

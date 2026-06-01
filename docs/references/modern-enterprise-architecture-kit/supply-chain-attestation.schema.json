@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Supply Chain Attestation",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "attestation",
+    "subjectService",
+    "owner",
+    "source",
+    "artifact",
+    "slsa",
+    "builder",
+    "sbom",
+    "provenance",
+    "signature",
+    "certificate",
+    "transparencyLog",
+    "verification"
+  ],
+  "properties": {
+    "attestation": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "subjectService": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-service$" },
+    "owner": { "type": "string", "pattern": "^team-[a-z0-9-]+$" },
+    "source": {
+      "type": "object",
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{12,40}$" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["repository", "digest"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      }
+    },
+    "slsa": {
+      "type": "object",
+      "required": ["level", "buildType"],
+      "properties": {
+        "level": { "type": "integer", "enum": [1, 2, 3] },
+        "buildType": { "type": "string", "minLength": 1 }
+      }
+    },
+    "builder": {
+      "type": "object",
+      "required": ["id", "workflow", "isolated"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "workflow": { "type": "string", "minLength": 1 },
+        "isolated": { "type": "boolean" }
+      }
+    },
+    "sbom": {
+      "type": "object",
+      "required": ["format", "location"],
+      "properties": {
+        "format": { "type": "string", "enum": ["cyclonedx", "spdx"] },
+        "location": { "type": "string", "minLength": 1 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["format", "location"],
+      "properties": {
+        "format": { "type": "string", "enum": ["in-toto", "slsa"] },
+        "location": { "type": "string", "minLength": 1 }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": ["provider", "location"],
+      "properties": {
+        "provider": { "type": "string", "enum": ["sigstore", "cosign", "notary"] },
+        "location": { "type": "string", "minLength": 1 }
+      }
+    },
+    "certificate": {
+      "type": "object",
+      "required": ["identity", "issuer"],
+      "properties": {
+        "identity": { "type": "string", "minLength": 1 },
+        "issuer": { "type": "string", "minLength": 1 }
+      }
+    },
+    "transparencyLog": {
+      "type": "object",
+      "required": ["provider", "entry"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "entry": { "type": "string", "minLength": 1 }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["policy", "command", "evidence", "verifiedAt", "result"],
+      "properties": {
+        "policy": { "type": "string", "minLength": 1 },
+        "command": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 },
+        "verifiedAt": { "type": "string", "format": "date" },
+        "result": { "type": "string", "enum": ["pass", "fail", "waived"] }
+      }
+    }
+  }
+}

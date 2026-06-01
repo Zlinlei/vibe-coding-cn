@@ -1,0 +1,22 @@
+report: order-created-event-compatibility
+event: order-created
+owner: team-order
+previousVersion: v1
+candidateVersion: v1
+schema: contracts/events/order-created.asyncapi.yaml
+checks:
+  - no removed fields
+  - no incompatible type changes
+  - idempotency key unchanged
+consumerImpact:
+  - consumer: payment-service
+    impact: no replay or schema migration required
+    replayRequired: false
+  - consumer: fulfillment-service
+    impact: no replay or schema migration required
+    replayRequired: false
+waiver:
+  required: false
+  exception: none
+decision: pass
+generatedAt: 2026-06-01
