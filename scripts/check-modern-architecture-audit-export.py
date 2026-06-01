@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""Validate generated audit export output invariants.
+
+This gate intentionally reuses the repository-local starter kit checker and
+exporter instead of adding runtime dependencies. It proves that the audit
+packet can be generated and that the generated JSON/OSCAL summaries agree with
+the version manifest, control catalog, and audit-export-gate contract.
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CHECKER_PATH = ROOT / "scripts/check-modern-architecture-kit.py"
+EXPORTER_PATH = ROOT / "scripts/export-modern-architecture-audit.py"
+DEFAULT_OUT_DIR = ROOT / "build/modern-enterprise-architecture-audit"
+
+
+def load_module(path: Path, name: str) -> Any:
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {name} from {path.relative_to(ROOT)}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    with path.open(encoding="utf-8") as handle:
+        value = json.load(handle)
+    if not isinstance(value, dict):
+        raise RuntimeError(f"{path.relative_to(ROOT)} must contain a JSON object")
+    return value
+
+
+def validate_packet(packet: dict[str, Any], oscal: dict[str, Any], checker: Any) -> list[str]:
+    errors: list[str] = []
+    version_manifest = checker.load_version_manifest()
+    control_catalog = checker.load_control_catalog()
+    examples = checker.load_examples()
+    controls = control_catalog.get("controls")
+    if not isinstance(controls, list):
+        controls = []
+
+    expected_version = version_manifest.get("currentVersion")
+    expected_pair_count = len(checker.PAIR_NAMES)
+    expected_control_count = len(controls)
+
+    if packet.get("package") != "modern-enterprise-architecture-audit-export":
+        errors.append("audit-export.json package must be modern-enterprise-architecture-audit-export")
+    if packet.get("version") != expected_version:
+        errors.append("audit-export.json version must match currentVersion")
+    if packet.get("starterKitPairs") != expected_pair_count:
+        errors.append("audit-export.json starterKitPairs must match checker PAIR_NAMES")
+    if packet.get("controlCount") != expected_control_count:
+        errors.append("audit-export.json controlCount must match control catalog length")
+
+    verification = packet.get("verification")
+    if not isinstance(verification, dict):
+        errors.append("audit-export.json verification must be an object")
+    else:
+        if verification.get("command") != "make check-modern-architecture-kit":
+            errors.append("audit-export.json verification.command must be make check-modern-architecture-kit")
+        if verification.get("result") != "pass":
+            errors.append("audit-export.json verification.result must be pass")
+
+    artifacts = packet.get("artifacts")
+    artifact_paths = {item.get("path") for item in artifacts if isinstance(item, dict)} if isinstance(artifacts, list) else set()
+    required_artifacts = {
+        "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
+        "scripts/check-modern-architecture-audit-export.py",
+    }
+    if not required_artifacts.issubset(artifact_paths):
+        errors.append("audit-export.json artifacts must include audit export gate contract and checker")
+
+    evidence = packet.get("evidence")
+    if not isinstance(evidence, dict):
+        errors.append("audit-export.json evidence must be an object")
+    else:
+        audit_export_gate = evidence.get("auditExportGate")
+        if audit_export_gate != examples.get("audit-export-gate"):
+            errors.append("audit-export.json evidence.auditExportGate must match starter kit example")
+        if isinstance(audit_export_gate, dict):
+            expectations = audit_export_gate.get("expectations")
+            if isinstance(expectations, dict):
+                if expectations.get("architectureVersion") != expected_version:
+                    errors.append("auditExportGate expectations architectureVersion must match currentVersion")
+                if expectations.get("starterKitPairs") != expected_pair_count:
+                    errors.append("auditExportGate expectations starterKitPairs must match pair count")
+                if expectations.get("controlCount") != expected_control_count:
+                    errors.append("auditExportGate expectations controlCount must match control catalog length")
+            quality_gate = audit_export_gate.get("qualityGate")
+            if isinstance(quality_gate, dict) and quality_gate.get("requiredInMakeTest") is not True:
+                errors.append("auditExportGate qualityGate.requiredInMakeTest must be true")
+
+    if oscal.get("version") != expected_version:
+        errors.append("oscal-summary.json version must match currentVersion")
+    catalog = oscal.get("catalog")
+    oscal_controls = catalog.get("controls") if isinstance(catalog, dict) else None
+    if not isinstance(oscal_controls, list) or len(oscal_controls) != expected_control_count:
+        errors.append("oscal-summary.json catalog.controls must match control catalog length")
+    component_definition = oscal.get("componentDefinition")
+    if isinstance(component_definition, dict) and component_definition.get("controlCount") != expected_control_count:
+        errors.append("oscal-summary.json componentDefinition.controlCount must match control catalog length")
+    profile = oscal.get("profile")
+    if not isinstance(profile, dict) or profile.get("version") != expected_version:
+        errors.append("oscal-summary.json profile.version must match currentVersion")
+
+    assessment = examples.get("control-assessment-report")
+    assessment_summary = assessment.get("summary") if isinstance(assessment, dict) else {}
+    poam = oscal.get("poam")
+    if isinstance(poam, dict) and isinstance(assessment_summary, dict):
+        expected_poam_required = assessment_summary.get("openFindings") != 0
+        if poam.get("required") != expected_poam_required:
+            errors.append("oscal-summary.json poam.required must follow openFindings")
+
+    return errors
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Check modern architecture audit export output")
+    parser.add_argument(
+        "--out-dir",
+        default=str(DEFAULT_OUT_DIR),
+        help="Output directory for audit-export.json, audit-export.md and oscal-summary.json",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    out_dir = Path(args.out_dir)
+    if not out_dir.is_absolute():
+        out_dir = ROOT / out_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    checker = load_module(CHECKER_PATH, "modern_architecture_checker")
+    exporter = load_module(EXPORTER_PATH, "modern_architecture_audit_exporter")
+    packet = exporter.build_packet(checker)
+
+    json_path = out_dir / "audit-export.json"
+    markdown_path = out_dir / "audit-export.md"
+    oscal_path = out_dir / "oscal-summary.json"
+    exporter.write_json(packet, json_path)
+    exporter.write_markdown(packet, markdown_path)
+    exporter.write_oscal_summary(packet, oscal_path)
+
+    loaded_packet = load_json(json_path)
+    loaded_oscal = load_json(oscal_path)
+    errors = validate_packet(loaded_packet, loaded_oscal, checker)
+    if errors:
+        print("MODERN_ARCHITECTURE_AUDIT_EXPORT_ERRORS")
+        for error in errors:
+            print(error)
+        print(f"TOTAL={len(errors)}")
+        return 1
+
+    version = loaded_packet.get("version")
+    pair_count = loaded_packet.get("starterKitPairs")
+    control_count = loaded_packet.get("controlCount")
+    print(
+        "OK modern architecture audit export gate checked: "
+        f"{version}, {pair_count} schema/example pairs, {control_count} controls"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

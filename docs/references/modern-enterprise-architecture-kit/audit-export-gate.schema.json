@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit Export Gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gate",
+    "version",
+    "owner",
+    "generatedOn",
+    "command",
+    "qualityGate",
+    "outputs",
+    "expectations",
+    "ciIntegration",
+    "retention"
+  ],
+  "properties": {
+    "gate": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^V\\d+\\.\\d+$"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generatedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local",
+        "preflight",
+        "export"
+      ],
+      "properties": {
+        "local": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preflight": {
+          "type": "string",
+          "minLength": 1
+        },
+        "export": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "qualityGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredInMakeTest",
+        "zeroDependency",
+        "blocksOnMismatch"
+      ],
+      "properties": {
+        "requiredInMakeTest": {
+          "type": "boolean"
+        },
+        "zeroDependency": {
+          "type": "boolean"
+        },
+        "blocksOnMismatch": {
+          "type": "boolean"
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "type",
+          "required",
+          "invariant"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "invariant": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "expectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architectureVersion",
+        "starterKitPairs",
+        "controlCount",
+        "verificationCommand",
+        "verificationResult",
+        "oscalControlCountMatchesCatalog",
+        "poamRequiredFollowsOpenFindings"
+      ],
+      "properties": {
+        "architectureVersion": {
+          "type": "string",
+          "pattern": "^V\\d+\\.\\d+$"
+        },
+        "starterKitPairs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "controlCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "verificationCommand": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verificationResult": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "oscalControlCountMatchesCatalog": {
+          "type": "boolean"
+        },
+        "poamRequiredFollowsOpenFindings": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ciIntegration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localGate",
+        "makefileTarget",
+        "script"
+      ],
+      "properties": {
+        "localGate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "makefileTarget": {
+          "type": "string",
+          "minLength": 1
+        },
+        "script": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period",
+        "reviewOn"
+      ],
+      "properties": {
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

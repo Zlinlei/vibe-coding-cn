@@ -1,0 +1,40 @@
+gate: modern-enterprise-architecture-audit-export-gate
+version: V2.16
+owner: governance-team
+generatedOn: 2026-06-02
+command:
+  local: make check-modern-architecture-audit-export
+  preflight: make check-modern-architecture-kit
+  export: make export-modern-architecture-audit
+qualityGate:
+  requiredInMakeTest: true
+  zeroDependency: true
+  blocksOnMismatch: true
+outputs:
+  - path: build/modern-enterprise-architecture-audit/audit-export.json
+    type: json
+    required: true
+    invariant: version, pair count, control count, evidence and artifact list match source manifests
+  - path: build/modern-enterprise-architecture-audit/audit-export.md
+    type: markdown
+    required: true
+    invariant: human-readable report is generated from the same packet
+  - path: build/modern-enterprise-architecture-audit/oscal-summary.json
+    type: json
+    required: true
+    invariant: OSCAL summary control count, profile version and POA&M state match assessment evidence
+expectations:
+  architectureVersion: V2.16
+  starterKitPairs: 47
+  controlCount: 31
+  verificationCommand: make check-modern-architecture-kit
+  verificationResult: pass
+  oscalControlCountMatchesCatalog: true
+  poamRequiredFollowsOpenFindings: true
+ciIntegration:
+  localGate: make test
+  makefileTarget: check-modern-architecture-audit-export
+  script: scripts/check-modern-architecture-audit-export.py
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

@@ -26,8 +26,10 @@ REQUIRED_EXPORT_ARTIFACTS = [
     "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
+    "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
     "scripts/check-modern-architecture-kit.py",
     "scripts/export-modern-architecture-audit.py",
+    "scripts/check-modern-architecture-audit-export.py",
 ]
 
 
@@ -120,6 +122,7 @@ def build_packet(checker: Any) -> dict[str, Any]:
             "controlAssessmentReport": examples.get("control-assessment-report"),
             "baselineChangeRecord": examples.get("baseline-change-record"),
             "oscalExportProfile": examples.get("oscal-export-profile"),
+            "auditExportGate": examples.get("audit-export-gate"),
         },
         "artifacts": artifacts,
         "verification": {

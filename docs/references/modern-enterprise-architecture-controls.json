@@ -1,14 +1,14 @@
 {
-  "version": "V2.15",
+  "version": "V2.16",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录和 OSCAL 交换映射",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射和审计导出门禁",
   "alignment": [
     {
       "source": "NIST OSCAL",
       "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
-      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告、基线变更记录和 OSCAL 交换映射"
+      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告、基线变更记录、OSCAL 交换映射和导出门禁"
     },
     {
       "source": "SLSA v1.2",
@@ -914,6 +914,7 @@
         "audit-export-manifest.scope.controlCount must match control catalog length",
         "audit-export-manifest.scope.starterKitPairs must match starter kit pair count",
         "audit-export-manifest.contents must include required audit artifacts",
+        "audit-export-manifest.verification.command must be make check-modern-architecture-audit-export",
         "audit-export-manifest.verification.result must be pass",
         "audit-export-manifest.signing.required must be true"
       ]
@@ -925,6 +926,7 @@
       "statement": "审计导出不能只停留在清单模板，仓库必须提供零依赖导出脚本和 Make 入口，先校验 starter kit 再生成 JSON 与 Markdown 审计包。",
       "requiredArtifacts": [
         "scripts/export-modern-architecture-audit.py",
+        "scripts/check-modern-architecture-audit-export.py",
         "Makefile",
         "scripts/README.md"
       ],
@@ -934,6 +936,11 @@
         "audit export script must exist",
         "Makefile must expose export-modern-architecture-audit",
         "scripts README must mention export-modern-architecture-audit.py",
+        "audit export gate script must exist",
+        "Makefile must expose check-modern-architecture-audit-export",
+        "Makefile test gate must include check-modern-architecture-audit-export",
+        "scripts README must mention check-modern-architecture-audit-export.py",
+        "AGENTS.md must mention check-modern-architecture-audit-export",
         "AGENTS.md must mention export-modern-architecture-audit"
       ]
     },
@@ -1025,7 +1032,7 @@
           "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
           "nestedRequired": {
             "target": ["standard", "format", "machineReadable"],
-            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate"],
             "controls": ["count", "selectionSource"],
             "assessment": ["source", "result", "openFindings", "poamRequired"],
             "validation": ["command", "result", "output"],
@@ -1046,6 +1053,46 @@
         "oscal-export-profile.assessment.result must match control assessment summary",
         "oscal-export-profile.validation.command must be make export-modern-architecture-audit",
         "oscal-export-profile.validation.output must be oscal-summary.json"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AUDIT-EXPORT-GATE-001",
+      "category": "audit-export",
+      "title": "审计导出必须进入本地质量门禁并校验输出不变量",
+      "statement": "审计导出不能只证明脚本存在，还必须通过质量门禁真实生成导出包，并校验 JSON、Markdown 和 OSCAL 摘要与版本清单、控制目录和评估结果一致。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/audit-export-gate.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
+        "scripts/check-modern-architecture-audit-export.py",
+        "Makefile"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-gate.schema.json",
+          "required": ["gate", "version", "owner", "generatedOn", "command", "qualityGate", "outputs", "expectations", "ciIntegration", "retention"],
+          "nestedRequired": {
+            "command": ["local", "preflight", "export"],
+            "qualityGate": ["requiredInMakeTest", "zeroDependency", "blocksOnMismatch"],
+            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult"],
+            "ciIntegration": ["localGate", "makefileTarget", "script"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
+          "fields": ["gate", "version", "command.local", "qualityGate.requiredInMakeTest", "outputs", "expectations.controlCount", "ciIntegration.localGate", "retention.reviewOn"]
+        }
+      ],
+      "checkerEvidence": [
+        "audit-export-gate.version must match currentVersion",
+        "audit-export-gate.command.local must be make check-modern-architecture-audit-export",
+        "audit-export-gate.expectations.controlCount must match control catalog length",
+        "audit-export-gate.outputs must include audit JSON, Markdown and OSCAL summary",
+        "audit-export-gate.qualityGate.requiredInMakeTest must be true",
+        "audit-export-gate.ciIntegration.localGate must be make test",
+        "audit export gate runtime invariant check failed"
       ]
     }
   ]

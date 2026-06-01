@@ -1,8 +1,8 @@
 map: modern-enterprise-architecture-control-evidence
-version: V2.15
+version: V2.16
 owner: governance-team
 generatedOn: 2026-06-02
-controlCount: 30
+controlCount: 31
 freshness:
   maxAgeDays: 90
   expiryAction: block
@@ -301,6 +301,20 @@ controls:
     evidence:
       - path: docs/references/modern-enterprise-architecture-kit/oscal-export-profile.schema.json
         type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-AUDIT-EXPORT-GATE-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/audit-export-gate.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+      - path: scripts/check-modern-architecture-audit-export.py
+        type: checker
         source: git
         verifiedOn: 2026-06-02
     status: pass

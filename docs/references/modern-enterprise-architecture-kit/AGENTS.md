@@ -29,10 +29,11 @@ modern-enterprise-architecture-kit/
 - V2.13 起，控制评估报告属于可执行企业标准，不应退回说明性段落。
 - V2.14 起，架构基线变更记录属于可执行企业标准，不应退回说明性段落。
 - V2.15 起，OSCAL 交换映射属于可执行企业标准，不应退回说明性段落。
+- V2.16 起，审计导出门禁属于可执行企业标准，不应退回说明性段落。
 - 示例必须通过同名 schema 校验，并保持领域、服务、API、事件、数据产品、AI 产品、AI 工具、RAG、微调、GitOps、catalog、scorecard、发布证据、供应链证明、治理例外、兼容性报告和漂移报告之间的基础一致性。
 - V2.5 起，服务可靠性、数据治理、AI 运行控制、GitOps 运行安全和供应链漏洞/Scorecard 字段属于可执行门禁，不应退回说明性字段。
 - 示例只放最低可执行字段，不写敏感信息、真实域名、真实密钥或真实客户数据。
-- 修改本目录后必须运行 `make check-modern-architecture-kit` 和 `make test`。
+- 修改本目录后必须运行 `make check-modern-architecture-kit`、`make check-modern-architecture-audit-export` 和 `make test`。
 
 ## 边界
 

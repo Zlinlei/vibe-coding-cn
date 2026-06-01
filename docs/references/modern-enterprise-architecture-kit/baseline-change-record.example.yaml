@@ -1,6 +1,6 @@
-record: modern-enterprise-architecture-v2-15-baseline-change
-version: V2.15
-previousVersion: V2.14
+record: modern-enterprise-architecture-v2-16-baseline-change
+version: V2.16
+previousVersion: V2.15
 changeLevel: Minor
 status: implemented
 owner: governance-team
@@ -11,18 +11,24 @@ scope:
   architectureDocument: docs/references/modern-enterprise-architecture-template.md
   versionManifest: docs/references/modern-enterprise-architecture-version.json
   controlCatalog: docs/references/modern-enterprise-architecture-controls.json
-  controlCount: 30
-  starterKitPairs: 46
+  controlCount: 31
+  starterKitPairs: 47
   changedArtifacts:
     - docs/references/modern-enterprise-architecture-version.json
     - docs/references/modern-enterprise-architecture-controls.json
     - docs/references/modern-enterprise-architecture-kit/baseline-change-record.schema.json
     - docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml
-    - docs/references/modern-enterprise-architecture-kit/oscal-export-profile.schema.json
+    - docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
     - docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/audit-export-gate.schema.json
+    - docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml
     - scripts/check-modern-architecture-kit.py
+    - scripts/check-modern-architecture-audit-export.py
+    - Makefile
 impact:
-  summary: add OSCAL exchange profile and machine-readable OSCAL summary output
+  summary: add audit export gate and generated output invariant validation
   security: low
   privacy: low
   data: low
@@ -33,15 +39,17 @@ validation:
   result: pass
   commands:
     - make check-modern-architecture-kit
+    - make check-modern-architecture-audit-export
     - make export-modern-architecture-audit
     - make test
   evidence:
     - build/modern-enterprise-architecture-audit/audit-export.json
     - build/modern-enterprise-architecture-audit/audit-export.md
+    - build/modern-enterprise-architecture-audit/oscal-summary.json
 rollback:
   supported: true
-  previousCommit: 7dba68f
-  plan: revert the OSCAL export profile commit and restore V2.14 manifest, control catalog and starter kit counts
+  previousCommit: f2d1d24
+  plan: revert the audit export gate commit and restore V2.15 manifest, control catalog and starter kit counts
   owner: governance-team
 approvals:
   - role: architecture-governance

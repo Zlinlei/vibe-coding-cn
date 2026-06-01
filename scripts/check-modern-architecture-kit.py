@@ -9,8 +9,10 @@ the starter kit, then validates each example against its paired schema.
 from __future__ import annotations
 
 import json
+import importlib.util
 import re
 import sys
+import tempfile
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -21,6 +23,7 @@ KIT_DIR = ROOT / "docs/references/modern-enterprise-architecture-kit"
 VERSION_MANIFEST_PATH = ROOT / "docs/references/modern-enterprise-architecture-version.json"
 CONTROL_CATALOG_PATH = ROOT / "docs/references/modern-enterprise-architecture-controls.json"
 AUDIT_EXPORT_SCRIPT_PATH = ROOT / "scripts/export-modern-architecture-audit.py"
+AUDIT_EXPORT_GATE_SCRIPT_PATH = ROOT / "scripts/check-modern-architecture-audit-export.py"
 PAIR_NAMES = [
     "domain",
     "service",
@@ -68,6 +71,7 @@ PAIR_NAMES = [
     "control-assessment-report",
     "baseline-change-record",
     "oscal-export-profile",
+    "audit-export-gate",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -635,18 +639,70 @@ def validate_audit_export_automation() -> list[str]:
     makefile_path = ROOT / "Makefile"
     scripts_readme_path = ROOT / "scripts/README.md"
     root_agents_path = ROOT / "AGENTS.md"
+    makefile_text = makefile_path.read_text(encoding="utf-8") if makefile_path.is_file() else ""
+    scripts_readme_text = scripts_readme_path.read_text(encoding="utf-8") if scripts_readme_path.is_file() else ""
+    root_agents_text = root_agents_path.read_text(encoding="utf-8") if root_agents_path.is_file() else ""
 
     if not AUDIT_EXPORT_SCRIPT_PATH.is_file():
         errors.append("audit export script must exist")
-    if not makefile_path.is_file() or "export-modern-architecture-audit" not in makefile_path.read_text(encoding="utf-8"):
+    if not makefile_path.is_file() or "export-modern-architecture-audit" not in makefile_text:
         errors.append("Makefile must expose export-modern-architecture-audit")
-    if not scripts_readme_path.is_file() or "export-modern-architecture-audit.py" not in scripts_readme_path.read_text(
-        encoding="utf-8"
-    ):
+    if not scripts_readme_path.is_file() or "export-modern-architecture-audit.py" not in scripts_readme_text:
         errors.append("scripts README must mention export-modern-architecture-audit.py")
-    if not root_agents_path.is_file() or "export-modern-architecture-audit" not in root_agents_path.read_text(encoding="utf-8"):
+    if not root_agents_path.is_file() or "export-modern-architecture-audit" not in root_agents_text:
         errors.append("AGENTS.md must mention export-modern-architecture-audit")
+    if not AUDIT_EXPORT_GATE_SCRIPT_PATH.is_file():
+        errors.append("audit export gate script must exist")
+    if "check-modern-architecture-audit-export" not in makefile_text:
+        errors.append("Makefile must expose check-modern-architecture-audit-export")
+    test_line = re.search(r"^test:\s*(.+)$", makefile_text, re.MULTILINE)
+    if test_line is None or "check-modern-architecture-audit-export" not in test_line.group(1):
+        errors.append("Makefile test gate must include check-modern-architecture-audit-export")
+    if "check-modern-architecture-audit-export.py" not in scripts_readme_text:
+        errors.append("scripts README must mention check-modern-architecture-audit-export.py")
+    if "check-modern-architecture-audit-export" not in root_agents_text:
+        errors.append("AGENTS.md must mention check-modern-architecture-audit-export")
 
+    return errors
+
+
+def load_module(path: Path, name: str) -> Any:
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {name} from {path.relative_to(ROOT)}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_json_object(path: Path) -> dict[str, Any]:
+    with path.open(encoding="utf-8") as handle:
+        value = json.load(handle)
+    if not isinstance(value, dict):
+        raise RuntimeError(f"{path.relative_to(ROOT)} must contain a JSON object")
+    return value
+
+
+def validate_audit_export_gate_runtime() -> list[str]:
+    errors: list[str] = []
+    try:
+        exporter = load_module(AUDIT_EXPORT_SCRIPT_PATH, "modern_architecture_audit_exporter_runtime")
+        gate = load_module(AUDIT_EXPORT_GATE_SCRIPT_PATH, "modern_architecture_audit_export_gate_runtime")
+        checker = sys.modules[__name__]
+        packet = exporter.build_packet(checker)
+        with tempfile.TemporaryDirectory(prefix="modern-architecture-audit-") as temp_dir:
+            out_dir = Path(temp_dir)
+            json_path = out_dir / "audit-export.json"
+            markdown_path = out_dir / "audit-export.md"
+            oscal_path = out_dir / "oscal-summary.json"
+            exporter.write_json(packet, json_path)
+            exporter.write_markdown(packet, markdown_path)
+            exporter.write_oscal_summary(packet, oscal_path)
+            errors.extend(gate.validate_packet(load_json_object(json_path), load_json_object(oscal_path), checker))
+            if not markdown_path.is_file() or markdown_path.stat().st_size == 0:
+                errors.append("audit export gate runtime must generate a non-empty Markdown report")
+    except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
+        errors.append(f"audit export gate runtime invariant check failed: {exc}")
     return errors
 
 
@@ -869,6 +925,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     control_assessment_report = examples.get("control-assessment-report")
     baseline_change_record = examples.get("baseline-change-record")
     oscal_export_profile = examples.get("oscal-export-profile")
+    audit_export_gate = examples.get("audit-export-gate")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1616,15 +1673,19 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
+                "scripts/check-modern-architecture-audit-export.py",
             }
             if not required_content_paths.issubset(content_paths):
                 errors.append("cross-file: audit-export-manifest.contents must include required audit artifacts")
         verification = audit_export_manifest.get("verification")
         if isinstance(verification, dict):
-            if verification.get("command") != "make check-modern-architecture-kit":
-                errors.append("cross-file: audit-export-manifest.verification.command must be make check-modern-architecture-kit")
+            if verification.get("command") != "make check-modern-architecture-audit-export":
+                errors.append(
+                    "cross-file: audit-export-manifest.verification.command must be make check-modern-architecture-audit-export"
+                )
             if verification.get("result") != "pass":
                 errors.append("cross-file: audit-export-manifest.verification.result must be pass")
         signing = audit_export_manifest.get("signing")
@@ -1760,6 +1821,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             if isinstance(commands, list):
                 required_commands = {
                     "make check-modern-architecture-kit",
+                    "make check-modern-architecture-audit-export",
                     "make export-modern-architecture-audit",
                     "make test",
                 }
@@ -1814,6 +1876,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "auditExportManifest": "docs/references/modern-enterprise-architecture-kit/audit-export-manifest.example.yaml",
                 "controlAssessmentReport": "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml",
                 "baselineChangeRecord": "docs/references/modern-enterprise-architecture-kit/baseline-change-record.example.yaml",
+                "auditExportGate": "docs/references/modern-enterprise-architecture-kit/audit-export-gate.example.yaml",
             }
             for key, expected_path in expected_sources.items():
                 if source_artifacts.get(key) != expected_path:
@@ -1876,6 +1939,68 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             if generated_on is not None and review_on is not None and review_on <= generated_on:
                 errors.append("cross-file: oscal-export-profile.retention.reviewOn must be after generatedOn")
 
+    if isinstance(audit_export_gate, dict):
+        if audit_export_gate.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: audit-export-gate.version must match currentVersion")
+        command = audit_export_gate.get("command")
+        if isinstance(command, dict):
+            if command.get("local") != "make check-modern-architecture-audit-export":
+                errors.append("cross-file: audit-export-gate.command.local must be make check-modern-architecture-audit-export")
+            if command.get("export") != "make export-modern-architecture-audit":
+                errors.append("cross-file: audit-export-gate.command.export must be make export-modern-architecture-audit")
+            if command.get("preflight") != "make check-modern-architecture-kit":
+                errors.append("cross-file: audit-export-gate.command.preflight must be make check-modern-architecture-kit")
+        expectations = audit_export_gate.get("expectations")
+        if isinstance(expectations, dict):
+            if expectations.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: audit-export-gate.expectations.architectureVersion must match currentVersion")
+            if expectations.get("controlCount") != len(catalog_control_ids):
+                errors.append("cross-file: audit-export-gate.expectations.controlCount must match control catalog length")
+            if expectations.get("starterKitPairs") != len(PAIR_NAMES):
+                errors.append("cross-file: audit-export-gate.expectations.starterKitPairs must match starter kit pair count")
+            if expectations.get("verificationCommand") != "make check-modern-architecture-kit":
+                errors.append(
+                    "cross-file: audit-export-gate.expectations.verificationCommand must be make check-modern-architecture-kit"
+                )
+            if expectations.get("verificationResult") != "pass":
+                errors.append("cross-file: audit-export-gate.expectations.verificationResult must be pass")
+        outputs = audit_export_gate.get("outputs")
+        if isinstance(outputs, list):
+            output_paths = {item.get("path") for item in outputs if isinstance(item, dict) and isinstance(item.get("path"), str)}
+            required_outputs = {
+                "build/modern-enterprise-architecture-audit/audit-export.json",
+                "build/modern-enterprise-architecture-audit/audit-export.md",
+                "build/modern-enterprise-architecture-audit/oscal-summary.json",
+            }
+            if not required_outputs.issubset(output_paths):
+                errors.append("cross-file: audit-export-gate.outputs must include audit JSON, Markdown and OSCAL summary")
+            for item in outputs:
+                if isinstance(item, dict) and item.get("required") is not True:
+                    errors.append("cross-file: audit-export-gate.outputs.required must be true")
+                    break
+        quality_gate = audit_export_gate.get("qualityGate")
+        if isinstance(quality_gate, dict):
+            if quality_gate.get("requiredInMakeTest") is not True:
+                errors.append("cross-file: audit-export-gate.qualityGate.requiredInMakeTest must be true")
+            if quality_gate.get("zeroDependency") is not True:
+                errors.append("cross-file: audit-export-gate.qualityGate.zeroDependency must be true")
+        ci_integration = audit_export_gate.get("ciIntegration")
+        if isinstance(ci_integration, dict):
+            if ci_integration.get("localGate") != "make test":
+                errors.append("cross-file: audit-export-gate.ciIntegration.localGate must be make test")
+            if ci_integration.get("makefileTarget") != "check-modern-architecture-audit-export":
+                errors.append(
+                    "cross-file: audit-export-gate.ciIntegration.makefileTarget must be check-modern-architecture-audit-export"
+                )
+            if ci_integration.get("script") != str(AUDIT_EXPORT_GATE_SCRIPT_PATH.relative_to(ROOT)):
+                errors.append("cross-file: audit-export-gate.ciIntegration.script must point to audit export gate script")
+        generated_on = parse_example_date(audit_export_gate.get("generatedOn"))
+        retention = audit_export_gate.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if generated_on is not None and review_on is not None and review_on <= generated_on:
+                errors.append("cross-file: audit-export-gate.retention.reviewOn must be after generatedOn")
+
     return errors
 
 
@@ -1924,6 +2049,8 @@ def main() -> int:
             errors.extend(validate_cross_file_consistency(load_examples()))
         except KitValidationError as exc:
             errors.append(str(exc))
+    if not errors:
+        errors.extend(validate_audit_export_gate_runtime())
 
     discovered_schemas = {path.stem.removesuffix(".schema") for path in KIT_DIR.glob("*.schema.json")}
     unexpected = sorted(discovered_schemas - set(PAIR_NAMES))
