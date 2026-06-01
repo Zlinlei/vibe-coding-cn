@@ -124,7 +124,9 @@
         "signingPolicyRequired",
         "signingPayloadDigestMatches",
         "signatureReceiptRequired",
-        "signatureReceiptExternal"
+        "signatureReceiptExternal",
+        "poamRecordRequired",
+        "poamMatchesAssessment"
       ],
       "properties": {
         "architectureVersion": {
@@ -178,6 +180,12 @@
           "type": "boolean"
         },
         "signatureReceiptExternal": {
+          "type": "boolean"
+        },
+        "poamRecordRequired": {
+          "type": "boolean"
+        },
+        "poamMatchesAssessment": {
           "type": "boolean"
         }
       }

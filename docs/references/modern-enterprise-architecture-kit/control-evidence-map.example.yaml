@@ -1,8 +1,8 @@
 map: modern-enterprise-architecture-control-evidence
-version: V2.20
+version: V2.21
 owner: governance-team
 generatedOn: 2026-06-02
-controlCount: 35
+controlCount: 36
 freshness:
   maxAgeDays: 90
   expiryAction: block
@@ -367,6 +367,24 @@ controls:
     evidence:
       - path: docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.schema.json
         type: schema
+        source: git
+        verifiedOn: 2026-06-02
+      - path: scripts/check-modern-architecture-kit.py
+        type: checker
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-POAM-RECORD-001
+    evidence:
+      - path: docs/references/modern-enterprise-architecture-kit/poam-record.schema.json
+        type: schema
+        source: git
+        verifiedOn: 2026-06-02
+      - path: docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+        type: evidence
         source: git
         verifiedOn: 2026-06-02
       - path: scripts/check-modern-architecture-kit.py

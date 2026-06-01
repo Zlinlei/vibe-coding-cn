@@ -1,0 +1,36 @@
+poam: modern-enterprise-architecture-poam
+version: V2.21
+owner: governance-team
+generatedOn: 2026-06-02
+scope:
+  architectureVersion: V2.21
+  controlAssessmentReport: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
+  openFindings: 0
+  blockingFindings: 0
+  status: no-open-items
+items:
+  - finding: legacy-manual-audit-export-risk
+    controlId: CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001
+    severity: low
+    status: closed
+    owner: governance-team
+    action: audit export command added and validated before V2.13 assessment
+    dueDate: 2026-06-02
+    closedOn: 2026-06-02
+    evidence:
+      - build/modern-enterprise-architecture-audit/audit-export.json
+      - build/modern-enterprise-architecture-audit/audit-export.md
+milestones:
+  - milestone: v2-13-audit-export-automation
+    finding: legacy-manual-audit-export-risk
+    status: complete
+    dueDate: 2026-06-02
+    completedOn: 2026-06-02
+signOff:
+  status: approved
+  approver: architecture-governance-board
+  signedOn: 2026-06-02
+  nextReviewOn: 2026-09-02
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

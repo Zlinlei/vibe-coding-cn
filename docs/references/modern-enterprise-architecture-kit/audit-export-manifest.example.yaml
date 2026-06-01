@@ -1,13 +1,13 @@
 package: modern-enterprise-architecture-audit-export
-version: V2.20
+version: V2.21
 generatedOn: 2026-06-02
 owner: governance-team
 scope:
-  architectureVersion: V2.20
+  architectureVersion: V2.21
   environment: starter-kit
   subject: modern-enterprise-architecture
-  controlCount: 35
-  starterKitPairs: 51
+  controlCount: 36
+  starterKitPairs: 52
 contents:
   - artifact: architecture-document
     path: docs/references/modern-enterprise-architecture-template.md
@@ -57,6 +57,10 @@ contents:
     path: docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml
     type: yaml
     required: true
+  - artifact: poam-record
+    path: docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+    type: yaml
+    required: true
   - artifact: starter-kit-readme
     path: docs/references/modern-enterprise-architecture-kit/README.md
     type: markdown
@@ -76,8 +80,8 @@ contents:
 verification:
   command: make check-modern-architecture-audit-export
   result: pass
-  runId: local-v2-20-audit-export-signature-receipt
-  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-20.md
+  runId: local-v2-21-poam-record
+  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-21.md
 signing:
   required: true
   method: sigstore-cosign-or-enterprise-signing

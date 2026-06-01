@@ -1,5 +1,5 @@
 gate: modern-enterprise-architecture-audit-export-gate
-version: V2.20
+version: V2.21
 owner: governance-team
 generatedOn: 2026-06-02
 command:
@@ -36,9 +36,9 @@ outputs:
     required: true
     invariant: signing policy payload digest matches the provenance statement and requires external signature
 expectations:
-  architectureVersion: V2.20
-  starterKitPairs: 51
-  controlCount: 35
+  architectureVersion: V2.21
+  starterKitPairs: 52
+  controlCount: 36
   verificationCommand: make check-modern-architecture-kit
   verificationResult: pass
   oscalControlCountMatchesCatalog: true
@@ -51,6 +51,8 @@ expectations:
   signingPayloadDigestMatches: true
   signatureReceiptRequired: true
   signatureReceiptExternal: true
+  poamRecordRequired: true
+  poamMatchesAssessment: true
 ciIntegration:
   localGate: make test
   makefileTarget: check-modern-architecture-audit-export

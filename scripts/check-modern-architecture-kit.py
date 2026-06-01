@@ -76,6 +76,7 @@ PAIR_NAMES = [
     "audit-export-provenance",
     "audit-export-signing-policy",
     "audit-export-signature-receipt",
+    "poam-record",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -568,7 +569,11 @@ def validate_control_catalog(expected_version: str, expected_control_count: Any)
         errors.append(f"{rel}: controls length must match controlCatalog.expectedControlCount")
 
     seen_ids: set[str] = set()
-    checker_text = Path(__file__).read_text(encoding="utf-8")
+    checker_text_parts = [Path(__file__).read_text(encoding="utf-8")]
+    for path in (AUDIT_EXPORT_SCRIPT_PATH, AUDIT_EXPORT_GATE_SCRIPT_PATH):
+        if path.is_file():
+            checker_text_parts.append(path.read_text(encoding="utf-8"))
+    checker_text = "\n".join(checker_text_parts)
     required_control_fields = [
         "id",
         "category",
@@ -771,6 +776,12 @@ def validate_control_schema_requirement(requirement: Any, location: str) -> list
         if not isinstance(nested_schema, dict):
             errors.append(f"{location}: nested schema '{field}' is missing")
             continue
+        if nested_schema.get("type") == "array":
+            item_schema = nested_schema.get("items")
+            if not isinstance(item_schema, dict):
+                errors.append(f"{location}: nested schema '{field}' items schema is missing")
+                continue
+            nested_schema = item_schema
         nested_schema_required = nested_schema.get("required", [])
         nested_schema_properties = nested_schema.get("properties", {})
         for nested_field in nested_fields:
@@ -952,6 +963,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     audit_export_provenance = examples.get("audit-export-provenance")
     audit_export_signing_policy = examples.get("audit-export-signing-policy")
     audit_export_signature_receipt = examples.get("audit-export-signature-receipt")
+    poam_record = examples.get("poam-record")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1704,6 +1716,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
                 "scripts/check-modern-architecture-audit-export.py",
@@ -1804,6 +1817,98 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: control-assessment-report.signOff.signedOn must be on or after assessedOn")
             if signed_on is not None and next_assessment_on is not None and next_assessment_on <= signed_on:
                 errors.append("cross-file: control-assessment-report.signOff.nextAssessmentOn must be after signedOn")
+
+    if isinstance(poam_record, dict):
+        if poam_record.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: poam-record.version must match currentVersion")
+        assessment_summary = control_assessment_report.get("summary") if isinstance(control_assessment_report, dict) else {}
+        scope = poam_record.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: poam-record.scope.architectureVersion must match currentVersion")
+            if scope.get("controlAssessmentReport") != "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml":
+                errors.append("cross-file: poam-record.scope.controlAssessmentReport must point to control assessment report")
+            if isinstance(assessment_summary, dict):
+                if scope.get("openFindings") != assessment_summary.get("openFindings"):
+                    errors.append("cross-file: poam-record.scope.openFindings must match control assessment summary")
+                if scope.get("blockingFindings") != assessment_summary.get("blockingFindings"):
+                    errors.append("cross-file: poam-record.scope.blockingFindings must match control assessment summary")
+                if assessment_summary.get("openFindings") == 0 and scope.get("status") != "no-open-items":
+                    errors.append("cross-file: poam-record.scope.status must be no-open-items when openFindings is 0")
+                if assessment_summary.get("openFindings", 0) > 0 and scope.get("status") != "open-items":
+                    errors.append("cross-file: poam-record.scope.status must be open-items when openFindings is greater than 0")
+        assessment_findings = control_assessment_report.get("findings") if isinstance(control_assessment_report, dict) else []
+        assessment_finding_map = {
+            finding.get("finding"): finding
+            for finding in assessment_findings
+            if isinstance(finding, dict) and isinstance(finding.get("finding"), str)
+        }
+        items = poam_record.get("items")
+        item_map: dict[str, Any] = {}
+        if isinstance(items, list):
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                finding_id = item.get("finding")
+                if isinstance(finding_id, str):
+                    item_map[finding_id] = item
+                assessment_finding = assessment_finding_map.get(finding_id)
+                if not isinstance(assessment_finding, dict):
+                    errors.append("cross-file: poam-record.items must cover every control assessment finding")
+                    continue
+                if item.get("controlId") != assessment_finding.get("controlId"):
+                    errors.append("cross-file: poam-record.items.controlId must match control assessment finding")
+                if item.get("severity") != assessment_finding.get("severity"):
+                    errors.append("cross-file: poam-record.items.severity must match control assessment finding")
+                if item.get("status") != assessment_finding.get("status"):
+                    errors.append("cross-file: poam-record.items.status must match control assessment finding status")
+                if item.get("owner") != assessment_finding.get("owner"):
+                    errors.append("cross-file: poam-record.items.owner must match control assessment finding")
+                if item.get("action") != assessment_finding.get("remediation"):
+                    errors.append("cross-file: poam-record.items.action must match control assessment finding remediation")
+                if item.get("dueDate") != assessment_finding.get("dueDate"):
+                    errors.append("cross-file: poam-record.items.dueDate must match control assessment finding dueDate")
+                if assessment_finding.get("status") == "closed" and item.get("closedOn") != assessment_finding.get("closedOn"):
+                    errors.append("cross-file: poam-record.items.closedOn must match closed control assessment finding")
+                due_date = parse_example_date(item.get("dueDate"))
+                closed_on = parse_example_date(item.get("closedOn"))
+                if closed_on is not None and due_date is not None and closed_on > due_date:
+                    errors.append("cross-file: poam-record.items.closedOn must be on or before dueDate")
+                evidence = item.get("evidence")
+                if not isinstance(evidence, list) or not evidence:
+                    errors.append("cross-file: poam-record.items.evidence must not be empty")
+            if set(item_map) != set(assessment_finding_map):
+                errors.append("cross-file: poam-record.items must cover every control assessment finding")
+        milestones = poam_record.get("milestones")
+        if isinstance(milestones, list):
+            for milestone in milestones:
+                if not isinstance(milestone, dict):
+                    continue
+                finding_id = milestone.get("finding")
+                if finding_id not in item_map:
+                    errors.append("cross-file: poam-record.milestones.finding must reference a POA&M item")
+                due_date = parse_example_date(milestone.get("dueDate"))
+                completed_on = parse_example_date(milestone.get("completedOn"))
+                if milestone.get("status") == "complete" and completed_on is None:
+                    errors.append("cross-file: poam-record.milestones.completedOn must be set when status is complete")
+                if completed_on is not None and due_date is not None and completed_on > due_date:
+                    errors.append("cross-file: poam-record.milestones.completedOn must be on or before dueDate")
+        generated_on = parse_example_date(poam_record.get("generatedOn"))
+        sign_off = poam_record.get("signOff")
+        if isinstance(sign_off, dict):
+            if sign_off.get("status") != "approved":
+                errors.append("cross-file: poam-record.signOff.status must be approved")
+            signed_on = parse_example_date(sign_off.get("signedOn"))
+            next_review_on = parse_example_date(sign_off.get("nextReviewOn"))
+            if generated_on is not None and signed_on is not None and signed_on < generated_on:
+                errors.append("cross-file: poam-record.signOff.signedOn must be on or after generatedOn")
+            if signed_on is not None and next_review_on is not None and next_review_on <= signed_on:
+                errors.append("cross-file: poam-record.signOff.nextReviewOn must be after signedOn")
+        retention = poam_record.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if generated_on is not None and review_on is not None and review_on <= generated_on:
+                errors.append("cross-file: poam-record.retention.reviewOn must be after generatedOn")
 
     if isinstance(baseline_change_record, dict):
         if baseline_change_record.get("version") != version_manifest.get("currentVersion"):
@@ -1911,10 +2016,16 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "auditExportProvenance": "docs/references/modern-enterprise-architecture-kit/audit-export-provenance.example.yaml",
                 "auditExportSigningPolicy": "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
                 "auditExportSignatureReceipt": "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
+                "poamRecord": "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
             }
             for key, expected_path in expected_sources.items():
                 if source_artifacts.get(key) != expected_path:
-                    errors.append(f"cross-file: oscal-export-profile.sourceArtifacts.{key} must point to {expected_path}")
+                    if key == "poamRecord":
+                        errors.append(
+                            "cross-file: oscal-export-profile.sourceArtifacts.poamRecord must point to docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml"
+                        )
+                    else:
+                        errors.append(f"cross-file: oscal-export-profile.sourceArtifacts.{key} must point to {expected_path}")
                 if not (ROOT / expected_path).is_file():
                     errors.append("cross-file: oscal-export-profile.sourceArtifacts paths must exist")
         model_mapping = oscal_export_profile.get("modelMapping")
@@ -1940,6 +2051,13 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                     errors.append("cross-file: oscal-export-profile.modelMapping.source must exist")
             if mapped_models != required_models:
                 errors.append("cross-file: oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results and POA&M")
+            for item in model_mapping:
+                if not isinstance(item, dict):
+                    continue
+                if item.get("model") == "plan-of-action-and-milestones" and item.get("source") != "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml":
+                    errors.append(
+                        "cross-file: oscal-export-profile.modelMapping plan-of-action-and-milestones source must be poam-record.example.yaml"
+                    )
         controls = oscal_export_profile.get("controls")
         if isinstance(controls, dict):
             if controls.get("count") != len(catalog_control_ids):
@@ -2014,6 +2132,10 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: audit-export-gate.expectations.signatureReceiptRequired must be true")
             if expectations.get("signatureReceiptExternal") is not True:
                 errors.append("cross-file: audit-export-gate.expectations.signatureReceiptExternal must be true")
+            if expectations.get("poamRecordRequired") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.poamRecordRequired must be true")
+            if expectations.get("poamMatchesAssessment") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.poamMatchesAssessment must be true")
         outputs = audit_export_gate.get("outputs")
         if isinstance(outputs, list):
             output_paths = {item.get("path") for item in outputs if isinstance(item, dict) and isinstance(item.get("path"), str)}

@@ -1,14 +1,14 @@
 {
-  "version": "V2.20",
+  "version": "V2.21",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、审计导出门禁、导出完整性清单、provenance statement、签名策略和签名验签回执",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、POA&M 整改计划、审计导出门禁、导出完整性清单、provenance statement、签名策略和签名验签回执",
   "alignment": [
     {
       "source": "NIST OSCAL",
       "url": "https://pages.nist.gov/OSCAL/learn/concepts/layer/control/",
-      "rationale": "采用机器可读控制目录、评估证据和评估结果思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告、基线变更记录、OSCAL 交换映射、导出门禁、完整性清单和 provenance statement"
+      "rationale": "采用机器可读控制目录、评估证据、评估结果和 POA&M 思想，记录控制项、证据、验证入口、审计导出清单、控制评估报告、基线变更记录、OSCAL 交换映射、整改计划、导出门禁、完整性清单和 provenance statement"
     },
     {
       "source": "SLSA v1.2",
@@ -1037,7 +1037,7 @@
           "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
           "nestedRequired": {
             "target": ["standard", "format", "machineReadable"],
-            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy", "auditExportSignatureReceipt"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy", "auditExportSignatureReceipt", "poamRecord"],
             "controls": ["count", "selectionSource"],
             "assessment": ["source", "result", "openFindings", "poamRequired"],
             "validation": ["command", "result", "output"],
@@ -1053,6 +1053,7 @@
       ],
       "checkerEvidence": [
         "oscal-export-profile.version must match currentVersion",
+        "oscal-export-profile.sourceArtifacts.poamRecord must point to docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
         "oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results and POA&M",
         "oscal-export-profile.controls.count must match control catalog length",
         "oscal-export-profile.assessment.result must match control assessment summary",
@@ -1078,7 +1079,7 @@
           "nestedRequired": {
             "command": ["local", "preflight", "export"],
             "qualityGate": ["requiredInMakeTest", "zeroDependency", "blocksOnMismatch"],
-            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches", "signatureReceiptRequired", "signatureReceiptExternal"],
+            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches", "signatureReceiptRequired", "signatureReceiptExternal", "poamRecordRequired", "poamMatchesAssessment"],
             "ciIntegration": ["localGate", "makefileTarget", "script"],
             "retention": ["period", "reviewOn"]
           }
@@ -1103,6 +1104,8 @@
         "audit-export-gate.expectations.signingPayloadDigestMatches must be true",
         "audit-export-gate.expectations.signatureReceiptRequired must be true",
         "audit-export-gate.expectations.signatureReceiptExternal must be true",
+        "audit-export-gate.expectations.poamRecordRequired must be true",
+        "audit-export-gate.expectations.poamMatchesAssessment must be true",
         "audit-export-gate.qualityGate.requiredInMakeTest must be true",
         "audit-export-gate.ciIntegration.localGate must be make test",
         "audit export gate runtime invariant check failed"
@@ -1269,6 +1272,47 @@
         "audit-export-signature-receipt.verification.command must use cosign verify-blob --bundle",
         "audit-export-signature-receipt.verification.tool must be cosign",
         "audit-export-signature-receipt.retention.reviewOn must be after verifiedOn"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-POAM-RECORD-001",
+      "category": "audit-interoperability",
+      "title": "控制发现项必须形成 POA&M 整改计划",
+      "statement": "控制评估中的发现项不能只存在于评估报告正文，必须形成机器可读 POA&M 记录，声明发现项、控制项、严重度、责任人、行动、里程碑、证据、签署和复审时间，并与 OSCAL POA&M 输出保持一致。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/poam-record.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
+        "scripts/check-modern-architecture-kit.py",
+        "scripts/export-modern-architecture-audit.py"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/poam-record.schema.json",
+          "required": ["poam", "version", "owner", "generatedOn", "scope", "items", "milestones", "signOff", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureVersion", "controlAssessmentReport", "openFindings", "blockingFindings", "status"],
+            "items": ["finding", "controlId", "severity", "status", "owner", "action", "dueDate", "evidence"],
+            "milestones": ["milestone", "finding", "status", "dueDate"],
+            "signOff": ["status", "approver", "signedOn", "nextReviewOn"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
+          "fields": ["poam", "version", "scope.openFindings", "scope.status", "items", "milestones", "signOff.status", "retention.reviewOn"]
+        }
+      ],
+      "checkerEvidence": [
+        "poam-record.version must match currentVersion",
+        "poam-record.scope.openFindings must match control assessment summary",
+        "poam-record.scope.status must be no-open-items when openFindings is 0",
+        "poam-record.items must cover every control assessment finding",
+        "poam-record.items.status must match control assessment finding status",
+        "poam-record.milestones.finding must reference a POA&M item",
+        "poam-record.signOff.nextReviewOn must be after signedOn",
+        "oscal-summary.json poam.items must match POA&M record items"
       ]
     }
   ]
