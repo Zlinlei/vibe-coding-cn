@@ -18,6 +18,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 KIT_DIR = ROOT / "docs/references/modern-enterprise-architecture-kit"
+VERSION_MANIFEST_PATH = ROOT / "docs/references/modern-enterprise-architecture-version.json"
 PAIR_NAMES = [
     "domain",
     "service",
@@ -52,6 +53,14 @@ JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
 class KitValidationError(ValueError):
     """Raised when a starter kit example cannot be parsed or validated."""
+
+
+def load_version_manifest() -> dict[str, Any]:
+    with VERSION_MANIFEST_PATH.open(encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    if not isinstance(manifest, dict):
+        raise ValueError("manifest root must be an object")
+    return manifest
 
 
 def load_schema(path: Path) -> dict[str, Any]:
@@ -341,6 +350,113 @@ def is_iso_date(value: str) -> bool:
     except ValueError:
         return False
     return True
+
+
+def validate_version_manifest() -> list[str]:
+    errors: list[str] = []
+    rel = str(VERSION_MANIFEST_PATH.relative_to(ROOT))
+
+    if not VERSION_MANIFEST_PATH.is_file():
+        return [f"{rel}: missing version manifest"]
+
+    try:
+        manifest = load_version_manifest()
+    except (json.JSONDecodeError, ValueError) as exc:
+        return [f"{rel}: invalid JSON manifest: {exc}"]
+
+    required_fields = [
+        "currentVersion",
+        "releaseDate",
+        "status",
+        "changeLevel",
+        "summary",
+        "architectureDocument",
+        "starterKit",
+        "requiredMentions",
+    ]
+    for field in required_fields:
+        if field not in manifest:
+            errors.append(f"{rel}: missing required field '{field}'")
+
+    current_version = manifest.get("currentVersion")
+    if not isinstance(current_version, str) or not re.fullmatch(r"V[0-9]+\.[0-9]+", current_version):
+        errors.append(f"{rel}: currentVersion must match Vx.y")
+
+    release_date = manifest.get("releaseDate")
+    if not isinstance(release_date, str) or not is_iso_date(release_date):
+        errors.append(f"{rel}: releaseDate must be a YYYY-MM-DD date")
+
+    starter_kit = manifest.get("starterKit")
+    if not isinstance(starter_kit, dict):
+        errors.append(f"{rel}: starterKit must be an object")
+        starter_kit = {}
+
+    kit_path = starter_kit.get("path")
+    if kit_path != str(KIT_DIR.relative_to(ROOT)):
+        errors.append(f"{rel}: starterKit.path must be {KIT_DIR.relative_to(ROOT)}")
+
+    expected_pair_count = starter_kit.get("expectedPairCount")
+    if expected_pair_count != len(PAIR_NAMES):
+        errors.append(f"{rel}: starterKit.expectedPairCount must be {len(PAIR_NAMES)}")
+
+    manifest_pairs = starter_kit.get("pairs")
+    if not isinstance(manifest_pairs, list) or not all(isinstance(item, str) for item in manifest_pairs):
+        errors.append(f"{rel}: starterKit.pairs must be a string array")
+        manifest_pairs = []
+    if manifest_pairs != PAIR_NAMES:
+        errors.append(f"{rel}: starterKit.pairs must match checker PAIR_NAMES order")
+    if len(manifest_pairs) != expected_pair_count:
+        errors.append(f"{rel}: starterKit.pairs length must match expectedPairCount")
+
+    mentions = manifest.get("requiredMentions")
+    if not isinstance(mentions, list):
+        errors.append(f"{rel}: requiredMentions must be an array")
+        mentions = []
+
+    architecture_document = manifest.get("architectureDocument")
+    if isinstance(architecture_document, str):
+        architecture_path = ROOT / architecture_document
+        if not architecture_path.is_file():
+            errors.append(f"{architecture_document}: architecture document is missing")
+        elif isinstance(current_version, str):
+            architecture_content = architecture_path.read_text(encoding="utf-8")
+            status = manifest.get("status")
+            change_level = manifest.get("changeLevel")
+            release_date_value = manifest.get("releaseDate")
+            generated_checks = [
+                f"**文档版本**：{current_version}",
+                f"| `{current_version}` | `{status}` |",
+                f"| `{current_version}` | {release_date_value} | {change_level} |",
+                f"### 0.7 {current_version} 可执行企业标准路线图",
+            ]
+            for expected_text in generated_checks:
+                if expected_text not in architecture_content:
+                    errors.append(f"{architecture_document}: missing generated version text '{expected_text}'")
+    else:
+        errors.append(f"{rel}: architectureDocument must be a string")
+
+    for index, mention in enumerate(mentions):
+        if not isinstance(mention, dict):
+            errors.append(f"{rel}: requiredMentions[{index}] must be an object")
+            continue
+        path_value = mention.get("path")
+        contains = mention.get("contains")
+        if not isinstance(path_value, str):
+            errors.append(f"{rel}: requiredMentions[{index}].path must be a string")
+            continue
+        if not isinstance(contains, list) or not all(isinstance(item, str) for item in contains):
+            errors.append(f"{rel}: requiredMentions[{index}].contains must be a string array")
+            continue
+        target_path = ROOT / path_value
+        if not target_path.is_file():
+            errors.append(f"{path_value}: version mention target is missing")
+            continue
+        content = target_path.read_text(encoding="utf-8")
+        for expected_text in contains:
+            if expected_text not in content:
+                errors.append(f"{path_value}: missing version manifest text '{expected_text}'")
+
+    return errors
 
 
 def validate_instance(schema: dict[str, Any], value: Any, location: str) -> list[str]:
@@ -738,6 +854,7 @@ def validate_pair(name: str) -> list[str]:
 
 def main() -> int:
     errors: list[str] = []
+    errors.extend(validate_version_manifest())
 
     for required_doc in ("README.md", "AGENTS.md"):
         path = KIT_DIR / required_doc

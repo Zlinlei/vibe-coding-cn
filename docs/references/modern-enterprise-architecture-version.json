@@ -1,0 +1,98 @@
+{
+  "currentVersion": "V2.4",
+  "releaseDate": "2026-06-01",
+  "status": "Baseline Candidate",
+  "changeLevel": "Minor",
+  "summary": "增加机器可读版本清单、starter kit pair 清单和版本同步校验规则",
+  "architectureDocument": "docs/references/modern-enterprise-architecture-template.md",
+  "starterKit": {
+    "path": "docs/references/modern-enterprise-architecture-kit",
+    "expectedPairCount": 25,
+    "pairs": [
+      "domain",
+      "service",
+      "api-contract",
+      "event-contract",
+      "data-product",
+      "ai-product",
+      "ai-tool-contract",
+      "rag-index-contract",
+      "fine-tuning-contract",
+      "catalog-component",
+      "catalog-data-product",
+      "catalog-ai-product",
+      "gitops-deployment",
+      "release-evidence",
+      "supply-chain-attestation",
+      "policy-exception",
+      "api-compatibility-report",
+      "event-compatibility-report",
+      "gitops-drift-report",
+      "production-readiness",
+      "raci",
+      "tiering-policy",
+      "deprecation-policy",
+      "audit-evidence-index",
+      "scorecard"
+    ]
+  },
+  "requiredMentions": [
+    {
+      "path": "docs/references/modern-enterprise-architecture-template.md",
+      "contains": [
+        "**文档版本**：V2.4",
+        "| `V2.4` | `Baseline Candidate` |",
+        "| `V2.4` | 2026-06-01 | Minor |",
+        "### 0.7 V2.4 可执行企业标准路线图",
+        "25 组 schema/example"
+      ]
+    },
+    {
+      "path": "docs/references/modern-enterprise-architecture-kit/README.md",
+      "contains": [
+        "V2.4",
+        "25 组"
+      ]
+    },
+    {
+      "path": "docs/README.md",
+      "contains": [
+        "V2.4",
+        "25 组"
+      ]
+    },
+    {
+      "path": "docs/references/README.md",
+      "contains": [
+        "V2.4",
+        "25 组"
+      ]
+    },
+    {
+      "path": "metadata/taxonomy.yml",
+      "contains": [
+        "V2.4",
+        "25 组"
+      ]
+    },
+    {
+      "path": "assets/ai-citation/llms-full.txt",
+      "contains": [
+        "V2.4",
+        "25 组"
+      ]
+    },
+    {
+      "path": "AGENTS.md",
+      "contains": [
+        "V2.4"
+      ]
+    },
+    {
+      "path": "docs/references/AGENTS.md",
+      "contains": [
+        "V2.4"
+      ]
+    }
+  ]
+}
