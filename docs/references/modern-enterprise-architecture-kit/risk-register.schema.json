@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Enterprise Architecture Risk Register",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "riskRegister",
+    "version",
+    "owner",
+    "generatedOn",
+    "scope",
+    "risks",
+    "review",
+    "retention"
+  ],
+  "properties": {
+    "riskRegister": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^V\\d+\\.\\d+$"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generatedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architectureVersion",
+        "subject",
+        "controlCatalog",
+        "controlAssessmentReport",
+        "poamRecord"
+      ],
+      "properties": {
+        "architectureVersion": {
+          "type": "string",
+          "pattern": "^V\\d+\\.\\d+$"
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controlCatalog": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controlAssessmentReport": {
+          "type": "string",
+          "minLength": 1
+        },
+        "poamRecord": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "riskId",
+          "title",
+          "category",
+          "severity",
+          "likelihood",
+          "impact",
+          "status",
+          "owner",
+          "treatment",
+          "controls",
+          "mitigation",
+          "residualRisk",
+          "reviewOn",
+          "evidence"
+        ],
+        "properties": {
+          "riskId": {
+            "type": "string",
+            "pattern": "^risk-[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "likelihood": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "impact": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "mitigating",
+              "accepted",
+              "closed"
+            ]
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "treatment": {
+            "type": "string",
+            "enum": [
+              "mitigate",
+              "accept",
+              "transfer",
+              "avoid"
+            ]
+          },
+          "controls": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^CTRL-[A-Z0-9-]+$"
+            }
+          },
+          "linkedPoamItem": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "mitigation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "action",
+              "dueDate"
+            ],
+            "properties": {
+              "action": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dueDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "completedOn": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "residualRisk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "severity",
+              "rationale",
+              "acceptedBy",
+              "acceptedOn"
+            ],
+            "properties": {
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ]
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              },
+              "acceptedBy": {
+                "type": "string",
+                "minLength": 1
+              },
+              "acceptedOn": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "reviewOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewer",
+        "reviewedOn",
+        "nextReviewOn"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected"
+          ]
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewedOn": {
+          "type": "string",
+          "format": "date"
+        },
+        "nextReviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period",
+        "reviewOn"
+      ],
+      "properties": {
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewOn": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

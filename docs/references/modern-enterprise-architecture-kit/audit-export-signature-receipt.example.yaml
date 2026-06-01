@@ -1,15 +1,15 @@
 receipt: modern-enterprise-architecture-audit-export-signature-receipt
-version: V2.21
+version: V2.22
 owner: governance-team
 verifiedOn: 2026-06-02
 scope:
-  architectureVersion: V2.21
+  architectureVersion: V2.22
   package: modern-enterprise-architecture-audit-export
-  controlCount: 36
-  starterKitPairs: 52
+  controlCount: 37
+  starterKitPairs: 53
 policyBinding:
   signingPolicy: docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml
-  signingPolicyVersion: V2.21
+  signingPolicyVersion: V2.22
   signingPolicyStatus: external-signature-required
 payload:
   path: build/modern-enterprise-architecture-audit/audit-export-provenance.json

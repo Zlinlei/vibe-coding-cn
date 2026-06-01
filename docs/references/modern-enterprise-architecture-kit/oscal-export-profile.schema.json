@@ -74,7 +74,8 @@
         "auditExportProvenance",
         "auditExportSigningPolicy",
         "auditExportSignatureReceipt",
-        "poamRecord"
+        "poamRecord",
+        "riskRegister"
       ],
       "properties": {
         "versionManifest": {
@@ -124,6 +125,10 @@
         "poamRecord": {
           "type": "string",
           "minLength": 1
+        },
+        "riskRegister": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },
@@ -147,7 +152,8 @@
               "component-definition",
               "system-security-plan",
               "assessment-results",
-              "plan-of-action-and-milestones"
+              "plan-of-action-and-milestones",
+              "risk-register"
             ]
           },
           "source": {

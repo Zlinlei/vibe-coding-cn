@@ -1,6 +1,6 @@
-record: modern-enterprise-architecture-v2-21-baseline-change
-version: V2.21
-previousVersion: V2.20
+record: modern-enterprise-architecture-v2-22-baseline-change
+version: V2.22
+previousVersion: V2.21
 changeLevel: Minor
 status: implemented
 owner: governance-team
@@ -11,8 +11,8 @@ scope:
   architectureDocument: docs/references/modern-enterprise-architecture-template.md
   versionManifest: docs/references/modern-enterprise-architecture-version.json
   controlCatalog: docs/references/modern-enterprise-architecture-controls.json
-  controlCount: 36
-  starterKitPairs: 52
+  controlCount: 37
+  starterKitPairs: 53
   changedArtifacts:
     - docs/references/modern-enterprise-architecture-version.json
     - docs/references/modern-enterprise-architecture-controls.json
@@ -34,11 +34,13 @@ scope:
     - docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml
     - docs/references/modern-enterprise-architecture-kit/poam-record.schema.json
     - docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/risk-register.schema.json
+    - docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml
     - scripts/check-modern-architecture-kit.py
     - scripts/check-modern-architecture-audit-export.py
     - scripts/export-modern-architecture-audit.py
 impact:
-  summary: add POA&M remediation plan contract and OSCAL remediation evidence closure
+  summary: add enterprise architecture risk register contract and risk evidence closure
   security: low
   privacy: low
   data: low
@@ -61,10 +63,11 @@ validation:
     - build/modern-enterprise-architecture-audit/audit-export-signing-policy.json
     - docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml
     - docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+    - docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml
 rollback:
   supported: true
-  previousCommit: 2da27ca
-  plan: revert the POA&M record commit and restore V2.20 manifest, control catalog and starter kit counts
+  previousCommit: a0ccb81
+  plan: revert the risk register commit and restore V2.21 manifest, control catalog and starter kit counts
   owner: governance-team
 approvals:
   - role: architecture-governance

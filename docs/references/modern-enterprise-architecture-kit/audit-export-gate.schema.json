@@ -126,7 +126,9 @@
         "signatureReceiptRequired",
         "signatureReceiptExternal",
         "poamRecordRequired",
-        "poamMatchesAssessment"
+        "poamMatchesAssessment",
+        "riskRegisterRequired",
+        "riskRegisterLinksPoam"
       ],
       "properties": {
         "architectureVersion": {
@@ -186,6 +188,12 @@
           "type": "boolean"
         },
         "poamMatchesAssessment": {
+          "type": "boolean"
+        },
+        "riskRegisterRequired": {
+          "type": "boolean"
+        },
+        "riskRegisterLinksPoam": {
           "type": "boolean"
         }
       }

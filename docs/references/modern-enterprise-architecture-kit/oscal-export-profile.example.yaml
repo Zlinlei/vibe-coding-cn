@@ -1,5 +1,5 @@
 profile: modern-enterprise-architecture-oscal-export
-version: V2.21
+version: V2.22
 owner: governance-team
 generatedOn: 2026-06-02
 target:
@@ -19,6 +19,7 @@ sourceArtifacts:
   auditExportSigningPolicy: docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml
   auditExportSignatureReceipt: docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml
   poamRecord: docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+  riskRegister: docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml
 modelMapping:
   - model: catalog
     source: docs/references/modern-enterprise-architecture-controls.json
@@ -40,8 +41,12 @@ modelMapping:
     source: docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
     output: build/modern-enterprise-architecture-audit/oscal-summary.json#/poam
     required: true
+  - model: risk-register
+    source: docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml
+    output: build/modern-enterprise-architecture-audit/oscal-summary.json#/riskRegister
+    required: true
 controls:
-  count: 36
+  count: 37
   selectionSource: docs/references/modern-enterprise-architecture-controls.json
 assessment:
   source: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml

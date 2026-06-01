@@ -1,9 +1,9 @@
 {
-  "version": "V2.21",
+  "version": "V2.22",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、POA&M 整改计划、审计导出门禁、导出完整性清单、provenance statement、签名策略和签名验签回执",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单、可运行审计导出命令、控制评估报告、架构基线变更记录、OSCAL 交换映射、POA&M 整改计划、企业架构风险登记、审计导出门禁、导出完整性清单、provenance statement、签名策略和签名验签回执",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -1037,7 +1037,7 @@
           "required": ["profile", "version", "owner", "generatedOn", "target", "sourceArtifacts", "modelMapping", "controls", "assessment", "validation", "retention"],
           "nestedRequired": {
             "target": ["standard", "format", "machineReadable"],
-            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy", "auditExportSignatureReceipt", "poamRecord"],
+            "sourceArtifacts": ["versionManifest", "controlCatalog", "controlEvidenceMap", "auditExportManifest", "controlAssessmentReport", "baselineChangeRecord", "auditExportGate", "auditExportIntegrity", "auditExportProvenance", "auditExportSigningPolicy", "auditExportSignatureReceipt", "poamRecord", "riskRegister"],
             "controls": ["count", "selectionSource"],
             "assessment": ["source", "result", "openFindings", "poamRequired"],
             "validation": ["command", "result", "output"],
@@ -1048,13 +1048,14 @@
       "exampleRequirements": [
         {
           "path": "docs/references/modern-enterprise-architecture-kit/oscal-export-profile.example.yaml",
-          "fields": ["profile", "version", "target.machineReadable", "sourceArtifacts.controlCatalog", "modelMapping", "controls.count", "assessment.result", "validation.output"]
+          "fields": ["profile", "version", "target.machineReadable", "sourceArtifacts.controlCatalog", "sourceArtifacts.riskRegister", "modelMapping", "controls.count", "assessment.result", "validation.output"]
         }
       ],
       "checkerEvidence": [
         "oscal-export-profile.version must match currentVersion",
         "oscal-export-profile.sourceArtifacts.poamRecord must point to docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
-        "oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results and POA&M",
+        "oscal-export-profile.sourceArtifacts.riskRegister must point to docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
+        "oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results, POA&M and risk register",
         "oscal-export-profile.controls.count must match control catalog length",
         "oscal-export-profile.assessment.result must match control assessment summary",
         "oscal-export-profile.validation.command must be make export-modern-architecture-audit",
@@ -1079,7 +1080,7 @@
           "nestedRequired": {
             "command": ["local", "preflight", "export"],
             "qualityGate": ["requiredInMakeTest", "zeroDependency", "blocksOnMismatch"],
-            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches", "signatureReceiptRequired", "signatureReceiptExternal", "poamRecordRequired", "poamMatchesAssessment"],
+            "expectations": ["architectureVersion", "starterKitPairs", "controlCount", "verificationCommand", "verificationResult", "integrityManifestRequired", "generatedOutputDigestsMatch", "provenanceStatementRequired", "provenanceSubjectDigestsMatch", "signingPolicyRequired", "signingPayloadDigestMatches", "signatureReceiptRequired", "signatureReceiptExternal", "poamRecordRequired", "poamMatchesAssessment", "riskRegisterRequired", "riskRegisterLinksPoam"],
             "ciIntegration": ["localGate", "makefileTarget", "script"],
             "retention": ["period", "reviewOn"]
           }
@@ -1106,6 +1107,8 @@
         "audit-export-gate.expectations.signatureReceiptExternal must be true",
         "audit-export-gate.expectations.poamRecordRequired must be true",
         "audit-export-gate.expectations.poamMatchesAssessment must be true",
+        "audit-export-gate.expectations.riskRegisterRequired must be true",
+        "audit-export-gate.expectations.riskRegisterLinksPoam must be true",
         "audit-export-gate.qualityGate.requiredInMakeTest must be true",
         "audit-export-gate.ciIntegration.localGate must be make test",
         "audit export gate runtime invariant check failed"
@@ -1313,6 +1316,47 @@
         "poam-record.milestones.finding must reference a POA&M item",
         "poam-record.signOff.nextReviewOn must be after signedOn",
         "oscal-summary.json poam.items must match POA&M record items"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-RISK-REGISTER-001",
+      "category": "risk-governance",
+      "title": "企业架构风险必须进入机器可读风险登记",
+      "statement": "企业架构风险不能只存在于会议纪要或章节说明中，必须形成机器可读风险登记，记录风险、严重度、可能性、影响、owner、处理策略、关联控制项、关联 POA&M、缓解行动、残余风险、复审和审计证据。",
+      "requiredArtifacts": [
+        "docs/references/modern-enterprise-architecture-kit/risk-register.schema.json",
+        "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
+        "scripts/check-modern-architecture-kit.py",
+        "scripts/export-modern-architecture-audit.py",
+        "scripts/check-modern-architecture-audit-export.py"
+      ],
+      "schemaRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/risk-register.schema.json",
+          "required": ["riskRegister", "version", "owner", "generatedOn", "scope", "risks", "review", "retention"],
+          "nestedRequired": {
+            "scope": ["architectureVersion", "subject", "controlCatalog", "controlAssessmentReport", "poamRecord"],
+            "risks": ["riskId", "title", "category", "severity", "likelihood", "impact", "status", "owner", "treatment", "controls", "mitigation", "residualRisk", "reviewOn", "evidence"],
+            "review": ["status", "reviewer", "reviewedOn", "nextReviewOn"],
+            "retention": ["period", "reviewOn"]
+          }
+        }
+      ],
+      "exampleRequirements": [
+        {
+          "path": "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
+          "fields": ["riskRegister", "version", "scope.controlCatalog", "scope.poamRecord", "risks", "risks.0.linkedPoamItem", "review.status", "retention.reviewOn"]
+        }
+      ],
+      "checkerEvidence": [
+        "risk-register.version must match currentVersion",
+        "risk-register.scope.poamRecord must point to POA&M record",
+        "risk-register.risks.controls must reference control catalog ids",
+        "risk-register.risks.linkedPoamItem must reference a POA&M item",
+        "risk-register.risks.mitigation.action must match linked POA&M action",
+        "risk-register.review.nextReviewOn must be after reviewedOn",
+        "audit-export.json evidence.riskRegister must match starter kit example",
+        "oscal-summary.json riskRegister.risks must match risk register"
       ]
     }
   ]

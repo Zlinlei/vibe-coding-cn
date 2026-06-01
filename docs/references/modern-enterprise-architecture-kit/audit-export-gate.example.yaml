@@ -1,5 +1,5 @@
 gate: modern-enterprise-architecture-audit-export-gate
-version: V2.21
+version: V2.22
 owner: governance-team
 generatedOn: 2026-06-02
 command:
@@ -22,7 +22,7 @@ outputs:
   - path: build/modern-enterprise-architecture-audit/oscal-summary.json
     type: json
     required: true
-    invariant: OSCAL summary control count, profile version and POA&M state match assessment evidence
+    invariant: OSCAL summary control count, profile version, POA&M state and risk register match source evidence
   - path: build/modern-enterprise-architecture-audit/audit-export-integrity.json
     type: json
     required: true
@@ -36,9 +36,9 @@ outputs:
     required: true
     invariant: signing policy payload digest matches the provenance statement and requires external signature
 expectations:
-  architectureVersion: V2.21
-  starterKitPairs: 52
-  controlCount: 36
+  architectureVersion: V2.22
+  starterKitPairs: 53
+  controlCount: 37
   verificationCommand: make check-modern-architecture-kit
   verificationResult: pass
   oscalControlCountMatchesCatalog: true
@@ -53,6 +53,8 @@ expectations:
   signatureReceiptExternal: true
   poamRecordRequired: true
   poamMatchesAssessment: true
+  riskRegisterRequired: true
+  riskRegisterLinksPoam: true
 ciIntegration:
   localGate: make test
   makefileTarget: check-modern-architecture-audit-export

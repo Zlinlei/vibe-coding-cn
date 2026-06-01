@@ -1,0 +1,46 @@
+riskRegister: modern-enterprise-architecture-risk-register
+version: V2.22
+owner: governance-team
+generatedOn: 2026-06-02
+scope:
+  architectureVersion: V2.22
+  subject: modern-enterprise-architecture
+  controlCatalog: docs/references/modern-enterprise-architecture-controls.json
+  controlAssessmentReport: docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
+  poamRecord: docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+risks:
+  - riskId: risk-legacy-manual-audit-export
+    title: legacy manual audit export could produce incomplete evidence
+    category: audit-interoperability
+    severity: low
+    likelihood: low
+    impact: medium
+    status: closed
+    owner: governance-team
+    treatment: mitigate
+    controls:
+      - CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001
+      - CTRL-ARCH-POAM-RECORD-001
+    linkedPoamItem: legacy-manual-audit-export-risk
+    mitigation:
+      action: audit export command added and validated before V2.13 assessment
+      dueDate: 2026-06-02
+      completedOn: 2026-06-02
+    residualRisk:
+      severity: low
+      rationale: export command, gate and POA&M record now provide repeatable evidence closure
+      acceptedBy: architecture-governance-board
+      acceptedOn: 2026-06-02
+    reviewOn: 2026-09-02
+    evidence:
+      - docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml
+      - docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml
+      - build/modern-enterprise-architecture-audit/audit-export.json
+review:
+  status: approved
+  reviewer: architecture-governance-board
+  reviewedOn: 2026-06-02
+  nextReviewOn: 2026-09-02
+retention:
+  period: 2y
+  reviewOn: 2026-12-02

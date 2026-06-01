@@ -33,6 +33,7 @@ REQUIRED_EXPORT_ARTIFACTS = [
     "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
     "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
+    "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
     "scripts/check-modern-architecture-kit.py",
     "scripts/export-modern-architecture-audit.py",
     "scripts/check-modern-architecture-audit-export.py",
@@ -150,6 +151,7 @@ def build_packet(checker: Any) -> dict[str, Any]:
             "auditExportSigningPolicy": examples.get("audit-export-signing-policy"),
             "auditExportSignatureReceipt": examples.get("audit-export-signature-receipt"),
             "poamRecord": examples.get("poam-record"),
+            "riskRegister": examples.get("risk-register"),
         },
         "artifacts": artifacts,
         "verification": {
@@ -199,6 +201,7 @@ def write_oscal_summary(packet: dict[str, Any], path: Path) -> None:
     assessment = evidence.get("controlAssessmentReport") if isinstance(evidence, dict) else {}
     oscal_profile = evidence.get("oscalExportProfile") if isinstance(evidence, dict) else {}
     poam_record = evidence.get("poamRecord") if isinstance(evidence, dict) else {}
+    risk_register = evidence.get("riskRegister") if isinstance(evidence, dict) else {}
     assessment_summary = assessment.get("summary") if isinstance(assessment, dict) else {}
     poam_scope = poam_record.get("scope") if isinstance(poam_record, dict) else {}
 
@@ -228,6 +231,11 @@ def write_oscal_summary(packet: dict[str, Any], path: Path) -> None:
             "items": poam_record.get("items", []) if isinstance(poam_record, dict) else [],
             "milestones": poam_record.get("milestones", []) if isinstance(poam_record, dict) else [],
             "signOff": poam_record.get("signOff", {}) if isinstance(poam_record, dict) else {},
+        },
+        "riskRegister": {
+            "source": "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
+            "risks": risk_register.get("risks", []) if isinstance(risk_register, dict) else [],
+            "review": risk_register.get("review", {}) if isinstance(risk_register, dict) else {},
         },
         "profile": oscal_profile,
     }
@@ -398,7 +406,7 @@ def parse_args() -> argparse.Namespace:
         default=str(DEFAULT_OUT_DIR),
         help=(
             "Output directory for audit-export.json, audit-export.md, oscal-summary.json, "
-            "POA&M summary, integrity manifest, provenance statement, signing policy and signature receipt contract"
+            "POA&M and risk register summary, integrity manifest, provenance statement, signing policy and signature receipt contract"
         ),
     )
     return parser.parse_args()
@@ -428,7 +436,7 @@ def main() -> int:
 
     print(f"OK modern architecture audit export written: {relative(json_path)}")
     print(f"OK modern architecture audit report written: {relative(markdown_path)}")
-    print(f"OK modern architecture OSCAL summary and POA&M view written: {relative(oscal_path)}")
+    print(f"OK modern architecture OSCAL summary, POA&M and risk register view written: {relative(oscal_path)}")
     print(f"OK modern architecture audit integrity manifest written: {relative(integrity_path)}")
     print(f"OK modern architecture audit provenance statement written: {relative(provenance_path)}")
     print(f"OK modern architecture audit signing policy written: {relative(signing_policy_path)}")

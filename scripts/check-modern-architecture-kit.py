@@ -77,6 +77,7 @@ PAIR_NAMES = [
     "audit-export-signing-policy",
     "audit-export-signature-receipt",
     "poam-record",
+    "risk-register",
 ]
 SCHEMA_TYPES = {"object", "array", "string", "number", "integer", "boolean", "null"}
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -540,6 +541,11 @@ def get_dotted_value(value: Any, dotted_path: str) -> Any:
     for part in dotted_path.split("."):
         if isinstance(current, dict) and part in current:
             current = current[part]
+        elif isinstance(current, list) and part.isdigit():
+            index = int(part)
+            if index >= len(current):
+                return None
+            current = current[index]
         else:
             return None
     return current
@@ -964,6 +970,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
     audit_export_signing_policy = examples.get("audit-export-signing-policy")
     audit_export_signature_receipt = examples.get("audit-export-signature-receipt")
     poam_record = examples.get("poam-record")
+    risk_register = examples.get("risk-register")
     try:
         version_manifest = load_version_manifest()
     except (json.JSONDecodeError, ValueError):
@@ -1717,6 +1724,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
                 "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
+                "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
                 "scripts/export-modern-architecture-audit.py",
                 "scripts/check-modern-architecture-audit-export.py",
@@ -1910,6 +1918,87 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
             if generated_on is not None and review_on is not None and review_on <= generated_on:
                 errors.append("cross-file: poam-record.retention.reviewOn must be after generatedOn")
 
+    if isinstance(risk_register, dict):
+        if risk_register.get("version") != version_manifest.get("currentVersion"):
+            errors.append("cross-file: risk-register.version must match currentVersion")
+        generated_on = parse_example_date(risk_register.get("generatedOn"))
+        scope = risk_register.get("scope")
+        if isinstance(scope, dict):
+            if scope.get("architectureVersion") != version_manifest.get("currentVersion"):
+                errors.append("cross-file: risk-register.scope.architectureVersion must match currentVersion")
+            if scope.get("controlCatalog") != str(CONTROL_CATALOG_PATH.relative_to(ROOT)):
+                errors.append("cross-file: risk-register.scope.controlCatalog must point to control catalog")
+            if (
+                scope.get("controlAssessmentReport")
+                != "docs/references/modern-enterprise-architecture-kit/control-assessment-report.example.yaml"
+            ):
+                errors.append("cross-file: risk-register.scope.controlAssessmentReport must point to control assessment report")
+            if scope.get("poamRecord") != "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml":
+                errors.append("cross-file: risk-register.scope.poamRecord must point to POA&M record")
+
+        poam_items = poam_record.get("items") if isinstance(poam_record, dict) else []
+        poam_item_map = {
+            item.get("finding"): item
+            for item in poam_items
+            if isinstance(item, dict) and isinstance(item.get("finding"), str)
+        }
+        risks = risk_register.get("risks")
+        if isinstance(risks, list):
+            for risk in risks:
+                if not isinstance(risk, dict):
+                    continue
+                controls = risk.get("controls")
+                if isinstance(controls, list):
+                    for control_id in controls:
+                        if control_id not in catalog_control_ids:
+                            errors.append("cross-file: risk-register.risks.controls must reference control catalog ids")
+                linked_poam_item = risk.get("linkedPoamItem")
+                poam_item = poam_item_map.get(linked_poam_item)
+                if isinstance(linked_poam_item, str):
+                    if not isinstance(poam_item, dict):
+                        errors.append("cross-file: risk-register.risks.linkedPoamItem must reference a POA&M item")
+                    else:
+                        mitigation = risk.get("mitigation")
+                        if risk.get("status") == "closed" and poam_item.get("status") != "closed":
+                            errors.append("cross-file: risk-register.closed risks linkedPoamItem must be closed")
+                        if isinstance(mitigation, dict):
+                            if mitigation.get("action") != poam_item.get("action"):
+                                errors.append("cross-file: risk-register.risks.mitigation.action must match linked POA&M action")
+                            if mitigation.get("dueDate") != poam_item.get("dueDate"):
+                                errors.append("cross-file: risk-register.risks.mitigation.dueDate must match linked POA&M dueDate")
+                mitigation = risk.get("mitigation")
+                if isinstance(mitigation, dict):
+                    due_date = parse_example_date(mitigation.get("dueDate"))
+                    completed_on = parse_example_date(mitigation.get("completedOn"))
+                    if risk.get("status") == "closed" and completed_on is None:
+                        errors.append("cross-file: risk-register.risks.mitigation.completedOn must be set when risk is closed")
+                    if completed_on is not None and due_date is not None and completed_on > due_date:
+                        errors.append("cross-file: risk-register.risks.mitigation.completedOn must be on or before dueDate")
+                residual_risk = risk.get("residualRisk")
+                if isinstance(residual_risk, dict):
+                    accepted_on = parse_example_date(residual_risk.get("acceptedOn"))
+                    if generated_on is not None and accepted_on is not None and accepted_on < generated_on:
+                        errors.append("cross-file: risk-register.risks.residualRisk.acceptedOn must be on or after generatedOn")
+                review_on = parse_example_date(risk.get("reviewOn"))
+                if generated_on is not None and review_on is not None and review_on <= generated_on:
+                    errors.append("cross-file: risk-register.risks.reviewOn must be after generatedOn")
+                evidence = risk.get("evidence")
+                if not isinstance(evidence, list) or not evidence:
+                    errors.append("cross-file: risk-register.risks.evidence must not be empty")
+        review = risk_register.get("review")
+        if isinstance(review, dict):
+            if review.get("status") != "approved":
+                errors.append("cross-file: risk-register.review.status must be approved")
+            reviewed_on = parse_example_date(review.get("reviewedOn"))
+            next_review_on = parse_example_date(review.get("nextReviewOn"))
+            if reviewed_on is not None and next_review_on is not None and next_review_on <= reviewed_on:
+                errors.append("cross-file: risk-register.review.nextReviewOn must be after reviewedOn")
+        retention = risk_register.get("retention")
+        if isinstance(retention, dict):
+            review_on = parse_example_date(retention.get("reviewOn"))
+            if generated_on is not None and review_on is not None and review_on <= generated_on:
+                errors.append("cross-file: risk-register.retention.reviewOn must be after generatedOn")
+
     if isinstance(baseline_change_record, dict):
         if baseline_change_record.get("version") != version_manifest.get("currentVersion"):
             errors.append("cross-file: baseline-change-record.version must match currentVersion")
@@ -2017,12 +2106,17 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "auditExportSigningPolicy": "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
                 "auditExportSignatureReceipt": "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
                 "poamRecord": "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
+                "riskRegister": "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
             }
             for key, expected_path in expected_sources.items():
                 if source_artifacts.get(key) != expected_path:
                     if key == "poamRecord":
                         errors.append(
                             "cross-file: oscal-export-profile.sourceArtifacts.poamRecord must point to docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml"
+                        )
+                    elif key == "riskRegister":
+                        errors.append(
+                            "cross-file: oscal-export-profile.sourceArtifacts.riskRegister must point to docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml"
                         )
                     else:
                         errors.append(f"cross-file: oscal-export-profile.sourceArtifacts.{key} must point to {expected_path}")
@@ -2036,6 +2130,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "system-security-plan",
                 "assessment-results",
                 "plan-of-action-and-milestones",
+                "risk-register",
             }
             mapped_models = set()
             for item in model_mapping:
@@ -2050,7 +2145,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 if isinstance(source_path, str) and not (ROOT / source_path).is_file():
                     errors.append("cross-file: oscal-export-profile.modelMapping.source must exist")
             if mapped_models != required_models:
-                errors.append("cross-file: oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results and POA&M")
+                errors.append("cross-file: oscal-export-profile.modelMapping must cover OSCAL catalog, component-definition, system-security-plan, assessment-results, POA&M and risk register")
             for item in model_mapping:
                 if not isinstance(item, dict):
                     continue
@@ -2058,6 +2153,8 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                     errors.append(
                         "cross-file: oscal-export-profile.modelMapping plan-of-action-and-milestones source must be poam-record.example.yaml"
                     )
+                if item.get("model") == "risk-register" and item.get("source") != "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml":
+                    errors.append("cross-file: oscal-export-profile.modelMapping risk-register source must be risk-register.example.yaml")
         controls = oscal_export_profile.get("controls")
         if isinstance(controls, dict):
             if controls.get("count") != len(catalog_control_ids):
@@ -2136,6 +2233,10 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 errors.append("cross-file: audit-export-gate.expectations.poamRecordRequired must be true")
             if expectations.get("poamMatchesAssessment") is not True:
                 errors.append("cross-file: audit-export-gate.expectations.poamMatchesAssessment must be true")
+            if expectations.get("riskRegisterRequired") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.riskRegisterRequired must be true")
+            if expectations.get("riskRegisterLinksPoam") is not True:
+                errors.append("cross-file: audit-export-gate.expectations.riskRegisterLinksPoam must be true")
         outputs = audit_export_gate.get("outputs")
         if isinstance(outputs, list):
             output_paths = {item.get("path") for item in outputs if isinstance(item, dict) and isinstance(item.get("path"), str)}

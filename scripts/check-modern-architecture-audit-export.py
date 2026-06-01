@@ -302,6 +302,7 @@ def validate_packet(
         "docs/references/modern-enterprise-architecture-kit/audit-export-signing-policy.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/audit-export-signature-receipt.example.yaml",
         "docs/references/modern-enterprise-architecture-kit/poam-record.example.yaml",
+        "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml",
         "scripts/check-modern-architecture-audit-export.py",
     }
     if not required_artifacts.issubset(artifact_paths):
@@ -357,6 +358,10 @@ def validate_packet(
                     errors.append("auditExportGate expectations.poamRecordRequired must be true")
                 if expectations.get("poamMatchesAssessment") is not True:
                     errors.append("auditExportGate expectations.poamMatchesAssessment must be true")
+                if expectations.get("riskRegisterRequired") is not True:
+                    errors.append("auditExportGate expectations.riskRegisterRequired must be true")
+                if expectations.get("riskRegisterLinksPoam") is not True:
+                    errors.append("auditExportGate expectations.riskRegisterLinksPoam must be true")
         audit_export_provenance = evidence.get("auditExportProvenance")
         if audit_export_provenance != examples.get("audit-export-provenance"):
             errors.append("audit-export.json evidence.auditExportProvenance must match starter kit example")
@@ -369,6 +374,9 @@ def validate_packet(
         poam_record = evidence.get("poamRecord")
         if poam_record != examples.get("poam-record"):
             errors.append("audit-export.json evidence.poamRecord must match starter kit example")
+        risk_register = evidence.get("riskRegister")
+        if risk_register != examples.get("risk-register"):
+            errors.append("audit-export.json evidence.riskRegister must match starter kit example")
 
     if oscal.get("version") != expected_version:
         errors.append("oscal-summary.json version must match currentVersion")
@@ -401,6 +409,20 @@ def validate_packet(
                 errors.append("oscal-summary.json poam.items must match POA&M record items")
             if poam.get("milestones") != poam_record.get("milestones"):
                 errors.append("oscal-summary.json poam.milestones must match POA&M record milestones")
+
+    risk_register = oscal.get("riskRegister")
+    if isinstance(risk_register, dict):
+        source = risk_register.get("source")
+        if source != "docs/references/modern-enterprise-architecture-kit/risk-register.example.yaml":
+            errors.append("oscal-summary.json riskRegister.source must point to risk register")
+        risk_register_example = examples.get("risk-register")
+        if isinstance(risk_register_example, dict):
+            if risk_register.get("risks") != risk_register_example.get("risks"):
+                errors.append("oscal-summary.json riskRegister.risks must match risk register")
+            if risk_register.get("review") != risk_register_example.get("review"):
+                errors.append("oscal-summary.json riskRegister.review must match risk register")
+    else:
+        errors.append("oscal-summary.json riskRegister must be generated")
 
     if integrity is None or generated_outputs is None:
         errors.append("audit-export-integrity.json must be generated and validated")
@@ -480,8 +502,8 @@ def main() -> int:
     control_count = loaded_packet.get("controlCount")
     print(
         "OK modern architecture audit export gate checked: "
-        f"{version}, {pair_count} schema/example pairs, {control_count} controls, POA&M, integrity, provenance, "
-        "signing policy and signature receipt contract"
+        f"{version}, {pair_count} schema/example pairs, {control_count} controls, POA&M, risk register, "
+        "integrity, provenance, signing policy and signature receipt contract"
     )
     return 0
 
