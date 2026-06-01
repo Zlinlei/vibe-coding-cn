@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT_DIR = ROOT / "docs/references/modern-enterprise-architecture-kit"
 VERSION_MANIFEST_PATH = ROOT / "docs/references/modern-enterprise-architecture-version.json"
 CONTROL_CATALOG_PATH = ROOT / "docs/references/modern-enterprise-architecture-controls.json"
+AUDIT_EXPORT_SCRIPT_PATH = ROOT / "scripts/export-modern-architecture-audit.py"
 PAIR_NAMES = [
     "domain",
     "service",
@@ -622,6 +623,26 @@ def validate_control_catalog(expected_version: str, expected_control_count: Any)
                     continue
                 if evidence not in checker_text:
                     errors.append(f"{location}: checker evidence is not present in script: {evidence}")
+
+    return errors
+
+
+def validate_audit_export_automation() -> list[str]:
+    errors: list[str] = []
+    makefile_path = ROOT / "Makefile"
+    scripts_readme_path = ROOT / "scripts/README.md"
+    root_agents_path = ROOT / "AGENTS.md"
+
+    if not AUDIT_EXPORT_SCRIPT_PATH.is_file():
+        errors.append("audit export script must exist")
+    if not makefile_path.is_file() or "export-modern-architecture-audit" not in makefile_path.read_text(encoding="utf-8"):
+        errors.append("Makefile must expose export-modern-architecture-audit")
+    if not scripts_readme_path.is_file() or "export-modern-architecture-audit.py" not in scripts_readme_path.read_text(
+        encoding="utf-8"
+    ):
+        errors.append("scripts README must mention export-modern-architecture-audit.py")
+    if not root_agents_path.is_file() or "export-modern-architecture-audit" not in root_agents_path.read_text(encoding="utf-8"):
+        errors.append("AGENTS.md must mention export-modern-architecture-audit")
 
     return errors
 
@@ -1588,6 +1609,7 @@ def validate_cross_file_consistency(examples: dict[str, Any]) -> list[str]:
                 "docs/references/modern-enterprise-architecture-controls.json",
                 "docs/references/modern-enterprise-architecture-kit/control-evidence-map.example.yaml",
                 "scripts/check-modern-architecture-kit.py",
+                "scripts/export-modern-architecture-audit.py",
             }
             if not required_content_paths.issubset(content_paths):
                 errors.append("cross-file: audit-export-manifest.contents must include required audit artifacts")
@@ -1640,6 +1662,7 @@ def validate_pair(name: str) -> list[str]:
 def main() -> int:
     errors: list[str] = []
     errors.extend(validate_version_manifest())
+    errors.extend(validate_audit_export_automation())
 
     for required_doc in ("README.md", "AGENTS.md"):
         path = KIT_DIR / required_doc

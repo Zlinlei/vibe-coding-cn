@@ -1,12 +1,12 @@
 package: modern-enterprise-architecture-audit-export
-version: V2.11
+version: V2.12
 generatedOn: 2026-06-02
 owner: governance-team
 scope:
-  architectureVersion: V2.11
+  architectureVersion: V2.12
   environment: starter-kit
   subject: modern-enterprise-architecture
-  controlCount: 26
+  controlCount: 27
   starterKitPairs: 43
 contents:
   - artifact: architecture-document
@@ -33,11 +33,15 @@ contents:
     path: scripts/check-modern-architecture-kit.py
     type: python
     required: true
+  - artifact: audit-exporter
+    path: scripts/export-modern-architecture-audit.py
+    type: python
+    required: true
 verification:
   command: make check-modern-architecture-kit
   result: pass
-  runId: local-v2-11-starter-gate
-  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-11.md
+  runId: local-v2-12-starter-gate
+  report: governance/evidence/audit-export/modern-enterprise-architecture-v2-12.md
 signing:
   required: true
   method: sigstore-or-enterprise-signing

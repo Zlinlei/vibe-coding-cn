@@ -1,8 +1,8 @@
 map: modern-enterprise-architecture-control-evidence
-version: V2.11
+version: V2.12
 owner: governance-team
 generatedOn: 2026-06-02
-controlCount: 26
+controlCount: 27
 freshness:
   maxAgeDays: 90
   expiryAction: block
@@ -261,6 +261,16 @@ controls:
     evidence:
       - path: docs/references/modern-enterprise-architecture-kit/audit-export-manifest.schema.json
         type: schema
+        source: git
+        verifiedOn: 2026-06-02
+    status: pass
+    required: true
+    fresh: true
+    blocking: true
+  - id: CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001
+    evidence:
+      - path: scripts/export-modern-architecture-audit.py
+        type: script
         source: git
         verifiedOn: 2026-06-02
     status: pass

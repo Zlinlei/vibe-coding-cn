@@ -1,9 +1,9 @@
 {
-  "version": "V2.11",
+  "version": "V2.12",
   "releaseDate": "2026-06-02",
   "status": "Baseline Candidate",
   "profile": "modern-enterprise-architecture-executable-controls",
-  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射和审计导出清单",
+  "summary": "把关键企业架构控制项映射到 schema、example、checker、控制证据映射、审计导出清单和可运行审计导出命令",
   "alignment": [
     {
       "source": "NIST OSCAL",
@@ -916,6 +916,25 @@
         "audit-export-manifest.contents must include required audit artifacts",
         "audit-export-manifest.verification.result must be pass",
         "audit-export-manifest.signing.required must be true"
+      ]
+    },
+    {
+      "id": "CTRL-ARCH-AUDIT-EXPORT-AUTOMATION-001",
+      "category": "audit-export",
+      "title": "审计导出包必须能由仓库命令生成",
+      "statement": "审计导出不能只停留在清单模板，仓库必须提供零依赖导出脚本和 Make 入口，先校验 starter kit 再生成 JSON 与 Markdown 审计包。",
+      "requiredArtifacts": [
+        "scripts/export-modern-architecture-audit.py",
+        "Makefile",
+        "scripts/README.md"
+      ],
+      "schemaRequirements": [],
+      "exampleRequirements": [],
+      "checkerEvidence": [
+        "audit export script must exist",
+        "Makefile must expose export-modern-architecture-audit",
+        "scripts README must mention export-modern-architecture-audit.py",
+        "AGENTS.md must mention export-modern-architecture-audit"
       ]
     }
   ]
