@@ -21,6 +21,10 @@ exclude_path = [
   '^docs/references/modern-enterprise-architecture-template\.md$',
   '^tools/external(/|$)',
   '^tools/chat-vault(/|$)',
+  # These research projects have independent link-checking contracts and are
+  # intentionally excluded from the root repository's first-party scan.
+  '^research/vibe-cybersecurity-cn(/|$)',
+  '^research/vibe-harness-cn(/|$)',
   '^tools/prompts-library(/|$)',
   '^skills/claude-official-skills(/|$)',
   '^skills/auto-tmux/assets/(oh-my-tmux|tmux-src)(/|$)',
