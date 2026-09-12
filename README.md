@@ -570,10 +570,29 @@ AI 负责生成候选解，隔离上下文负责审查和优化候选解，事�
 *   [**scripts 仓库控制面治理**](docs/references/modern-enterprise-architecture-template.md#reference-modern-enterprise-scripts-control-plane): 成熟企业项目的脚本分层、风险边界、登记、测试、审计和下线规则。
 *   [**scripts 目录说明**](scripts/README.md): 本仓库自动化入口、验证命令和脚本职责索引。
 *   [**研究域治理契约**](research/research-domain-contract.md): 研究域的结构、raw 原始事实层、成熟度、证据、沉淀和归档规则。
-*   [**研究价值与应用地图**](research/research-value-application-map.md): 17 个研究域的用户价值、核心启示、应用位置和下沉路线。
+*   [**研究项目第三方许可说明**](research/vibe-cybersecurity-cn/THIRD_PARTY_NOTICES.md): 纳入研究项目的来源、许可证和公开边界。
+*   [**研究价值与应用地图**](research/research-value-application-map.md): 35 个研究域的用户价值、核心启示、应用位置和下沉路线。
 *   [**研究迁移综合**](research/research-transfer-synthesis.md): 用对标拆解、改良迭代和杂交创新把研究转成可执行路线。
 *   [**Harness 工程解析**](research/harness/harness-engineering.md): Harness Engineering 的工程控制、评估器与反馈闭环解析。
+*   [**vibe-cybersecurity-cn 研究项目**](research/vibe-cybersecurity-cn/README.md): 授权边界内的 Agent 网络安全自动化研究与工程项目。
+*   [**vibe-harness-cn 研究项目**](research/vibe-harness-cn/README.md): 治理 Agent Harness 与问题求解算子库的元 Harness 项目。
 *   [**OpenAI Codex 研究域**](research/openai-codex/README.md): 官方 coding agent 工具源码研究对象。
+*   [**OpenAI Plugins 研究域**](research/openai-plugins/README.md): Codex 插件、marketplace 与 skill-only plugin 分发研究对象。
+*   [**OpenAI Skills 研究域**](research/openai-skills/README.md): 已 deprecated 的 Codex Skills Catalog 与插件迁移参照。
+*   [**OpenAI Agents SDK 研究域**](research/openai-agents-python/README.md): Agent、工具、护栏、handoff 与 tracing 运行时研究对象。
+*   [**OpenAI Agents JS 研究域**](research/openai-agents-js/README.md): 官方 TypeScript/JavaScript Agent 运行时研究对象。
+*   [**OpenAI Cookbook 研究域**](research/openai-cookbook/README.md): OpenAI API、Codex、Agent、评估与安全示例库研究对象。
+*   [**GitHub Spec Kit 研究域**](research/github-spec-kit/README.md): GitHub 官方规格驱动开发工具包研究对象。
+*   [**OpenSpec 研究域**](research/fission-ai-openspec/README.md): 面向 AI coding assistant 的规格驱动开发工具研究对象。
+*   [**OpenCode 研究域**](research/anomalyco-opencode/README.md): 模型无关的终端与编辑器 coding agent 研究对象。
+*   [**Gemini CLI 研究域**](research/google-gemini-gemini-cli/README.md): 终端 coding agent、MCP、扩展与安全评估研究对象。
+*   [**OpenHands 研究域**](research/openhands-openhands/README.md): Agent Canvas、工作区、后端与自动化控制中心研究对象。
+*   [**Superpowers 研究域**](research/obra-superpowers/README.md): 跨 coding agent 的技能框架与开发方法论研究对象。
+*   [**Addy Agent Skills 研究域**](research/addyosmani-agent-skills/README.md): 面向 coding agent 的生命周期技能与质量门禁研究对象。
+*   [**Goose 研究域**](research/aaif-goose-goose/README.md): 跨模型、跨平台的开源 AI Agent 研究对象。
+*   [**Continue 研究域**](research/continuedev-continue/README.md): 已停止主动维护的 IDE/CLI Agent 历史对标对象。
+*   [**mini-SWE-agent 研究域**](research/swe-agent-mini-swe-agent/README.md): 面向 issue 和命令行任务的极简软件工程 Agent 研究对象。
+*   [**ECC 研究域**](research/affaan-m-ecc/README.md): 多种 coding agent 的 Harness、技能与质量实践集合研究对象。
 *   [**Claude Code Best Practice 研究域**](research/shanraisshan-claude-code-best-practice/README.md): Agentic Engineering 方法论对标研究对象。
 *   [**Cline 研究域**](research/cline-cline/README.md): IDE/SDK/CLI 自主编码 Agent 研究对象。
 *   [**Aider 研究域**](research/aider-ai-aider/README.md): 终端 AI 结对编程工具研究对象。
@@ -648,13 +667,16 @@ pip install -r tools/prompts-library/scripts/requirements.txt
 | 提示词格式转换 | `cd tools/prompts-library && python3 main.py` | `tools/prompts-library/main.py` |
 | Skill 严格校验示例 | `skills/auto-skill/scripts/validate-skill.sh skills/auto-skill --strict` | `skills/auto-skill/scripts/validate-skill.sh` |
 
+仓库级文档门禁跳过两个纳入的独立工程研究项目：`research/vibe-cybersecurity-cn/` 和
+`research/vibe-harness-cn/`；请按各项目 README 运行其独立验证。
+
 ### 配置与 CI
 
 - 路径级 owner 评审基线：`.github/CODEOWNERS`
 - Markdown lint 配置：`.github/lint_config.json`
 - Markdown lint 版本：`Makefile` 中固定为 `markdownlint-cli@0.48.0`
 - 外部链接检查配置：`.lychee.toml`，统一管理外链检查的超时、重试、并发上限和排除项
-- CI 配置：`.github/workflows/ci.yml`，在 `develop` / `master` 分支的 push / pull_request 上运行 markdown-lint、本地链接检查、docs 结构检查与 link-checker
+- CI 配置：`.github/workflows/ci.yml`，在 `develop` 分支的 push / pull_request 上运行 markdown-lint、本地链接检查、docs 结构检查与 link-checker
 - Codex 配置基线：`tools/config/.codex/README.md`，支持一键安装、自动备份和恢复。
 - Submodule 来源：`.gitmodules`
 

@@ -14,6 +14,8 @@ SKIP_PARTS = {".git", ".history", "node_modules"}
 SKIP_PREFIXES = [
     Path(".github/wiki"),
     Path("tools/external"),
+    Path("research/vibe-cybersecurity-cn"),
+    Path("research/vibe-harness-cn"),
 ]
 ANCHOR_PATTERN = re.compile(r"<a\s+id=[\"']([^\"']+)[\"']")
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")

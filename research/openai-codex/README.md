@@ -4,7 +4,7 @@
 
 - 本目录研究 `openai/codex` 这个外部仓库。
 - 当前优先级：P1；研究角色：官方 coding agent 工具源码。
-- GitHub 动态事实放在 `domain.yml`，观测日期为 2026-07-03。
+- GitHub 动态事实放在 `domain.yml`，观测日期为 2026-09-08；当前最新 release 为 `rust-v0.153.4`。
 
 ## 快速导航
 
@@ -31,6 +31,7 @@
 
 - 先读本 README 的判断，再读 `analysis.md` 和 `deep-dive.md` 的研究结论，最后读 `domain.yml`。
 - 需要引用 stars、forks、release、归档状态时，先重新核验 GitHub。
+- CLI 安装、认证、IDE、Skills 和 Plugins 的现行用法，以 [OpenAI Codex 文档](https://developers.openai.com/codex) 为准。
 - 如果形成稳定方法论，再迁入 concepts、references、workflow 或 skills。
 
 ## 正文
@@ -50,9 +51,12 @@
 - 当前优先级：P1
 - 当前归档状态：`false`
 - 主要语言：`Rust`
+- 最新 release：`rust-v0.153.4`
+- 本地源码快照：`raw/repository/`，commit `31ccaf40c2298bb3286c8fe274e1e21c498bb70a`
 
 ### 后续观察
 
-- 是否有稳定文档结构、命令入口和可复用工作流。
+- 官方 CLI、Skills、Plugins 和 IDE 入口是否继续保持清晰分层。
+- 沙箱、执行策略、MCP、命令入口和可复用工作流是否继续保持稳定。
 - 是否能反哺本仓库的 concepts、references、workflow 或 skills。
 - 是否存在许可证、归档状态、维护活跃度或生态迁移风险。

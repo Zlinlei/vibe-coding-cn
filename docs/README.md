@@ -81,6 +81,10 @@
 - [研究迁移综合](../research/research-transfer-synthesis.md) - 将对标拆解、改良迭代和杂交创新转成可执行研究路线。
 - [Harness 研究对象](../research/harness/README.md) - Harness Engineering 的工程控制、评估器与反馈闭环研究对象。
 - [Harness 工程解析](../research/harness/harness-engineering.md) - Harness Engineering 的工程控制、评估器与反馈闭环解析。
+- [walkinglabs/learn-harness-engineering 研究域](../research/walkinglabs-learn-harness-engineering/README.md) - Harness Engineering 课程、模板、Skill 与审计工具。
+- [mindfold-ai/Trellis 研究域](../research/mindfold-ai-trellis/README.md) - 跨平台 Agent Harness、任务规格与会话记忆系统。
+- [vibe-cybersecurity-cn](../research/vibe-cybersecurity-cn/README.md) - 授权边界内的 Agent 网络安全自动化研究与工程项目。
+- [vibe-harness-cn](../research/vibe-harness-cn/README.md) - 治理 Agent Harness 与问题求解算子库的元 Harness 项目。
 - [tmux 蜂群协作](../research/tmux-ai-swarm.md) - 用 tmux 让多个 AI 终端可感知、可调度、可救援的实验性协作范式。
 - [Aider-AI/aider 研究域](../research/aider-ai-aider/README.md) - 终端 AI 结对编程工具。
 - [Aider-AI/aider 研究分析](../research/aider-ai-aider/analysis.md) - 结构化研究结论、可借鉴点、风险和下一轮任务。
@@ -94,6 +98,54 @@
 - [openai/codex 研究域](../research/openai-codex/README.md) - 官方 coding agent 工具源码。
 - [openai/codex 研究分析](../research/openai-codex/analysis.md) - 结构化研究结论、可借鉴点、风险和下一轮任务。
 - [openai/codex 深度研究](../research/openai-codex/deep-dive.md) - L2 源码/结构深度研究、关键机制和可迁移模式。
+- [openai/plugins 研究域](../research/openai-plugins/README.md) - Codex 插件、marketplace 与 skill-only plugin 分发。
+- [openai/plugins 研究分析](../research/openai-plugins/analysis.md) - 插件能力包、发现和权限边界的结构化研究。
+- [openai/plugins 深度研究](../research/openai-plugins/deep-dive.md) - manifest、marketplace 和验证资产的 L2 研究。
+- [openai/skills 研究域](../research/openai-skills/README.md) - 已 deprecated 的 Codex Skills Catalog 与插件迁移参照。
+- [openai/skills 研究分析](../research/openai-skills/analysis.md) - 技能目录生命周期和迁移边界的结构化研究。
+- [openai/skills 深度研究](../research/openai-skills/deep-dive.md) - 技能目录、能力包和渐进加载的 L2 研究。
+- [openai/openai-agents-python 研究域](../research/openai-agents-python/README.md) - Agent 运行时与多 Agent 工作流编排。
+- [openai/openai-agents-python 研究分析](../research/openai-agents-python/analysis.md) - Agent、工具、护栏和追踪的结构化研究。
+- [openai/openai-agents-python 深度研究](../research/openai-agents-python/deep-dive.md) - SDK 运行时对象与验证机制的 L2 研究。
+- [openai/openai-agents-js 研究域](../research/openai-agents-js/README.md) - 官方 TypeScript/JavaScript Agent 运行时。
+- [openai/openai-agents-js 研究分析](../research/openai-agents-js/analysis.md) - TypeScript Agent 运行时的结构化研究。
+- [openai/openai-agents-js 深度研究](../research/openai-agents-js/deep-dive.md) - SDK 包结构、sandbox 与验证机制的 L2 研究。
+- [openai/openai-cookbook 研究域](../research/openai-cookbook/README.md) - OpenAI API、Codex、Agent、评估与安全示例库。
+- [openai/openai-cookbook 研究分析](../research/openai-cookbook/analysis.md) - 官方示例、登记表和可复现产物的结构化研究。
+- [openai/openai-cookbook 深度研究](../research/openai-cookbook/deep-dive.md) - registry、Codex 示例、Agent 示例与风险边界的 L2 研究。
+- [github/spec-kit 研究域](../research/github-spec-kit/README.md) - GitHub 官方规格驱动开发工具包。
+- [github/spec-kit 研究分析](../research/github-spec-kit/analysis.md) - 规格驱动流程和测试分层的结构化研究。
+- [github/spec-kit 深度研究](../research/github-spec-kit/deep-dive.md) - `.specify`、命令模板、扩展和测试结构的 L2 研究。
+- [Fission-AI/OpenSpec 研究域](../research/fission-ai-openspec/README.md) - 面向 AI coding assistant 的规格驱动开发工具。
+- [Fission-AI/OpenSpec 研究分析](../research/fission-ai-openspec/analysis.md) - 变更提案、规格资产和 CLI/Skill 边界的结构化研究。
+- [Fission-AI/OpenSpec 深度研究](../research/fission-ai-openspec/deep-dive.md) - changes、specs、schema、skills 与命令的 L2 研究。
+- [google-gemini/gemini-cli 研究域](../research/google-gemini-gemini-cli/README.md) - 终端 coding agent、MCP 和扩展。
+- [google-gemini/gemini-cli 研究分析](../research/google-gemini-gemini-cli/analysis.md) - 上下文、工具、权限和安全评估的结构化研究。
+- [google-gemini/gemini-cli 深度研究](../research/google-gemini-gemini-cli/deep-dive.md) - CLI、扩展、checkpoint 和负例评估的 L2 研究。
+- [OpenHands/OpenHands 研究域](../research/openhands-openhands/README.md) - Agent Canvas、工作区和后端控制中心。
+- [OpenHands/OpenHands 研究分析](../research/openhands-openhands/analysis.md) - Agent 编排、工作区和自动化的结构化研究。
+- [OpenHands/OpenHands 深度研究](../research/openhands-openhands/deep-dive.md) - Agent Server、适配层和状态边界的 L2 研究。
+- [anomalyco/opencode 研究域](../research/anomalyco-opencode/README.md) - 模型无关的终端与编辑器 coding agent。
+- [anomalyco/opencode 研究分析](../research/anomalyco-opencode/analysis.md) - provider、权限、插件和配置生命周期的结构化研究。
+- [anomalyco/opencode 深度研究](../research/anomalyco-opencode/deep-dive.md) - plan/build、策略、插件 reload 和 v2 spec 的 L2 研究。
+- [obra/superpowers 研究域](../research/obra-superpowers/README.md) - 跨 coding agent 的技能框架与开发方法论。
+- [obra/superpowers 研究分析](../research/obra-superpowers/analysis.md) - 技能触发、TDD、审查和插件分发的结构化研究。
+- [obra/superpowers 深度研究](../research/obra-superpowers/deep-dive.md) - 技能组合、阶段门禁和跨 harness 分发的 L2 研究。
+- [addyosmani/agent-skills 研究域](../research/addyosmani-agent-skills/README.md) - 面向 coding agent 的生命周期技能与质量门禁。
+- [addyosmani/agent-skills 研究分析](../research/addyosmani-agent-skills/analysis.md) - 生命周期命令、上下文层级和技能评估的结构化研究。
+- [addyosmani/agent-skills 深度研究](../research/addyosmani-agent-skills/deep-dive.md) - commands、skills、references 和 evals 的 L2 研究。
+- [aaif-goose/goose 研究域](../research/aaif-goose-goose/README.md) - 跨模型、跨平台的开源 AI Agent。
+- [aaif-goose/goose 研究分析](../research/aaif-goose-goose/analysis.md) - provider、MCP、工作区和评估资产的结构化研究。
+- [aaif-goose/goose 深度研究](../research/aaif-goose-goose/deep-dive.md) - Rust workspace、上下文管理和 workflow recipe 的 L2 研究。
+- [continuedev/continue 研究域](../research/continuedev-continue/README.md) - 已停止主动维护的 IDE/CLI Agent 历史对标。
+- [continuedev/continue 研究分析](../research/continuedev-continue/analysis.md) - 只读生命周期、上下文分层和迁移边界的结构化研究。
+- [continuedev/continue 深度研究](../research/continuedev-continue/deep-dive.md) - IDE/CLI、配置、上下文和生命周期的 L2 研究。
+- [SWE-agent/mini-SWE-agent 研究域](../research/swe-agent-mini-swe-agent/README.md) - 面向 issue 和命令行任务的极简软件工程 Agent。
+- [SWE-agent/mini-SWE-agent 研究分析](../research/swe-agent-mini-swe-agent/analysis.md) - 极简工具面、有界执行和问题修复闭环研究。
+- [SWE-agent/mini-SWE-agent 深度研究](../research/swe-agent-mini-swe-agent/deep-dive.md) - Bash 工具、轨迹、环境适配和评估边界的 L2 研究。
+- [affaan-m/ECC 研究域](../research/affaan-m-ecc/README.md) - 多种 coding agent 的 Harness、技能与质量实践集合。
+- [affaan-m/ECC 研究分析](../research/affaan-m-ecc/analysis.md) - Harness、记忆、安全和技能治理的结构化研究。
+- [affaan-m/ECC 深度研究](../research/affaan-m-ecc/deep-dive.md) - `.codex`、manifests、hooks 和评估技能的 L2 研究。
 - [shanraisshan/claude-code-best-practice 研究域](../research/shanraisshan-claude-code-best-practice/README.md) - Claude Code / Agentic Engineering 最强对标。
 - [shanraisshan/claude-code-best-practice 研究分析](../research/shanraisshan-claude-code-best-practice/analysis.md) - 结构化研究结论、可借鉴点、风险和下一轮任务。
 - [shanraisshan/claude-code-best-practice 深度研究](../research/shanraisshan-claude-code-best-practice/deep-dive.md) - L2 源码/结构深度研究、关键机制和可迁移模式。

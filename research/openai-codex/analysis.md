@@ -17,6 +17,14 @@ owner、风险等级、输入输出、dry-run、CI 状态和审计边界。
 - 原始来源清单：`raw/sources.yml`
 - 事实摘要：`domain.yml`
 - 深度证据：`deep-dive.md`
+- 当前源码快照：`raw/repository/`，commit `31ccaf40c2298bb3286c8fe274e1e21c498bb70a`
+
+## 官方公开入口
+
+- [Codex CLI](https://developers.openai.com/codex/cli)：安装、使用和终端入口。
+- [Codex Skills](https://developers.openai.com/codex/skills)：技能发现与使用。
+- [Codex Plugins](https://developers.openai.com/codex/plugins)：插件安装与能力分发。
+- [Build plugins](https://developers.openai.com/codex/plugins/build)：插件和 skill-only plugin 构建约定。
 
 ## 对标拆解
 
@@ -24,7 +32,7 @@ owner、风险等级、输入输出、dry-run、CI 状态和审计边界。
 |:---|:---|
 | 参考对象 | `openai/codex` |
 | 它解决的核心问题 | 让本地 coding agent 的命令执行、文件修改和工具调用进入可配置、可审计、可限制的系统 |
-| 核心机制 | `config`、`sandboxing`、`linux-sandbox`、`tools`、`skills`、`docs/exec*`、`AGENTS.md` 分层 |
+| 核心机制 | `config`、`config-schema`、`exec`、`execpolicy`、`sandboxing`、`tools`、`skills`、`plugin`、`docs/exec*`、`AGENTS.md` 分层 |
 | 真正带来结果的动作 | 把执行风险做成系统对象，而不是把风险控制写成提示词愿望 |
 | 可迁移做法 | 脚本登记表、风险等级、自动执行边界、人工审批边界、dry-run 和审计说明 |
 | 不可迁移条件 | 不复制 Rust workspace、Bazel/Nix、CLI runtime 和产品级沙箱实现 |
@@ -44,6 +52,7 @@ owner、风险等级、输入输出、dry-run、CI 状态和审计边界。
 - 对脚本补齐输入、输出、幂等性、dry-run、失败恢复和审计说明。
 - 把 Agent 可自动执行与必须人工确认的边界写进 `scripts/AGENTS.md`。
 - 把命令执行策略沉淀到 `docs/references/` 或 `docs/workflow/`。
+- 将 Codex CLI 配置基线的安装、备份、恢复和权限审查与研究结论保持对照，但不把研究仓库源码当作用户配置文件。
 
 ## 不可迁移清单
 

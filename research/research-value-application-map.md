@@ -2,10 +2,10 @@
 
 ## 字多不看
 
-- 当前研究体系已经覆盖 17 个独立研究域，17 个均已完成 L2 深度研究。
+- 当前研究体系已经覆盖 33 个独立外部仓库研究域，33 个均已完成 L2 深度研究。
 - 这些研究不是为了介绍外部项目，而是为了把外部项目拆成可验证事实、核心机制、迁移边界和本仓可执行改进项。
-- 17 个研究域的 `analysis.md` 已统一为对标拆解、改良迭代、可迁移清单、不可迁移清单和验证动作格式。
-- 17 个研究域的 `deep-dive.md` 已补齐 L2 证据层、关键机制、迁移边界和 L3 验证任务。
+- 35 个研究域的 `analysis.md` 已统一为对标拆解、改良迭代、可迁移清单、不可迁移清单和验证动作格式。
+- 35 个研究域的 `deep-dive.md` 已补齐 L2 证据层、关键机制、迁移边界和 L3 验证任务。
 - 用户获得的直接价值是少走弯路、看见范式、拿到可落地路线。
 - 本仓获得的直接价值是形成 `getting-started`、`references`、`workflow`、`skills`、`assets`、`scripts`
   和 `research` 的改进输入。
@@ -16,8 +16,8 @@
 
 | 层级 | 数量 | 状态 | 说明 |
 |:---|---:|:---|:---|
-| 研究域 | 17 | 已建立 | 每个外部仓库一个独立研究域，均有 raw 原始事实层、`analysis.md` 和 `deep-dive.md` |
-| L2 深度研究 | 17 | 已完成 | 覆盖工具、课程、资源索引、项目实践、中文主题雷达和归档工具样本 |
+| 研究域 | 33 | 已建立 | 每个外部仓库一个独立研究域，均有 raw 原始事实层、`analysis.md` 和 `deep-dive.md` |
+| L2 深度研究 | 33 | 已完成 | 覆盖 coding agent、Agent runtime、插件、规格驱动开发、技能框架、课程、资源索引、项目实践和归档工具样本 |
 | L1 观察研究 | 0 | 已清空 | P3 仍是低采用优先级，不再代表研究深度缺口 |
 
 ## 用户能获得什么
@@ -76,7 +76,8 @@
 
 ### 一、AI Coding 的底座是控制面
 
-来自 `openai/codex`、`aider`、`cline` 的共同启示是：成熟 coding agent 依赖控制面，而不是只依赖
+来自 `openai/codex`、`openai/plugins`、`openai/openai-agents-python`、`openai/openai-agents-js`、
+`openai/openai-cookbook`、`aider`、`cline`、Gemini CLI、OpenHands、OpenCode、Goose 和 ECC 的共同启示是：成熟 coding agent 依赖控制面，而不是只依赖
 聊天能力。
 
 可迁移结论：
@@ -86,6 +87,8 @@
 - `skills/` 不是 prompt 收藏，而是可复用能力单元。
 - `metadata/` 和 `llms-full.txt` 是 AI 可读入口，不是附属索引。
 - 高风险执行必须有权限、沙箱、审批、dry-run 或审计说明。
+- Plugins/Skills 研究说明能力还需要来源、manifest、安装、启用、禁用和版本生命周期；Agents SDK、OpenHands、
+  OpenCode、Goose 和 ECC 研究说明运行循环、工作区、后端、配置、权限、记忆和验证也必须有明确边界。
 
 ### 二、教程价值来自路径和产出
 
@@ -135,11 +138,50 @@
 - HITL 不是低效，而是高风险节点的责任边界。
 - Agent 编排的核心不是“多个 Agent”，而是职责、输入、输出、依赖和验收标准。
 
+### 六、规格先行会把 AI 编程从对话变成变更系统
+
+来自 `github/spec-kit`、`Fission-AI/OpenSpec`、`obra/superpowers` 和 `addyosmani/agent-skills` 的共同启示是：
+复杂任务需要把规格、计划、变更、实现、测试和收敛拆成可追踪阶段；短命令或 Skill 只是入口，不能替代规格和证据。
+
+可迁移结论：
+
+- 规格、临时变更和稳定知识应分层保存。
+- 生命周期入口应映射到明确的产物和验证命令。
+- Skill 必须有触发条件、输入输出、失败信号和独立评估。
+- 不把第三方方法论或 Skill 原样当成本仓规则，先经过迁移边界审查。
+
+### 七、极简工具和生命周期状态同样是工程能力
+
+来自 `SWE-agent/mini-SWE-agent` 与 `continuedev/continue` 的共同启示是：工具面可以极简，但执行必须有界；
+项目停止维护、只读或归档状态必须进入推荐判断，而不能只看 Star 和功能列表。
+
+可迁移结论：
+
+- 用最小工具面完成问题定位时，显式限制命令、时长、输出和退出条件。
+- 研究对象的维护状态、最终版本和替代路径要和技术判断一起展示。
+- 极简不等于无验证；线性轨迹仍需要测试、退出码和可复查证据。
+
 ## 研究到应用的转化矩阵
 
 | 研究来源 | 用户价值 | 本仓应用位置 | 可执行产物 |
 |:---|:---|:---|:---|
 | `openai/codex` | 理解 coding agent 控制面 | `scripts/`、`skills/`、`references/` | 脚本风险分级、沙箱/审批清单、Agent 控制面模板 |
+| `openai/plugins` | 理解 Codex 能力包和插件分发 | `skills/`、`assets/`、`metadata/` | 插件 manifest、来源审查、安装/回滚清单 |
+| `openai/skills` | 理解技能目录从 catalog 到 plugin 的迁移 | `skills/`、`docs/workflow/` | Skill 生命周期、触发契约和弃用迁移规则 |
+| `openai/openai-agents-python` | 理解 Agent、工具、护栏和追踪运行时 | `workflow/`、`references/` | 任务 Agent、工具契约、护栏和证据记录模板 |
+| `openai/openai-agents-js` | 理解 TypeScript Agent 运行时和状态所有权 | `workflow/`、`skills/` | runner、工具审批、session、sandbox 和 tracing 契约 |
+| `openai/openai-cookbook` | 理解官方示例如何变成可复现方法 | `getting-started/`、`references/` | 示例索引、复现前置条件和验证结果模板 |
+| `github/spec-kit` | 理解规格驱动开发的阶段化流程 | `workflow/`、`references/` | 规格、计划、任务、实现和测试的阶段契约 |
+| `Fission-AI/OpenSpec` | 理解变更提案、稳定规格和归档边界 | `workflow/`、`references/` | 变更目录、规格目录、验证和归档清单 |
+| `google-gemini/gemini-cli` | 理解终端 Agent 的上下文、MCP 和负例评估 | `getting-started/`、`workflow/` | 非交互入口、上下文层级和安全评估样本 |
+| `OpenHands/OpenHands` | 理解 Agent Canvas、工作区和后端适配 | `workflow/`、`references/` | Agent/工作区/后端边界和可恢复任务状态表 |
+| `anomalyco/opencode` | 理解模型无关配置、权限和插件生命周期 | `getting-started/`、`references/` | plan/build、配置备份、权限和插件回滚清单 |
+| `obra/superpowers` | 理解可组合 Skill 如何承载开发方法论 | `skills/`、`workflow/` | Skill 触发、TDD、审查和分支收尾清单 |
+| `addyosmani/agent-skills` | 理解生命周期命令、上下文层级和技能评估 | `skills/`、`workflow/` | `/spec`、`/plan`、`/test`、`/review` 到 `/ship` 的入口契约 |
+| `aaif-goose/goose` | 理解跨模型 Agent 的 provider、MCP 和工作区边界 | `workflow/`、`references/` | provider、工具、上下文和评估的边界表 |
+| `continuedev/continue` | 理解只读项目的生命周期和迁移风险 | `research/`、`references/` | 维护状态、替代方案和过期引用检查 |
+| `SWE-agent/mini-SWE-agent` | 理解极简问题修复 Agent 的有界执行 | `workflow/`、`references/` | Bash 工具面、退出码、轨迹和预算检查 |
+| `affaan-m/ECC` | 理解多 coding agent 的 Harness、记忆和质量资产 | `skills/`、`workflow/`、`references/` | Harness 资产、记忆策略、安全和评估清单 |
 | `aider` | 理解 Git 驱动 AI 修改闭环 | `workflow/`、`references/` | AI 修改到提交的标准流程、文档 map / repo map 机制 |
 | `cline` | 理解多入口 agent 平台 | `metadata/`、`llms.txt`、`skills/` | 人类入口、AI 入口、脚本入口、skill 入口的入口契约 |
 | `awesome-claude-code` | 理解资源治理 | `assets/external-resources/` | 资源 schema、生命周期字段、资源校验脚本 |
@@ -149,7 +191,13 @@
 | `awesome-vibe-coding` | 发现国际生态 | `assets/`、`research/`、`metadata/` | 候选资源雷达、关键词候选、P1/P2 研究候选 |
 | `ai-coding-lab` | 理解项目矩阵 | `workflow/`、`references/`、`skills/` | 实践项目模板、Skill 打包和评测模式 |
 | `CS146S_CN` | 理解 assignments 验证 | `getting-started/`、`workflow/` | prompt、tool calling、RAG、MCP、agent workflow 练习 |
-| P3 低优先级对象 | 保留低频雷达 | `research/`、`assets/` | 候选观察、术语补充、按需下沉队列 |
+| `ai-for-developers-awesome-vibe-coding` | 发现 Vibe Coding 工具族 | `assets/external-resources/`、`research/` | 工具分类词、候选资源和 P1/P2 研究候选 |
+| `daotin-ai-coding` | 观察中文 AI Coding 主题 | `docs/concepts/`、`assets/external-resources/` | 高频关键词、资源候选和经验分流项 |
+| `earyantle-vibe-coding-skill` | 理解最小 Skill 产品化骨架 | `skills/` | Skill 触发、输入输出、引用和发布检查清单 |
+| `liyupi-ai-guide` | 降低中文大众用户的学习门槛 | `docs/getting-started/`、`assets/external-resources/` | 大众化解释、项目实战和工具候选筛选表 |
+| `luzhenqian-ai-coding-lab` | 用项目矩阵承接概念实践 | `docs/workflow/`、未来实践层 | 最小实践项目模板和概念到项目映射 |
+| `roocodeinc-roo-code` | 研究归档工具的模式和生命周期 | `research/`、`assets/external-resources/` | archived 标记、替代路径和模式/schema 观察记录 |
+| `wendy7756-vibe-coding-guide` | 理解非程序员的入门障碍 | `docs/getting-started/`、`prompts/` | 人、AI、提示词、工具和环境的低门槛入口说明 |
 
 ## 优先应用清单
 

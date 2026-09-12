@@ -54,6 +54,8 @@ GENERATED_OR_VENDOR_DIRS = [
 SKIP_PARTS = {".git", ".history", "build", "node_modules", "__pycache__"}
 SKIP_PREFIXES = [
     Path(".github/wiki"),
+    Path("research/vibe-cybersecurity-cn"),
+    Path("research/vibe-harness-cn"),
 ]
 VENDOR_SUBTREES = [
     Path("tools/external"),

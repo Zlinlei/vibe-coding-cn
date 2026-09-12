@@ -85,6 +85,14 @@ GEOFlow 的关键启发是：GEO 不是关键词堆砌，而是内容工程链�
 - research/research-transfer-synthesis.md：将对标拆解、改良迭代和杂交创新转成可执行研究路线。
 - research/harness/README.md：Harness Engineering 的工程控制、评估器与反馈闭环研究对象。
 - research/harness/harness-engineering.md：Harness Engineering 的工程控制、评估器与反馈闭环解析。
+- research/walkinglabs-learn-harness-engineering/README.md：Harness Engineering 课程、模板、Skill 与审计工具研究对象。
+- research/walkinglabs-learn-harness-engineering/analysis.md：Harness 课程、控制面和验证闭环的结构化研究。
+- research/walkinglabs-learn-harness-engineering/deep-dive.md：Harness 结构、工具链和可迁移机制的 L2 研究。
+- research/mindfold-ai-trellis/README.md：跨平台 Agent Harness、任务规格与会话记忆系统研究对象。
+- research/mindfold-ai-trellis/analysis.md：任务控制面、规格注入和多平台适配的结构化研究。
+- research/mindfold-ai-trellis/deep-dive.md：Harness 架构、CLI 和记忆系统的 L2 研究。
+- research/vibe-cybersecurity-cn/README.md：授权边界内的 Agent 网络安全自动化研究与工程项目。
+- research/vibe-harness-cn/README.md：治理 Agent Harness 与问题求解算子库的元 Harness 项目。
 - research/aider-ai-aider/README.md：终端 AI 结对编程工具研究对象。
 - research/aider-ai-aider/analysis.md：Aider-AI/aider 的结构化研究结论、可借鉴点、风险和下一轮任务。
 - research/aider-ai-aider/deep-dive.md：Aider-AI/aider 的 L2 源码/结构深度研究、关键机制和可迁移模式。
@@ -97,6 +105,54 @@ GEOFlow 的关键启发是：GEO 不是关键词堆砌，而是内容工程链�
 - research/openai-codex/README.md：OpenAI Codex 官方 coding agent 工具源码研究对象。
 - research/openai-codex/analysis.md：openai/codex 的结构化研究结论、可借鉴点、风险和下一轮任务。
 - research/openai-codex/deep-dive.md：openai/codex 的 L2 源码/结构深度研究、关键机制和可迁移模式。
+- research/openai-plugins/README.md：OpenAI Codex 插件、marketplace 与 skill-only plugin 分发研究对象。
+- research/openai-plugins/analysis.md：openai/plugins 的能力包、发现和权限边界结构化研究。
+- research/openai-plugins/deep-dive.md：openai/plugins 的 manifest、marketplace 和验证资产 L2 研究。
+- research/openai-skills/README.md：已 deprecated 的 OpenAI Codex Skills Catalog 与插件迁移研究对象。
+- research/openai-skills/analysis.md：openai/skills 的技能目录生命周期和迁移边界结构化研究。
+- research/openai-skills/deep-dive.md：openai/skills 的技能目录、能力包和渐进加载 L2 研究。
+- research/openai-agents-python/README.md：OpenAI Agents SDK 的 Agent 运行时与多 Agent 工作流研究对象。
+- research/openai-agents-python/analysis.md：openai/openai-agents-python 的 Agent、工具、护栏和追踪结构化研究。
+- research/openai-agents-python/deep-dive.md：OpenAI Agents SDK 运行时对象与验证机制 L2 研究。
+- research/openai-agents-js/README.md：OpenAI 官方 TypeScript/JavaScript Agent 运行时研究对象。
+- research/openai-agents-js/analysis.md：openai/openai-agents-js 的 TypeScript Agent 运行时结构化研究。
+- research/openai-agents-js/deep-dive.md：openai/openai-agents-js 的 SDK 包结构、sandbox 与验证机制 L2 研究。
+- research/openai-cookbook/README.md：OpenAI API、Codex、Agent、评估与安全示例库研究对象。
+- research/openai-cookbook/analysis.md：openai/openai-cookbook 的官方示例、登记表和可复现产物结构化研究。
+- research/openai-cookbook/deep-dive.md：OpenAI Cookbook registry、Codex 示例、Agent 示例与风险边界 L2 研究。
+- research/github-spec-kit/README.md：GitHub 官方规格驱动开发工具包研究对象。
+- research/github-spec-kit/analysis.md：github/spec-kit 的规格驱动流程和测试分层结构化研究。
+- research/github-spec-kit/deep-dive.md：github/spec-kit 的 `.specify`、命令模板、扩展和测试结构 L2 研究。
+- research/fission-ai-openspec/README.md：面向 AI coding assistant 的规格驱动开发工具研究对象。
+- research/fission-ai-openspec/analysis.md：Fission-AI/OpenSpec 的变更提案、规格资产和 CLI/Skill 边界结构化研究。
+- research/fission-ai-openspec/deep-dive.md：OpenSpec 的 changes、specs、schema、skills 与命令 L2 研究。
+- research/google-gemini-gemini-cli/README.md：Google Gemini CLI 终端 coding agent、MCP 和扩展研究对象。
+- research/google-gemini-gemini-cli/analysis.md：Gemini CLI 上下文、工具、权限和安全评估结构化研究。
+- research/google-gemini-gemini-cli/deep-dive.md：Gemini CLI 的 CLI、扩展、checkpoint 和负例评估 L2 研究。
+- research/openhands-openhands/README.md：OpenHands Agent Canvas、工作区和后端控制中心研究对象。
+- research/openhands-openhands/analysis.md：OpenHands Agent 编排、工作区和自动化结构化研究。
+- research/openhands-openhands/deep-dive.md：OpenHands Agent Server、适配层和状态边界 L2 研究。
+- research/anomalyco-opencode/README.md：当前规范 OpenCode 的模型无关终端与编辑器 coding agent 研究对象。
+- research/anomalyco-opencode/analysis.md：OpenCode provider、权限、插件和配置生命周期结构化研究。
+- research/anomalyco-opencode/deep-dive.md：OpenCode plan/build、策略、插件 reload 和 v2 spec L2 研究。
+- research/obra-superpowers/README.md：跨 coding agent 的技能框架与开发方法论研究对象。
+- research/obra-superpowers/analysis.md：obra/superpowers 的技能触发、TDD、审查和插件分发结构化研究。
+- research/obra-superpowers/deep-dive.md：Superpowers 技能组合、阶段门禁和跨 harness 分发 L2 研究。
+- research/addyosmani-agent-skills/README.md：面向 coding agent 的生命周期技能与质量门禁研究对象。
+- research/addyosmani-agent-skills/analysis.md：addyosmani/agent-skills 的生命周期命令、上下文层级和技能评估结构化研究。
+- research/addyosmani-agent-skills/deep-dive.md：Agent Skills 的 commands、skills、references 和 evals L2 研究。
+- research/aaif-goose-goose/README.md：跨模型、跨平台的开源 AI Agent 研究对象。
+- research/aaif-goose-goose/analysis.md：aaif-goose/goose 的 provider、MCP、工作区和评估资产结构化研究。
+- research/aaif-goose-goose/deep-dive.md：Goose Rust workspace、上下文管理和 workflow recipe L2 研究。
+- research/continuedev-continue/README.md：已停止主动维护的 IDE/CLI Agent 历史对标研究对象。
+- research/continuedev-continue/analysis.md：Continue 只读生命周期、上下文分层和迁移边界结构化研究。
+- research/continuedev-continue/deep-dive.md：Continue IDE/CLI、配置、上下文和生命周期 L2 研究。
+- research/swe-agent-mini-swe-agent/README.md：面向 issue 和命令行任务的极简软件工程 Agent 研究对象。
+- research/swe-agent-mini-swe-agent/analysis.md：mini-SWE-agent 的极简工具面、有界执行和问题修复闭环研究。
+- research/swe-agent-mini-swe-agent/deep-dive.md：mini-SWE-agent Bash 工具、轨迹、环境适配和评估边界 L2 研究。
+- research/affaan-m-ecc/README.md：多种 coding agent 的 Harness、技能与质量实践集合研究对象。
+- research/affaan-m-ecc/analysis.md：ECC 的 Harness、记忆、安全和技能治理结构化研究。
+- research/affaan-m-ecc/deep-dive.md：ECC `.codex`、manifests、hooks 和评估技能 L2 研究。
 - research/shanraisshan-claude-code-best-practice/README.md：Claude Code / Agentic Engineering 方法论对标研究对象。
 - research/shanraisshan-claude-code-best-practice/analysis.md：shanraisshan/claude-code-best-practice 的结构化研究结论、可借鉴点、风险和下一轮任务。
 - research/shanraisshan-claude-code-best-practice/deep-dive.md：shanraisshan/claude-code-best-practice 的 L2 源码/结构深度研究、关键机制和可迁移模式。

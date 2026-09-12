@@ -165,6 +165,8 @@ git push origin develop
 ├── research/                    # 根级研究域：新技术、优秀 repo 与工程范式研究
 │   ├── README.md                # research 总索引
 │   ├── AGENTS.md                # research 目录规则
+│   ├── vibe-cybersecurity-cn/   # 纳入的授权网络安全 Agent 研究项目
+│   ├── vibe-harness-cn/         # 纳入的元 Harness 研究项目
 │   └── harness/                 # Harness Engineering 研究对象
 │
 ├── prompts/                     # 提示词库入口（指向云端表格）
@@ -236,7 +238,7 @@ git push origin develop
 - `.github/AGENTS.md` - GitHub 平台配置目录规则；根 `.github/` 不保留 `README.md`，避免 GitHub 首页误展示目录说明
 - `.github/CODEOWNERS` - 路径级 owner 评审基线，用于让关键目录变更自动请求维护者审查
 - `.github/lint_config.json` - markdownlint 规则，供 `make lint` 与 CI 共用
-- `.github/workflows/ci.yml` - GitHub Actions：develop/master 分支 markdown-lint + link-checker
+- `.github/workflows/ci.yml` - GitHub Actions：develop 分支 markdown-lint + link-checker
 - `scripts/check-local-links.py` - 仓库内 Markdown 相对链接与锚点检查脚本，供 `make check-links` 与 CI 使用
 - `scripts/check-markdown-details.py` - 仓库内 Markdown 折叠块结构检查脚本，供 `make check-details` 与 CI 使用
 - `scripts/check-doc-structure.py` - docs README 标准块顺序、目录入口和重复锚点检查脚本，供 `make check-doc-structure` 与 CI 使用
@@ -297,8 +299,8 @@ feat|fix|docs|chore|refactor|test: scope - summary
 - 测试与验证步骤
 
 ### CI 触发条件
-- `push` 到 `develop` 或 `master` 分支
-- `pull_request` 到 `develop` 或 `master` 分支
+- `push` 到 `develop` 分支
+- `pull_request` 到 `develop` 分支
 - 手动触发 `workflow_dispatch`
 
 ### CI 检查项
@@ -367,7 +369,7 @@ make test
 2. **Conversion Tool**: 使用 Python + pandas + openpyxl
 3. **Documentation Standard**: 用户文档使用中文；代码/文件名使用英文
 4. **Skills**: 每个技能有独立的 `SKILL.md`
-5. **Quality Gates**: `make test` 执行 Markdown lint、本地相对链接/锚点检查、折叠块结构检查、docs 结构检查、metadata 路径检查、AI 引用一致性检查与现代企业架构 starter kit 检查
+5. **Quality Gates**: `make test` 执行 Markdown lint、本地相对链接/锚点检查、折叠块结构检查、docs 结构检查、metadata 路径检查、AI 引用一致性检查与现代企业架构 starter kit 检查；纳入的 `research/vibe-cybersecurity-cn/` 与 `research/vibe-harness-cn/` 保留独立项目门禁，仓库级文档检查跳过其内部文件。
 
 ## Development Workflow
 

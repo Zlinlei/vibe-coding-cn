@@ -24,6 +24,27 @@ research/
 │   ├── README.md
 │   ├── harness-engineering.md
 │   └── AGENTS.md
+├── vibe-cybersecurity-cn/
+│   ├── README.md
+│   ├── governance/
+│   ├── skills/
+│   └── web3-lab/
+├── vibe-harness-cn/
+│   ├── README.md
+│   ├── contracts/
+│   ├── operators/
+│   ├── skills/
+│   └── governance/
+├── walkinglabs-learn-harness-engineering/
+│   ├── README.md
+│   ├── AGENTS.md
+│   ├── domain.yml
+│   └── raw/
+├── mindfold-ai-trellis/
+│   ├── README.md
+│   ├── AGENTS.md
+│   ├── domain.yml
+│   └── raw/
 ├── ai-for-developers-awesome-vibe-coding/
 │   ├── README.md
 │   ├── domain.yml
@@ -74,6 +95,70 @@ research/
 │   ├── README.md
 │   ├── domain.yml
 │   └── AGENTS.md
+├── openai-plugins/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── openai-skills/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── openai-agents-python/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── openai-agents-js/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── openai-cookbook/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── github-spec-kit/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── fission-ai-openspec/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── google-gemini-gemini-cli/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── openhands-openhands/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── anomalyco-opencode/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── obra-superpowers/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── addyosmani-agent-skills/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── aaif-goose-goose/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── continuedev-continue/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── swe-agent-mini-swe-agent/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
+├── affaan-m-ecc/
+│   ├── README.md
+│   ├── domain.yml
+│   └── AGENTS.md
 ├── roocodeinc-roo-code/
 │   ├── README.md
 │   ├── domain.yml
@@ -98,9 +183,9 @@ research/
 └── AGENTS.md  # 本目录操作规则
 ```
 
-上方只展开了第一个外部仓库研究域的基础形态；所有外部仓库研究域都必须包含同样的原始事实层、
+上方只展开了第一个外部仓库研究域的基础形态；所有外部仓库研究域都必须包含同样的原始事实层；两个内部工程研究项目按各自项目契约维护。
 `analysis.md` 和 `deep-dive.md`。
-`deep-dive.md` 是 L2 产物；当前 17 个外部仓库研究域已经全部补齐，P3 只表示采用优先级低，
+`deep-dive.md` 是 L2 产物；当前 35 个外部仓库研究域已经全部补齐，P3 只表示采用优先级低，
 不再表示研究深度缺口。
 
 ## 修改规则

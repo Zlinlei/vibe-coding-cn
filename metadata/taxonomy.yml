@@ -181,6 +181,30 @@ documents:
   - path: research/harness/harness-engineering.md
     title: Harness 工程解析
     role: 工程控制、评估器、反馈闭环与 AI 生成系统可靠性
+  - path: research/walkinglabs-learn-harness-engineering/README.md
+    title: walkinglabs/learn-harness-engineering 研究域
+    role: Harness Engineering 课程、模板、Skill 与审计工具
+  - path: research/walkinglabs-learn-harness-engineering/analysis.md
+    title: walkinglabs/learn-harness-engineering 研究分析
+    role: Harness 课程、控制面和验证闭环的结构化研究
+  - path: research/walkinglabs-learn-harness-engineering/deep-dive.md
+    title: walkinglabs/learn-harness-engineering 深度研究
+    role: Harness 结构、工具链和可迁移机制的 L2 研究
+  - path: research/mindfold-ai-trellis/README.md
+    title: mindfold-ai/Trellis 研究域
+    role: 跨平台 Agent Harness、任务规格与会话记忆系统
+  - path: research/mindfold-ai-trellis/analysis.md
+    title: mindfold-ai/Trellis 研究分析
+    role: 任务控制面、规格注入和多平台适配的结构化研究
+  - path: research/mindfold-ai-trellis/deep-dive.md
+    title: mindfold-ai/Trellis 深度研究
+    role: Harness 架构、CLI 和记忆系统的 L2 研究
+  - path: research/vibe-cybersecurity-cn/README.md
+    title: vibe-cybersecurity-cn
+    role: 授权边界内的 Agent 网络安全自动化研究与工程项目
+  - path: research/vibe-harness-cn/README.md
+    title: vibe-harness-cn
+    role: 治理 Agent Harness 与问题求解算子库的元 Harness 项目
   - path: research/aider-ai-aider/README.md
     title: Aider-AI/aider 研究域
     role: 终端 AI 结对编程工具
@@ -217,6 +241,150 @@ documents:
   - path: research/openai-codex/deep-dive.md
     title: openai/codex 深度研究
     role: L2 源码/结构深度研究、关键机制和可迁移模式
+  - path: research/openai-plugins/README.md
+    title: openai/plugins 研究域
+    role: Codex 插件、marketplace 与 skill-only plugin 分发
+  - path: research/openai-plugins/analysis.md
+    title: openai/plugins 研究分析
+    role: 插件能力包、发现和权限边界的结构化研究
+  - path: research/openai-plugins/deep-dive.md
+    title: openai/plugins 深度研究
+    role: manifest、marketplace 和验证资产的 L2 研究
+  - path: research/openai-skills/README.md
+    title: openai/skills 研究域
+    role: 已 deprecated 的 Codex Skills Catalog 与插件迁移参照
+  - path: research/openai-skills/analysis.md
+    title: openai/skills 研究分析
+    role: 技能目录生命周期和迁移边界的结构化研究
+  - path: research/openai-skills/deep-dive.md
+    title: openai/skills 深度研究
+    role: 技能目录、能力包和渐进加载的 L2 研究
+  - path: research/openai-agents-python/README.md
+    title: openai/openai-agents-python 研究域
+    role: Agent 运行时与多 Agent 工作流编排
+  - path: research/openai-agents-python/analysis.md
+    title: openai/openai-agents-python 研究分析
+    role: Agent、工具、护栏和追踪的结构化研究
+  - path: research/openai-agents-python/deep-dive.md
+    title: openai/openai-agents-python 深度研究
+    role: SDK 运行时对象与验证机制的 L2 研究
+  - path: research/openai-agents-js/README.md
+    title: openai/openai-agents-js 研究域
+    role: 官方 TypeScript/JavaScript Agent 运行时
+  - path: research/openai-agents-js/analysis.md
+    title: openai/openai-agents-js 研究分析
+    role: TypeScript Agent 运行时的结构化研究
+  - path: research/openai-agents-js/deep-dive.md
+    title: openai/openai-agents-js 深度研究
+    role: SDK 包结构、sandbox 与验证机制的 L2 研究
+  - path: research/openai-cookbook/README.md
+    title: openai/openai-cookbook 研究域
+    role: OpenAI API、Codex、Agent、评估与安全示例库
+  - path: research/openai-cookbook/analysis.md
+    title: openai/openai-cookbook 研究分析
+    role: 官方示例、登记表和可复现产物的结构化研究
+  - path: research/openai-cookbook/deep-dive.md
+    title: openai/openai-cookbook 深度研究
+    role: registry、Codex 示例、Agent 示例与风险边界的 L2 研究
+  - path: research/github-spec-kit/README.md
+    title: github/spec-kit 研究域
+    role: GitHub 官方规格驱动开发工具包
+  - path: research/github-spec-kit/analysis.md
+    title: github/spec-kit 研究分析
+    role: 规格驱动流程和测试分层的结构化研究
+  - path: research/github-spec-kit/deep-dive.md
+    title: github/spec-kit 深度研究
+    role: .specify、命令模板、扩展和测试结构的 L2 研究
+  - path: research/fission-ai-openspec/README.md
+    title: Fission-AI/OpenSpec 研究域
+    role: 面向 AI coding assistant 的规格驱动开发工具
+  - path: research/fission-ai-openspec/analysis.md
+    title: Fission-AI/OpenSpec 研究分析
+    role: 变更提案、规格资产和 CLI/Skill 边界的结构化研究
+  - path: research/fission-ai-openspec/deep-dive.md
+    title: Fission-AI/OpenSpec 深度研究
+    role: changes、specs、schema、skills 与命令的 L2 研究
+  - path: research/google-gemini-gemini-cli/README.md
+    title: google-gemini/gemini-cli 研究域
+    role: 终端 coding agent、MCP 和扩展
+  - path: research/google-gemini-gemini-cli/analysis.md
+    title: google-gemini/gemini-cli 研究分析
+    role: 上下文、工具、权限和安全评估的结构化研究
+  - path: research/google-gemini-gemini-cli/deep-dive.md
+    title: google-gemini/gemini-cli 深度研究
+    role: CLI、扩展、checkpoint 和负例评估的 L2 研究
+  - path: research/openhands-openhands/README.md
+    title: OpenHands/OpenHands 研究域
+    role: Agent Canvas、工作区和后端控制中心
+  - path: research/openhands-openhands/analysis.md
+    title: OpenHands/OpenHands 研究分析
+    role: Agent 编排、工作区和自动化的结构化研究
+  - path: research/openhands-openhands/deep-dive.md
+    title: OpenHands/OpenHands 深度研究
+    role: Agent Server、适配层和状态边界的 L2 研究
+  - path: research/anomalyco-opencode/README.md
+    title: anomalyco/opencode 研究域
+    role: 模型无关的终端与编辑器 coding agent
+  - path: research/anomalyco-opencode/analysis.md
+    title: anomalyco/opencode 研究分析
+    role: provider、权限、插件和配置生命周期的结构化研究
+  - path: research/anomalyco-opencode/deep-dive.md
+    title: anomalyco/opencode 深度研究
+    role: plan/build、策略、插件 reload 和 v2 spec 的 L2 研究
+  - path: research/obra-superpowers/README.md
+    title: obra/superpowers 研究域
+    role: 跨 coding agent 的技能框架与开发方法论
+  - path: research/obra-superpowers/analysis.md
+    title: obra/superpowers 研究分析
+    role: 技能触发、TDD、审查和插件分发的结构化研究
+  - path: research/obra-superpowers/deep-dive.md
+    title: obra/superpowers 深度研究
+    role: 技能组合、阶段门禁和跨 harness 分发的 L2 研究
+  - path: research/addyosmani-agent-skills/README.md
+    title: addyosmani/agent-skills 研究域
+    role: 面向 coding agent 的生命周期技能与质量门禁
+  - path: research/addyosmani-agent-skills/analysis.md
+    title: addyosmani/agent-skills 研究分析
+    role: 生命周期命令、上下文层级和技能评估的结构化研究
+  - path: research/addyosmani-agent-skills/deep-dive.md
+    title: addyosmani/agent-skills 深度研究
+    role: commands、skills、references 和 evals 的 L2 研究
+  - path: research/aaif-goose-goose/README.md
+    title: aaif-goose/goose 研究域
+    role: 跨模型、跨平台的开源 AI Agent
+  - path: research/aaif-goose-goose/analysis.md
+    title: aaif-goose/goose 研究分析
+    role: provider、MCP、工作区和评估资产的结构化研究
+  - path: research/aaif-goose-goose/deep-dive.md
+    title: aaif-goose/goose 深度研究
+    role: Rust workspace、上下文管理和 workflow recipe 的 L2 研究
+  - path: research/continuedev-continue/README.md
+    title: continuedev/continue 研究域
+    role: 已停止主动维护的 IDE/CLI Agent 历史对标
+  - path: research/continuedev-continue/analysis.md
+    title: continuedev/continue 研究分析
+    role: 只读生命周期、上下文分层和迁移边界的结构化研究
+  - path: research/continuedev-continue/deep-dive.md
+    title: continuedev/continue 深度研究
+    role: IDE/CLI、配置、上下文和生命周期的 L2 研究
+  - path: research/swe-agent-mini-swe-agent/README.md
+    title: SWE-agent/mini-SWE-agent 研究域
+    role: 面向 issue 和命令行任务的极简软件工程 Agent
+  - path: research/swe-agent-mini-swe-agent/analysis.md
+    title: SWE-agent/mini-SWE-agent 研究分析
+    role: 极简工具面、有界执行和问题修复闭环研究
+  - path: research/swe-agent-mini-swe-agent/deep-dive.md
+    title: SWE-agent/mini-SWE-agent 深度研究
+    role: Bash 工具、轨迹、环境适配和评估边界的 L2 研究
+  - path: research/affaan-m-ecc/README.md
+    title: affaan-m/ECC 研究域
+    role: 多种 coding agent 的 Harness、技能与质量实践集合
+  - path: research/affaan-m-ecc/analysis.md
+    title: affaan-m/ECC 研究分析
+    role: Harness、记忆、安全和技能治理的结构化研究
+  - path: research/affaan-m-ecc/deep-dive.md
+    title: affaan-m/ECC 深度研究
+    role: .codex、manifests、hooks 和评估技能的 L2 研究
   - path: research/shanraisshan-claude-code-best-practice/README.md
     title: shanraisshan/claude-code-best-practice 研究域
     role: Claude Code / Agentic Engineering 最强对标

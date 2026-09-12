@@ -5,11 +5,11 @@
 - 当前级别：L2 源码/结构深度研究。
 - 研究对象：`openai/codex`。
 - 证据来源：本目录 `raw/` 下的 GitHub 元数据、README 快照和本地仓库工作树。
-- 观察日期：2026-07-03。
+- 观察日期：2026-09-08。
 
 ## L2 结论
 
-`openai/codex` 不是简单的 CLI 包，而是一个以 Rust 工作区为核心的 coding agent
+截至当前观察日、最新 release 为 `rust-v0.153.4` 的 `openai/codex` 不是简单的 CLI 包，而是一个以 Rust 工作区为核心的 coding agent
 控制面。它把协议、配置、沙箱、工具、提示词、技能、TUI、CLI 包装和 MCP 服务拆成相对清晰的
 边界，说明成熟 coding agent 的核心不是“会调用模型”，而是把模型能力放进可配置、可审计、
 可限制、可交互的执行系统里。
@@ -32,6 +32,9 @@
 - `raw/repository/docs/sandbox.md`：沙箱文档，说明安全边界不是实现细节。
 - `raw/repository/docs/agents_md.md`：Agent 指令文档，说明项目级上下文是正式接口。
 - `raw/repository/docs/skills.md`：技能文档，说明技能不是杂项 prompt，而是可治理能力单元。
+- `raw/repository/codex-rs/config-schema/`：配置 schema，说明配置字段需要机器可读契约。
+- `raw/repository/codex-rs/exec/`、`codex-rs/execpolicy/`：执行与策略边界，说明“能生成命令”和“允许执行命令”是两件事。
+- `raw/repository/codex-rs/plugin/`、官方 [Plugins 文档](https://developers.openai.com/codex/plugins)：插件与技能分发边界。
 
 ## 关键机制
 
@@ -57,6 +60,12 @@ exec policy 和配置作为显式层，而不是把风险控制埋进一段提�
 `codex-cli/` 更像分发入口，核心复杂度集中在 `codex-rs/`。这种结构适合长期维护：
 包管理、安装体验和跨平台入口可以变化，但 agent 核心边界保持稳定。
 
+### 技能、插件与运行时分层
+
+源码中的 `skills/` 与 `plugin/`，以及官方 Skills/Plugins 文档，共同表明可复用能力至少有
+“能力本体”和“分发/发现”两层。对本仓而言，`skills/` 保存能力实现，研究与资源索引保存来源和
+审查信息，不能因为一个目录可安装就默认其安全或适合当前项目。
+
 ## 可迁移模式
 
 - 把 agent 执行相关内容分成 `config`、`sandbox`、`exec policy`、`tools`、`skills` 和
@@ -65,6 +74,7 @@ exec policy 和配置作为显式层，而不是把风险控制埋进一段提�
 - 将 `AGENTS.md` 视为项目级上下文接口，而不是临时提示词。
 - 将 skills 视为可复用能力单元，要求有触发条件、边界、输入输出和验证方式。
 - 对本仓 `scripts/`、`skills/`、`research/` 建立类似的控制面文档。
+- 把能力安装、启用、禁用和升级视为独立生命周期，并保留来源、版本和回滚信息。
 
 ## 对本仓的影响
 
