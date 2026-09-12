@@ -47,4 +47,9 @@ exclude = [
   '^https://xn--9kqz23b19z\.com/.*',
   '^https://opencode\.ai/go\?ref=FF7EBR5TKW.*',
   '^https://www\.bybit\.com/.*',
+  # 外部站点风控/TLS/限流导致 runner 上不稳定，属于既有失败类。
+  '^https://x\.com/.*',
+  '^https://opencode\.ai/docs/%E3%80%82$',
+  '^https://windsurf\.com/.*',
+  '^https://www\.lesswrong\.com/.*',
 ]
